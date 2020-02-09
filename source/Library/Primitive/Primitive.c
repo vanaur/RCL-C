@@ -33,6 +33,8 @@
 #include <VM\Core\Wordefinition\RCL_Structure.h>
 #include <VM\Core\Wordefinition\Wordico.h>
 
+#define INIT_DEFAULT_SIZE 12
+
 String rcl__show_ir_expr(const rcl__expr_t e)
 {
     return show_rcode(e);
