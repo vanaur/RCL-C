@@ -28,19 +28,6 @@
 #include <VM\Core\Argv.h>
 #include <VM\Core\Exec.h>
 
-/*
-typedef struct BResult
-{
-    BrowsedAbsyn psdata;
-    struct Wordico wordico;
-    RawCode resulting;
-    struct State state;
-    struct RCL_Argv argvs;
-    Exec exec_infos;
-    String current_filename;
-} __attribute__((packed)) BResult;
-*/
-
 struct BResult new_bresult()
 {
     struct BResult res;

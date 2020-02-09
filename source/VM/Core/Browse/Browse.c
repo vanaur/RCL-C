@@ -93,14 +93,6 @@ BResult browseAbsyn(Program prog, String filename)
 
     pthread_t t1, t2, t3;
 
-    pthread_attr_t attr1, attr2, attr3;
-    pthread_attr_init(&attr1);
-    pthread_attr_setdetachstate(&attr1, PTHREAD_CREATE_DETACHED);
-    pthread_attr_init(&attr2);
-    pthread_attr_setdetachstate(&attr2, PTHREAD_CREATE_DETACHED);
-    pthread_attr_init(&attr3);
-    pthread_attr_setdetachstate(&attr3, PTHREAD_CREATE_DETACHED);
-
     /*
     * Sorting the definitions (functions, external and structures) according to their hash code will then make it possible
     * to be more efficient when searching for one of the elements, using in particular the binary search algorithm ( O(log n) ),
@@ -109,13 +101,13 @@ BResult browseAbsyn(Program prog, String filename)
     * The difference is really significant.
     */
 
-    pthread_create(&t1, &attr1, (void *(*)(void *))sort_functions, (void *)&bresult.wordico.functions);
-    pthread_create(&t2, &attr2, (void *(*)(void *))sort_externs, (void *)&bresult.wordico.externs);
-    pthread_create(&t3, &attr3, (void *(*)(void *))sort_structures, (void *)&bresult.wordico.structures);
+    pthread_create(&t1, NULL, (void *(*)(void *))sort_functions, (void *)&bresult.wordico.functions);
+    pthread_create(&t2, NULL, (void *(*)(void *))sort_externs, (void *)&bresult.wordico.externs);
+    pthread_create(&t3, NULL, (void *(*)(void *))sort_structures, (void *)&bresult.wordico.structures);
 
-    pthread_detach(t1);
-    pthread_detach(t2);
-    pthread_detach(t3);
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+    pthread_join(t3, NULL);
 
     return bresult;
 }

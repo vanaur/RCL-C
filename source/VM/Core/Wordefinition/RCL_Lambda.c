@@ -73,7 +73,6 @@ void vec_add_lambdas(struct VEC_Lambdas *restrict rcl_lam, struct RCL_Lambda lam
 
 void vec_remove_lambda(struct VEC_Lambdas *restrict rcl_lam, String name)
 {
-    // Faire en linked list :)
     rcl_lam->size = --rcl_lam->used == 0 ? 1 : rcl_lam->used;
     rcl_lam->array = (struct RCL_Lambda *)realloc(rcl_lam->array, rcl_lam->size * sizeof(struct RCL_Lambda));
 }
