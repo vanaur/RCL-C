@@ -52,18 +52,24 @@ static int hash_cmp_st(const void *p1, const void *p2)
 
 void *sort_functions(struct VEC_Functions *functions)
 {
+    if (!functions->used)
+        return NULL;
     qsort(functions->array, functions->used, sizeof(struct RCL_Function), hash_cmp_fn);
     return NULL;
 }
 
 void *sort_externs(struct VEC_Externs *externs)
 {
+    if (!externs->used)
+        return NULL;
     qsort(externs->array, externs->used, sizeof(struct RCL_Extern), hash_cmp_ex);
     return NULL;
 }
 
 void *sort_structures(struct VEC_Structures *structures)
 {
+    if (!structures->used)
+        return NULL;
     qsort(structures->array, structures->used, sizeof(struct RCL_Structure), hash_cmp_st);
     return NULL;
 }

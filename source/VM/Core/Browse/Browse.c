@@ -93,9 +93,13 @@ BResult browseAbsyn(Program prog, String filename)
 
     pthread_t t1, t2, t3;
 
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_attr_t attr1, attr2, attr3;
+    pthread_attr_init(&attr1);
+    pthread_attr_setdetachstate(&attr1, PTHREAD_CREATE_DETACHED);
+    pthread_attr_init(&attr2);
+    pthread_attr_setdetachstate(&attr2, PTHREAD_CREATE_DETACHED);
+    pthread_attr_init(&attr3);
+    pthread_attr_setdetachstate(&attr3, PTHREAD_CREATE_DETACHED);
 
     /*
     * Sorting the definitions (functions, external and structures) according to their hash code will then make it possible
@@ -105,9 +109,9 @@ BResult browseAbsyn(Program prog, String filename)
     * The difference is really significant.
     */
 
-    pthread_create(&t1, &attr, (void *(*)(void *))sort_functions, (void *)&bresult.wordico.functions);
-    pthread_create(&t2, &attr, (void *(*)(void *))sort_externs, (void *)&bresult.wordico.externs);
-    pthread_create(&t3, &attr, (void *(*)(void *))sort_structures, (void *)&bresult.wordico.structures);
+    pthread_create(&t1, &attr1, (void *(*)(void *))sort_functions, (void *)&bresult.wordico.functions);
+    pthread_create(&t2, &attr2, (void *(*)(void *))sort_externs, (void *)&bresult.wordico.externs);
+    pthread_create(&t3, &attr3, (void *(*)(void *))sort_structures, (void *)&bresult.wordico.structures);
 
     pthread_detach(t1);
     pthread_detach(t2);
@@ -349,7 +353,7 @@ void _handle_endlambda(BResult *restrict bresult, String name)
             name);
     }
 
-    push_rcode(&bresult->psdata.rcode, make_RCL_Value_Lambda(name));
+    push_rcode(&bresult->psdata.rcode, make_RCL_Value_EndLamScope(name));
 }
 
 void case_operation(BResult *restrict bresult, const Operation op)
