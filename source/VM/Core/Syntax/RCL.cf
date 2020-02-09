@@ -1,0 +1,171 @@
+comment "//" ;
+comment "/*" "*/" ;
+
+entrypoints Program ;
+
+PVoid. Program ::= ; -- An empty program is considered as an empty stack, so it is acceptable
+Prog1. Program ::= ".idata" [Preprocessor] ".define" [Definition] ".main" Operation1 ;
+Prog2. Program ::= ".idata" [Preprocessor] ".define" [Definition] ;
+Prog3. Program ::= ".idata" [Preprocessor] ".main" Operation1 ;
+Prog4. Program ::= ".define" [Definition] ".main" Operation1 ;
+Prog5. Program ::= ".define" [Definition] ;
+Prog6. Program ::= ".main" Operation1 ;
+Prog7. Program ::= Operation1 ;
+Prog8. Program ::= ".idata" [Preprocessor] ;
+
+-- Names --
+
+Name.       Identifier ::= LIdent ;
+QualName.   Identifier ::= UIdent "." Identifier ;
+
+-- Preprocessor --
+
+Import.     Preprocessor ::= "import" String ;              -- Import another RCL IR file
+ImportAs.   Preprocessor ::= "import" String "as" UIdent ;  -- Import another RCL IR file by named it
+Include.    Preprocessor ::= "include" String "as" UIdent ; -- Include an externe file
+
+Define.     Preprocessor ::= "define" UIdent ; -- Create a new simple name (like #define in C without macro, just name)
+
+IF.         Preprocessor ::= "ifdef" UIdent "then" Preprocessor ;
+ELSE.       Preprocessor ::= "ifdef" UIdent "then" Preprocessor "else" Preprocessor ; 
+
+Error.      Preprocessor ::= "error" String ;   -- Stops the program after having been showed all error message
+Warning.    Preprocessor ::= "warning" String ; -- Displays a warning
+Info.       Preprocessor ::= "info" String ;    -- Displays an info
+
+FaultInt.   Preprocessor ::= "fault" Integer ;  -- Display the 'fault message' corresponding to the number entered (CAN DO AN ACTION LIKE STOPPING RCL)
+FaultId.    Preprocessor ::= "fault" UIdent ;   -- Display the 'fault message' corresponding to the identifier entered (CAN DO AN ACTION LIKE STOPPING THE RCL)
+
+-- Basic operations on the stacks --
+
+Def.       Definition ::= LIdent "=" Operation1 ; -- Define a function
+Extern.    Definition ::= "extern" Identifier "(" [FFI_Type_Signature] ")" "->" FFI_Type_Signature  ; -- Define an externe function
+Structure. Definition ::= "structure" UIdent "=" [RCL_Structure_Field] ; -- Define a data structure
+
+-- Structures --
+
+FreeField.  RCL_Structure_Field ::= "." LIdent ;                   -- .x
+EnumField.  RCL_Structure_Field ::= "." LIdent "!" ;               -- .x!
+SpecField.  RCL_Structure_Field  ::= "." LIdent "::" Identifier ;  -- .x :: T
+
+-- Types --
+
+TPrimitive. FFI_Type_Signature ::= FFI_Type_SignatureT ;
+TStruct.    FFI_Type_Signature ::= "[" [FFI_Type_Signature] "]" ;
+TSSelf.     FFI_Type_Signature ::= "self" ;
+TPtr.       FFI_Type_Signature ::= FFI_Type_Signature [Ptr] ;
+
+Point.  Ptr ::= "*" ;
+
+TVoid.       FFI_Type_SignatureT ::= "void" ;
+TUint8.      FFI_Type_SignatureT ::= "uint8" ;
+TSint8.      FFI_Type_SignatureT ::= "sint8" ;
+TUint16.     FFI_Type_SignatureT ::= "uint16" ;
+TSint16.     FFI_Type_SignatureT ::= "sint16" ;
+TUint32.     FFI_Type_SignatureT ::= "uint32" ;
+TSint32.     FFI_Type_SignatureT ::= "sint32" ;
+TUint64.     FFI_Type_SignatureT ::= "uint64" ;
+TSint64.     FFI_Type_SignatureT ::= "sint64" ;
+TFloat.      FFI_Type_SignatureT ::= "float" ;
+TLongDouble. FFI_Type_SignatureT ::= "long double" ;
+TDouble.     FFI_Type_SignatureT ::= "double" ;
+TUchar.      FFI_Type_SignatureT ::= "uchar" ;
+TSchar.      FFI_Type_SignatureT ::= "schar" ;
+TUshort.     FFI_Type_SignatureT ::= "ushort" ;
+TSshort.     FFI_Type_SignatureT ::= "sshort" ;
+TUint.       FFI_Type_SignatureT ::= "uint" ;
+TSint.       FFI_Type_SignatureT ::= "sint" ;
+Tint.        FFI_Type_SignatureT ::= "int" ;
+TUlong.      FFI_Type_SignatureT ::= "ulong" ;
+TSlong.      FFI_Type_SignatureT ::= "slong" ;
+TAny.        FFI_Type_SignatureT ::= "any" ;
+
+-----
+
+Concatenation.   Operation1 ::= [Operation] ;             -- Concatenation
+RepeatOperation. Operation  ::= "~" Integer Operation ;   -- Syntactic sugar allowing the non-repetition of operations (dup dup dup => ~3 dup)
+ParallelConcat.  Operation  ::= Operation "#" Operation ; -- Parallel concatenation
+Lambda.          Operation  ::= LIdent "\\" ;             -- Lambda: take the last item of the stack and stores it as an identifier
+EndLambdaScope.  Operation  ::= LIdent "$" ;              -- End the scope of a variable lambda identifier
+Quote.           Operation  ::= "[" Operation1 "]" ;      -- Do a quotation == first citizen function (by composition)
+List.            Operation  ::= "{" [Operation1] "}" ;    -- Push a list of value on the stack
+Var.             Operation  ::= Identifier ;              -- Function name, identifier
+Lit.             Operation  ::= Data ;                    -- Push a data literal on the stack
+BasicLiteralOp.  Operation  ::= LiteralOperation ;        -- Basic literal operation
+Field.           Operation  ::= RCL_Structure_Field ;     -- Reference to a structure field on the top of the stack
+
+{- Note about parallel concatenation:
+    The expression `f # g` takes n + m items from the stack ('n' arguments for 'f' and 'm' arguments for 'g')
+    then applies 'f' to the first 'n' elements and 'g' to the last 'm' elements in parallel.
+
+    Example: `4 2 3 6 * # * +` == `4 * 2 + 4 * 7`.
+-}
+
+{- Note about dual concatenation:
+    The 'dual' combinator take 2 quotations from the stack and execute them simultaneously.
+    If there are resulting values, push a respective position quotation on the stack.
+
+    Example: `[3 2 +] ["Computing..." print] dual`
+    Shows a message "Computing..." while computing the other operation (3 + 2).
+    Push `[5]` onto the stack.
+
+-}
+
+-- Basic operations on basic vaules --
+
+Add.    LiteralOperation ::= "+"  ;
+Sub.    LiteralOperation ::= "-"  ;
+Pow.    LiteralOperation ::= "**" ;
+Mul.    LiteralOperation ::= "*"  ;
+Div.    LiteralOperation ::= "/"  ;
+Mod.    LiteralOperation ::= "%"  ;
+Inc.    LiteralOperation ::= "++" ;
+Dec.    LiteralOperation ::= "--" ;
+BAnd.   LiteralOperation ::= "&"  ;
+BOr.    LiteralOperation ::= "|"  ;
+BXor.   LiteralOperation ::= "^"  ;
+BLeft.  LiteralOperation ::= "<<" ;
+BRight. LiteralOperation ::= ">>" ;
+
+-- Basic data literals --
+
+Int.  Data ::= Integer ;
+Flt.  Data ::= Double  ;
+Chr.  Data ::= Char    ;
+Str.  Data ::= String  ;
+
+
+separator          Operation1   "," ;
+separator FFI_Type_Signature    "," ;
+separator          Ptr          ""  ;
+separator nonempty Operation    ""  ;
+separator nonempty Definition   ""  ;
+separator nonempty Preprocessor ""  ;
+separator nonempty RCL_Structure_Field "," ;
+
+terminator Definition ";" ;
+
+token UIdent upper (letter | digit | '_')* ;
+token LIdent lower (letter | digit | '_')* ;
+
+{- Note:
+
+    Optimisation tips: eliminate lambdas ==> all combinators and programs can be writen without lambdas ;
+
+    Eevery lambda x\ where there is no occurence of x in scope, is replaced by "drop".
+        Scope extends all the way to the right until we hit a "]", a '$', or the end of the program ;
+    
+    Then, for every lambda x\ that has two or more references to x in scope, replace "x\" with "dup x1\ x\"
+        (where x1 is a name which is not used elsewhere) and change the first occurence of x to x1;
+        continue this until every lambda has exactly one occurence of its variable ;
+
+    Consider the last (furthest right) lambda x\. It will be immediately followed by an atom or quotation which will
+        either (1) be equal to x, (2) be a quotation containing x, or (3) neither be or contain an occurence of x ;
+-}
+
+-- https://github.com/valderman/lambdascript/blob/d93092507baa4502eb2e8bd817c7f37f8a0ded71/src/LambdaScript.cf
+-- https://github.com/Aearnus/charm/blob/master/src/Stage2/TypeChecker.hs
+-- http://tunes.org/~iepos/joy.html#finder
+-- https://www.eff-lang.org/handlers-tutorial.pdf
+-- https://en.wikipedia.org/wiki/Differentiable_programming
+-- https://rosettacode.org/wiki/Call_a_foreign-language_function
