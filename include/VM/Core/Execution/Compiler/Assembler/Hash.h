@@ -26,6 +26,6 @@
 #include <Tools\Hash\djb2.h>
 #include <VM\Core\Execution\Compiler\Assembler\Opcode.h>
 
-// Takes a block of assembly code and returns its hash code
+// Takes a block of assembly code and returns its hash code.
 hash_t hash_opcode_block(const Opcode_block block);
 hash_t hash_asm_value(const ASM_Value);

@@ -36,7 +36,7 @@ static String show_array(RCL_Value_Array_t array)
     String result;
     if (array.length > 30)
     {
-        rcl_asprintf(&result, "'Array{of %lld %ss}", array.length, showKind(array.array->array[0].kind));
+        rcl_asprintf(&result, "'Array{of %lld %ss}", array.length, show_kind(array.array->array[0].kind));
     }
     else
     {
@@ -92,7 +92,7 @@ String show_value(Value value)
     }
     case RCL_Value_Quotation:
     {
-        rcl_asprintf(&result, "%s", showQuote(*value.u.quote_));
+        rcl_asprintf(&result, "%s", show_quote(*value.u.quote_));
         break;
     }
     case RCL_Value_EndLamScope:
@@ -107,14 +107,14 @@ String show_value(Value value)
     }
     case RCL_Value_Combinator:
     {
-        rcl_asprintf(&result, "%s", showComb(value.u.comb_));
+        rcl_asprintf(&result, "%s", show_comb(value.u.comb_));
         break;
     }
     case RCL_Value_Empty:
         return ""; // 'empty-stack
     case RCL_Value_LiteralOperation:
     {
-        rcl_asprintf(&result, showLo(value.u.litOperation_));
+        rcl_asprintf(&result, show_arithop(value.u.litOperation_));
         break;
     }
     case RCL_Value_Array:
@@ -144,12 +144,12 @@ String show_value(Value value)
     return result;
 }
 
-String showComb(Combinator comb)
+String show_comb(Combinator comb)
 {
     return (String)Combinators[(int)comb];
 }
 
-String showLo(LiteralOperation lo)
+String show_arithop(LiteralOperation lo)
 {
     switch (lo->kind)
     {
@@ -182,7 +182,7 @@ String showLo(LiteralOperation lo)
     }
 }
 
-String showStack(Stack stack)
+String show_stack(Stack stack)
 {
     String result;
     rcl_asprintf(&result, "[ ");
@@ -199,7 +199,7 @@ String showStack(Stack stack)
     return result;
 }
 
-String showStack_nobraces(Stack stack)
+String show_stack_nobraces(Stack stack)
 {
     String result;
     rcl_asprintf(&result, "");
@@ -237,7 +237,7 @@ String show_rcode(RawCode rcode)
     return result;
 }
 
-String showQuote(RawCode rcode)
+String show_quote(RawCode rcode)
 {
     if (rcode.used >= 50)
         return "[...]";

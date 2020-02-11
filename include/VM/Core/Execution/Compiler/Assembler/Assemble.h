@@ -26,20 +26,32 @@
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Execution\Compiler\Assembler\Opcode.h>
 
+/*** The literal name given to certain types of labels, in the generated code ***/
+
 #define ENTRY_NAME "RCL_entry_main"
 #define QUOTATION_LABEL_NAME "qte"
 #define CST_ARRAY_LABEL_NAME "ctb"
 #define STRING_LABEL_NAME "str"
 
+// The `Bunch' (a `packet') is a simple structure gathering all the useful information
+// generally used in most of the functions of this module.
 struct Bunch
 {
+    // A vector of labels, representing the final compilation result.
     Labels result;
-    const BResult *bresult;
+    // All the informations about the program.
+    BResult *bresult;
+    // The existing label environment, which evolves over the course of compilation.
     Lenv_map_t lenv;
+    // A label counter.
     label_count_t lbl_count;
+    // A scalable table of labels containing strings.
     OnlyStrLbl_const_lit_map_t cst_str_map;
+    // An evolutive table of labels containing constant tables.
     HashOpBloLbl_const_map_t cst_lbl_map;
 };
 
+// Returns an empty, but initialized `Bunch'.
 struct Bunch init_bunch(const BResult *);
+// Returns the program when compiled into the `Assembled_Program` structure form.
 Assembled_Program assemble(const BResult *);

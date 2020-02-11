@@ -32,6 +32,8 @@
 
 typedef struct RawCode RawCode;
 
+// An enumeration of all possible types of values
+// (there are currently 15 + 1 if you count concatenation)
 enum Value_Kind
 {
     RCL_Value_Array,
@@ -71,7 +73,8 @@ enum Value_Kind
 
 typedef struct ValueTag Value;
 
-String showKind(enum Value_Kind);
+// Returns the value kind in textual form.
+String show_kind(enum Value_Kind);
 
 struct RCL_Value_DataStruct_Field
 {
@@ -104,7 +107,6 @@ typedef mpz_t RCL_Value_Integer_t;
 typedef mpf_t RCL_Value_Float_t;
 typedef char RCL_Value_Char_t;
 typedef String RCL_Value_String_t;
-//typedef String RCL_Value_Word_t;
 typedef struct
 {
     String word_str;
@@ -211,26 +213,34 @@ Value otov(Operation);
     size_t size;
 } __attribute__((packed)); */
 
+/*** Values vectorization under concatenation form ***/
+
 typedef Vector(RawCode, Value);
 
 void init_rcode(RawCode *, size_t);
 void push_rcode(RawCode *, Value);
 void pop_rcode(RawCode *);
 
+// Concatenates the first `RawCode` with the second given.
 void concat_rcode(RawCode *, RawCode *);
-void concatRcode(RawCode *, RawCode *, size_t);
-void concatRcodeUntil(RawCode *, RawCode *, size_t, size_t);
+// Concatenates the first `RawCode` with the second given but from the given index.
+void concat_rcode_from(RawCode *, RawCode *, size_t);
+// Concatenates the first `RawCode` with the second given but between the given indexes.
+void concat_rcode_until(RawCode *, RawCode *, size_t, size_t);
 
+// Replace all sequences corresponding to `seq1` with `seq2` in the sent `RawCode`.
+// Length must be specified.
 void seq_replace(
     RawCode *restrict rcode,
     const Value seq1[], size_t size1,
     const Value seq2[], size_t size2);
 
+// Pop `RawCode` and returns is value.
 Value drop_rcode(RawCode *);
+// Returns the top of the `RawCode`.
 Value top_rcode(RawCode *);
 
 size_t count_operations(ListOperation);
 size_t count_operations_bykind(RawCode, enum Value_Kind);
 
 static const Value emptyRawCodeValue = {.kind = RCL_Value_Empty};
-

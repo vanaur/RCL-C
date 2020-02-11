@@ -38,7 +38,7 @@ void eval_new(Stack *restrict stack, BResult *restrict bresult)
             make_error,
             Interpreter,
             "The `new__` operator need to work with a data structure, but the top of the stack is a %s.",
-            showKind(top_ptr(stack)->kind));
+            show_kind(top_ptr(stack)->kind));
     }
 
     struct RCL_Value_DataStruct _struct = drop(stack).u.dataStruct_;

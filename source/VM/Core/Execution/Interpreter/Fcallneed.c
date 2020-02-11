@@ -76,8 +76,8 @@ inline bool is_able_to_process(
                 NewState_continue(make_info,
                                   Interpreter,
                                   "Expected a %s but got a %s (`%s`).",
-                                  showKind(needed[i]),
-                                  showKind(stack->array[i].kind),
+                                  show_kind(needed[i]),
+                                  show_kind(stack->array[i].kind),
                                   show_value(stack->array[i]));
             }
             return false;

@@ -28,8 +28,6 @@
 #include <VM\Core\Browse\BResult.h>
 #include <Tools\Utils\Utils.h>
 
-size_t refsize(char**, size_t);
-
 String hasArgv(BResult);
 void concatWordico(BResult*, BResult);
 void concatBResult(BResult*, BResult);

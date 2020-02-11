@@ -50,7 +50,7 @@ struct RCL_Value_DataStruct make_DataStruct_unfilled(struct RCL_Structure *paren
                                          .fields = malloc(sizeof(struct RCL_Value_DataStruct_Field) * parent_structure_ptr->field_alloc_used)};
 }
 
-String showKind(const enum Value_Kind kind)
+String show_kind(const enum Value_Kind kind)
 {
     // It is deliberately made that each "kind" in the form of a character string begins with a consonant,
     // it is indeed easier not to worry about the determinant (a/an) for the next uses.
@@ -259,10 +259,10 @@ static Value otov_quote(Operation op)
 
 static Value otov_var(Operation op)
 {
-    if (is_combinator(showIdentifier(op->u.var_.identifier_)))
-        return make_RCL_Value_Combinator(str_to_comb(showIdentifier(op->u.var_.identifier_)));
+    if (is_combinator(show_ast_identifier(op->u.var_.identifier_)))
+        return make_RCL_Value_Combinator(str_to_comb(show_ast_identifier(op->u.var_.identifier_)));
     else
-        return make_RCL_Value_Word(showIdentifier(op->u.var_.identifier_));
+        return make_RCL_Value_Word(show_ast_identifier(op->u.var_.identifier_));
 }
 
 static Value otov_concatenation(Operation op)
@@ -389,7 +389,7 @@ void concat_rcode(RawCode *restrict dest_ptr, RawCode *restrict src_ptr)
         push_rcode(dest_ptr, src_ptr->array[i]);
 }
 
-void concatRcode(RawCode *restrict dest_ptr, RawCode *restrict src_ptr, size_t from)
+void concat_rcode_from(RawCode *restrict dest_ptr, RawCode *restrict src_ptr, size_t from)
 {
     assert(src_ptr->used >= from);
 
@@ -404,7 +404,7 @@ void concatRcode(RawCode *restrict dest_ptr, RawCode *restrict src_ptr, size_t f
         dest_ptr->size = 2 * dest_ptr->used;
 }
 
-void concatRcodeUntil(RawCode *restrict dest_ptr, RawCode *restrict src_ptr, size_t from, size_t until)
+void concat_rcode_until(RawCode *restrict dest_ptr, RawCode *restrict src_ptr, size_t from, size_t until)
 {
     if (from >= until)
         return;

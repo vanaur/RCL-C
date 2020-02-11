@@ -29,18 +29,18 @@
 // They do not take into account the context of use to provide a result.
 
 // Return the size of the identifier (as string size)
-size_t identifierLength(Identifier);
+size_t identifier_length(Identifier);
 // Return the number of qual names (X.Y.Z => 3 quals)
-size_t countQuals(Identifier);
+size_t count_quals(Identifier);
 // Return a string formed by all the Identifier
-char *showIdentifier(Identifier);
+char *show_ast_identifier(Identifier);
 // Return the DLL name of the `extern` field
-char *getDLL_extern(Definition);
+char *get_ast_DLL_extern(Definition);
 // Return the DLL given identifier of an identifier field assuming it is a DLL name
-char *getDLL_asid(Identifier);
+char *get_DLL_asid(Identifier);
 // Return the last qual
-char *getLast(Identifier);
+char *get_last_qual(Identifier);
 // From a word as `Abc.def` return `def`
-char *getWordName(char *);
+char *get_word_name(char *);
 // From a word as `Abc.def` return `Abc`
-char *getWordPath(char *);
+char *get_word_path(char *);

@@ -25,4 +25,7 @@
 #pragma once
 #include <VM\Core\Checker\Typechecker\Types\Types.h>
 
+// Performs a type inference (more precisely, it determines the action on the stack,
+// the scope of the elements and the type of the result) of the expression sent,
+// taking into account an environment of variable types or not already existing.
 RCL_Type infer_type(Env_map_t *, RawCode *, struct State *);

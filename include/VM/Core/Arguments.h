@@ -31,6 +31,9 @@
 #include <VM\Core\Exec.h>
 #include <VM\Core\Argv.h>
 
+// For arguments `argc` of the main function, removes the last one.
 void remove_element(String*, int, int);
+// From the main arguments of `argc`, returns the compilation options.
 Exec get_exec(String*, int*);
+// Retrieves arguments for the interpreted program.
 struct RCL_Argv get_lamargs(String*, int*);

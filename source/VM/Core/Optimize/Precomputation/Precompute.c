@@ -73,7 +73,7 @@ static void precompute_table(BResult *restrict bresult)
 void precompute_main(BResult *restrict bresult)
 {
     precompute_table(bresult);
-    printf("\n%s", showQuote(bresult->psdata.rcode));
+    printf("\n%s", show_quote(bresult->psdata.rcode));
 }
 
 void precompute_defs(BResult *restrict bresult)

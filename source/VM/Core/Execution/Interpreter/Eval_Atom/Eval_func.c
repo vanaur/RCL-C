@@ -104,10 +104,10 @@ static void tramp_Eval_function(Trampoline_t *data)
     for (i = 0; i < parameters->result->used; i++)
         evalop(parameters->stack, &parameters->result->array[i], parameters->bresult);
 
-/*     printf("Stack:  %s\n", showStack(*parameters->stack));
-    printf("Tmp:    %s\n", showStack(*parameters->tmp));
-    printf("Rest:   %s\n", showStack(*parameters->rest));
-    printf("Result: %s\n\n", showStack(*parameters->result)); */
+/*     printf("Stack:  %s\n", show_stack(*parameters->stack));
+    printf("Tmp:    %s\n", show_stack(*parameters->tmp));
+    printf("Rest:   %s\n", show_stack(*parameters->rest));
+    printf("Result: %s\n\n", show_stack(*parameters->result)); */
 
     Tramp_Stop(data);
 }

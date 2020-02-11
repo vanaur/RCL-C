@@ -30,15 +30,29 @@
 #include <VM\Core\Argv.h>
 #include <VM\Core\Exec.h>
 
+// `BResult` (for Browse Result, i.e. the result obtained after the naming phase)
+// contains absolutely all the information about the program to be used.
 typedef struct BResult
 {
+    // Information about the main function and about included and imported files.
     BrowsedAbsyn psdata;
+    // Contains all information on the functions, external resources and structures used in the program.
+    // It can evolve during the evaluation by including or removing lambdas.
     struct Wordico wordico;
+    // Contains only the information on the program evaluation stop, when the program will be executed.
     RawCode resulting;
+    // Informs about the state of the virtual machine through a list of errors, attentions or information,
+    // these can be added at any time, and is therefore not constant.
+    // The state will be displayed at the end, if it contains something.
     struct State state;
+    // In case the program requires boot arguments (those of the main function),
+    // their information will be available here if the program is launched from the interpreter or the JIT.
     struct RCL_Argv argvs;
+    // Represents a record of all the information that the user has sent to the virtual machine for his program.
     Exec exec_infos;
+    // For information reports, contains the name of the file currently being processed. 
     String current_filename;
 } __attribute__((packed)) BResult;
 
+// Returns an initialized `BResult` structure, but without any information.
 struct BResult new_bresult();

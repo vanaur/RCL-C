@@ -95,7 +95,7 @@ _export struct IResult rcl__simple_interpret_ir_s(const String p_s, const bool s
         res.program_res = INCOMPLETE;
     }
     if (show_res)
-        printf("Resulting: %s\n", showQuote(bresult.resulting));
+        printf("Resulting: %s\n", show_quote(bresult.resulting));
     return res;
 }
 

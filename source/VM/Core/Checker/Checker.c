@@ -45,7 +45,7 @@ Checked_out check_program(BResult *restrict bresult)
     Env_map_t env;
     init_Env(&env, bresult->psdata.rcode.used);
     RCL_Type main_type = infer_type(&env, &bresult->psdata.rcode, &bresult->state);
-    printf("\n%s : %s\n", showQuote(bresult->psdata.rcode), show_type(main_type));
+    printf("\n%s : %s\n", show_quote(bresult->psdata.rcode), show_type(main_type));
     return CHECKED_OUT_OK(bresult->state);
 }
 

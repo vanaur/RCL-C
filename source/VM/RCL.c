@@ -216,7 +216,7 @@ void make_noise(const BResult bresult, const Exec exec, const String files[], co
     if (exec.ioc != Compiled)
     {
         if (exec.show_res)
-            _display_info("Resulting stack: %s", showStack(*((Stack *)&bresult.resulting))) else _display_newline;
+            _display_info("Resulting stack: %s", show_stack(*((Stack *)&bresult.resulting))) else _display_newline;
     }
     else
         _display_newline;

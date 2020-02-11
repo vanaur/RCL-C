@@ -26,6 +26,8 @@
 #include <VM\Core\RawCode\RawCode.h>
 #include <VM\Core\FFI\RCL_File.h>
 
+// `BrowsedAbsyn` (for Browsed Abstract Syntax Tree) contains information about the main function
+// as well as the included and imported files.
 typedef struct
 {
     RawCode rcode;

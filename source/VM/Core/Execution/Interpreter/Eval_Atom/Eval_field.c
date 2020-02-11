@@ -40,7 +40,7 @@ void eval_field(Stack *restrict stack, BResult *restrict bresult, RCL_Structure_
             make_error,
             Interpreter,
             "A field operator needs a structure, but the top of the stack is a %s.",
-            showKind(top_ptr(stack)->kind));
+            show_kind(top_ptr(stack)->kind));
     }
 
     String field_name;

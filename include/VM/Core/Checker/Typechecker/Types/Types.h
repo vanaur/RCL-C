@@ -34,6 +34,7 @@
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Wordefinition\RCL_Function.h>
 
+// There are, for the moment, 8 types
 enum Type_kind
 {
     TYPE_LITERAL,   // Strings, integers, ...

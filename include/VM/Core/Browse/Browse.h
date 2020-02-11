@@ -31,59 +31,6 @@
 #include <VM\Core\Browse\BrowsedAbsyn.h>
 #include <VM\Core\Browse\BResult.h>
 
-#define IsInFn 1
-#define IsNotInFn 0
-
+// Analyzes the program sent from a source file, in a readable syntax, and returns the result after the naming phase.
 BResult browseAbsyn(Program, String);
 
-/*** Browse type of programs ***/
-
-void browsePVoid(BResult *);          // An empty program
-void browseProg1(Program, BResult *); // Idata + definitions + code
-void browseProg2(Program, BResult *); // Idata + definitions
-void browseProg3(Program, BResult *); // Idata + code
-void browseProg4(Program, BResult *); // Definitions + code
-void browseProg5(Program, BResult *); // Definitions
-void browseProg6(Program, BResult *); // Code (with section '.code' indicated)
-void browseProg7(Program, BResult *); // Simple code
-void browseProg8(Program, BResult *); // Simple preprocessor
-
-void handle_absynInclude(BResult *, Preprocessor);
-void handle_absynImportAs(BResult *, Preprocessor);
-void handle_absynImport(BResult *, Preprocessor);
-
-int canHandleLiteralOp(RawCode, LiteralOperation);
-int rcodeContainsEOSV(RawCode *, char *);
-
-size_t count_includes(ListPreprocessor);
-size_t count_imports(ListPreprocessor);
-
-struct Code_handler
-{
-    BResult *bresult;
-    ListOperation lo;
-} __attribute__((packed));
-
-struct Definition_handler
-{
-    struct Wordico *wordico;
-    BrowsedAbsyn *absyn;
-    ListDefinition ld;
-} __attribute__((packed));
-
-struct Preprocessor_handler
-{
-    BResult *bresult;
-    ListPreprocessor lp;
-} __attribute__((packed));
-
-void handle_code(struct Code_handler *);
-void handle_definitions(struct Definition_handler *);
-void handle_preprocessor(struct Preprocessor_handler *);
-
-void handle_word(BResult *, String);
-void handle_lambda(BResult *, String);
-void handle_endlambda(BResult *, String);
-
-void case_operation(BResult *, Operation);
-void case_preprocessor(BResult *, Preprocessor p);

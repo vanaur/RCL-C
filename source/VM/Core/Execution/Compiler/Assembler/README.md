@@ -46,7 +46,7 @@ We read the IR from right to left, having as first information the arity of the 
   Reserve 2 registers of size $a$ for output. </br>
   $\implies$ Infers that the output of (2) = input arity of (1). </br>
   $\implies$ Type of $a$ = $\Z$. </br>
-  $\implies$ Registers for (2) output match with registers for (3) input.
+  $\implies$ Registers for (2) output match with registers for (1) input.
 3) $\rho$(`7`) = `0`. </br>
    Type = $() \to Z$. </br>
    Put the value into a register. </br>

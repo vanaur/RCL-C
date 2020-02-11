@@ -100,7 +100,7 @@ struct RCL_Structure make_rcl_structure(UIdent name, ListRCL_Structure_Field fie
 
         case is_SpecField:
             add_field(&result, make_spec_field(fields->rcl_structure_field_->u.specfield_.lident_,
-                                               showIdentifier(fields->rcl_structure_field_->u.specfield_.identifier_)));
+                                               show_ast_identifier(fields->rcl_structure_field_->u.specfield_.identifier_)));
             break;
         }
         fields = fields->listrcl_structure_field_;

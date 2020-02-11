@@ -25,4 +25,5 @@
 #pragma once
 #include <VM\Core\Checker\Typechecker\Types\Types.h>
 
+// An array containing the type of all stack combinators
 extern const RCL_Type combinator_types[];

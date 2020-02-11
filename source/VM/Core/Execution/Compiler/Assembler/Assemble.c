@@ -160,12 +160,12 @@ static void cst_array__seval_case(RawCode *result_ptr, const RawCode exp_case, s
 
     if (result_ptr->used > 1)
     {
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Non-constant or evaluable array case result: `%s`.", showQuote(*result_ptr));
+        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Non-constant or evaluable array case result: `%s`.", show_quote(*result_ptr));
         return exit(EXIT_FAILURE);
     }
     if (result_ptr->array[0].kind != expected_kind)
     {
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Non-conform type array of case result: `%s`.", showQuote(*result_ptr));
+        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Non-conform type array of case result: `%s`.", show_quote(*result_ptr));
         return exit(EXIT_FAILURE);
     }
 }
@@ -302,7 +302,7 @@ static Name cst_array_label(struct Bunch *bunch_ptr, const Value value)
         break;
 
     default:
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unarrayable data kind: %s.", showKind(RCL_ARRAY_CONTENT_CASE(value, 0)->array[0].kind));
+        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unarrayable data kind: %s.", show_kind(RCL_ARRAY_CONTENT_CASE(value, 0)->array[0].kind));
     }
     return osize_optimization__push_label(bunch_ptr, assembled_array, lbl_name);
 }

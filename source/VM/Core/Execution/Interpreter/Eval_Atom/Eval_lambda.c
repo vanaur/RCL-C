@@ -47,13 +47,13 @@ void new_lambda(Stack *stack, BResult *restrict bresult, const Value lamdop)
 
 void unscope_lambda(BResult *restrict bresult, const Value lamdop)
 {
-    if (getSpecific_lambda(&bresult->wordico, hash_djb2(lamdop.u.lam_)) == NULL)
+    if (getSpecific_lambda(&bresult->wordico, hash_djb2(lamdop.u.endLamScope_)) == NULL)
     {
         NewState_return(
             make_warning,
             Interpreter,
             "Trying to unscope an non-existing lambda (`%s').",
-            lamdop.u.lam_);
+            lamdop.u.endLamScope_);
     }
 
     vec_remove_lambda(&bresult->wordico.lambdas, lamdop.u.lam_);

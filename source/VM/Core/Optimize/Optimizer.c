@@ -61,7 +61,7 @@ static void optimize_O3(BResult *restrict bresult)
 
 void optimize(BResult *restrict bresult)
 {
-    //printf("\n--> Before: %s\n", showStack(*((Stack *)&bresult->psdata.rcode)));
+    //printf("\n--> Before: %s\n", show_stack(*((Stack *)&bresult->psdata.rcode)));
     switch (bresult->exec_infos.optimize_level)
     {
     case O0:
@@ -89,5 +89,5 @@ void optimize(BResult *restrict bresult)
             "Unknown or unimplemented yet optimization flag: '%d'.",
             bresult->exec_infos.optimize_level);
     }
-    //printf("--> After:  %s\n", showStack(*((Stack *)&bresult->psdata.rcode)));
+    //printf("--> After:  %s\n", show_stack(*((Stack *)&bresult->psdata.rcode)));
 }

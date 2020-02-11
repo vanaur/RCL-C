@@ -40,4 +40,5 @@ typedef struct
 #define CHECKED_OUT_OK(i)  (CHECKED_OUT(i, true))
 #define CHECKED_OUT_ERR(i) (CHECKED_OUT(i, false)
 
+// Performs an analysis of the program sent.
 Checked_out check_program(BResult *);

@@ -47,7 +47,7 @@
 inline void evalop(Stack *restrict stack, Value *restrict op, BResult *restrict bresult)
 {
     if (bresult->exec_infos.show_steps)
-        printf("step>\t\t%s%s\n", showStack_nobraces(*stack), show_value(*op));
+        printf("step>\t\t%s%s\n", show_stack_nobraces(*stack), show_value(*op));
 
     switch (op->kind)
     {

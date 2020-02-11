@@ -66,7 +66,7 @@ void vec_init_externs(struct VEC_Externs *vec, size_t i)
 
 void vec_add_externs(struct VEC_Externs *vec, Definition define)
 {
-    PushToVector(vec, struct RCL_Extern, make_RCL_extern(getLast(define->u.extern_.identifier_), getDLL_extern(define), define));
+    PushToVector(vec, struct RCL_Extern, make_RCL_extern(get_last_qual(define->u.extern_.identifier_), get_ast_DLL_extern(define), define));
 }
 
 void vec_add_externs_data(struct VEC_Externs *vec, struct RCL_Extern rcl_extern)

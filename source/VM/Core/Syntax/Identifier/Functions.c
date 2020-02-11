@@ -30,33 +30,33 @@
 #include <stdlib.h>
 #include <string.h>
 
-size_t identifierLength(Identifier id)
+size_t identifier_length(Identifier id)
 {
     switch (id->kind)
     {
     case is_Name:
         return strlen(id->u.name_.lident_);
     case is_QualName:
-        return 1 + (strlen(id->u.qualname_.uident_) + identifierLength(id->u.qualname_.identifier_));
+        return 1 + (strlen(id->u.qualname_.uident_) + identifier_length(id->u.qualname_.identifier_));
     }
     return 0;
 }
 
-size_t countQuals(Identifier id)
+size_t count_quals(Identifier id)
 {
     switch (id->kind)
     {
     case is_Name:
         return 1;
     case is_QualName:
-        return countQuals(id->u.qualname_.identifier_) + 1;
+        return count_quals(id->u.qualname_.identifier_) + 1;
     }
     return 0;
 }
 
-String showIdentifier(Identifier id)
+String show_ast_identifier(Identifier id)
 {
-    String result = (String)malloc(identifierLength(id));
+    String result = (String)malloc(identifier_length(id));
     String tmp1, tmp2;
     size_t pos = 0;
     switch (id->kind)
@@ -68,19 +68,19 @@ String showIdentifier(Identifier id)
         
     case is_QualName:
         tmp1 = id->u.qualname_.uident_;
-        tmp2 = showIdentifier(id->u.qualname_.identifier_);
+        tmp2 = show_ast_identifier(id->u.qualname_.identifier_);
         pos += sprintf(&result[pos], "%s.%s", tmp1, tmp2);
         break;
     }
     return result;
 }
 
-String getDLL_extern(Definition def)
+String get_ast_DLL_extern(Definition def)
 {
     return def->u.extern_.identifier_->u.qualname_.uident_;
 }
 
-String getDLL_asid(Identifier id)
+String get_DLL_asid(Identifier id)
 {
     String tmp1, tmp2;
     switch (id->kind)
@@ -90,7 +90,7 @@ String getDLL_asid(Identifier id)
 
     case is_QualName:
         tmp1 = id->u.qualname_.uident_;
-        tmp2 = getDLL_asid(id->u.qualname_.identifier_);
+        tmp2 = get_DLL_asid(id->u.qualname_.identifier_);
         if (tmp2 == NULL)
             return tmp1;
         break;
@@ -98,7 +98,7 @@ String getDLL_asid(Identifier id)
     return "";
 }
 
-String getLast(Identifier id)
+String get_last_qual(Identifier id)
 {
     String tmp1, *tmp2;
     switch (id->kind)
@@ -107,12 +107,12 @@ String getLast(Identifier id)
         return id->u.name_.lident_;
         
     case is_QualName:
-        return getLast(id->u.qualname_.identifier_);
+        return get_last_qual(id->u.qualname_.identifier_);
     }
     return "";
 }
 
-char *getWordName(char *word)
+char *get_word_name(char *word)
 {
     if (strchr(word, '.') == NULL) return word;
     String result = word;
@@ -120,10 +120,10 @@ char *getWordName(char *word)
     return ++result;
 }
 
-char *getWordPath(char *word)
+char *get_word_path(char *word)
 {
     String result = word;
-    rcl_asprintf(&result, "%.*s", (int)(strlen(word) - strlen(getWordName(word)) - 1), result + 0);
+    rcl_asprintf(&result, "%.*s", (int)(strlen(word) - strlen(get_word_name(word)) - 1), result + 0);
     return result;
 }
 

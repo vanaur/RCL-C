@@ -25,10 +25,12 @@
 #pragma once
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 
-String showStack(Stack);
-String showStack_nobraces(Stack);
+/*** Versatile display functions ***/
+
+String show_stack(Stack);
+String show_stack_nobraces(Stack);
 String show_value(Value);
-String showLo(LiteralOperation);
-String showQuote(RawCode);
-String showComb(Combinator);
+String show_arithop(LiteralOperation);
+String show_quote(RawCode);
+String show_comb(Combinator);
 String show_rcode(RawCode);
