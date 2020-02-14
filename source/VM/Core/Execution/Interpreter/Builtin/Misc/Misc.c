@@ -33,7 +33,6 @@
 #include <VM\Core\Show\Show.h>
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 #include <VM\Core\Execution\Interpreter\Stack\Combinators\Basics.h>
-#include <VM\Core\Execution\Interpreter\Fcallneed.h>
 #include <VM\Core\Execution\Interpreter\Builtin\Misc\Misc.h>
 
 static inline void f_case(Stack *restrict stack, BResult *restrict bresult)

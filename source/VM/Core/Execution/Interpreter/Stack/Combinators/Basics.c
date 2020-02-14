@@ -325,6 +325,26 @@ static void do_nprec(Stack *restrict stack)
         mpf_set_prec(topx_ptr(stack, 2)->u.float_, (mp_bitcnt_t)mpz_get_d(drop(stack).u.int_));
 }
 
+static void do_ifte(Stack *restrict stack, BResult *restrict bresult)
+{
+    // [condition] [then] [else] ifte
+    const Value _else = drop(stack);
+    const Value _then = drop(stack);
+    const Value _cond = drop(stack);
+
+    Stack stk_cond;
+    init_stack(&stk_cond, _cond.u.quote_->used);
+
+    doUnquote(&stk_cond, &_cond, bresult);
+
+    if (mpz_get_d(top_ptr(&stk_cond)->u.int_))
+        doUnquote(stack, &_then, bresult);
+    else
+        doUnquote(stack, &_else, bresult);
+    
+    free(stk_cond.array);
+}
+
 inline void doComb(Stack *restrict stack, const Combinator comb, BResult *restrict bresult)
 {
     switch (comb)
@@ -415,6 +435,13 @@ inline void doComb(Stack *restrict stack, const Combinator comb, BResult *restri
     case PUTS:
         printf("%s", drop(stack).u.string_);
         break;
+
+    case NVSHOW:
+        push(stack, make_RCL_Value_String(show_value(drop(stack))));
+        break;
+
+    case IFTE:
+        return do_ifte(stack, bresult);
 
     default:
         printf("Combinator not implemented yet\n");
