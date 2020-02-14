@@ -52,6 +52,20 @@ static void doFlip(Stack *restrict stack)
     *topx_ptr(stack, 3) = tmp;
 }
 
+static void doGis(Stack *restrict stack)
+{
+    const int from = mpz_get_d(drop(stack).u.int_);
+    const int until = mpz_get_d(drop(stack).u.int_);
+
+    RawCode *quote = (RawCode *)malloc(sizeof(*quote));
+    init_rcode(quote, abs(until - from) + 1);
+
+    for (Iterator i = from; i < until; i++)
+        push_rcode(quote, make_RCL_Value_Integer_i(i));
+    
+    push(stack, make_RCL_Value_Quotation(quote));
+}
+
 static void doPop(Stack *restrict stack)
 {
     pop(stack);
@@ -267,6 +281,33 @@ static void doStep(Stack *restrict stack, BResult *restrict bresult)
     }
 }
 
+/*
+    vq
+    [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20]
+    [~10 cube square quote cat]
+    step
+*/
+
+static void doSteq(Stack *restrict stack, BResult *restrict bresult)
+{
+    Value program = drop(stack);
+    const Value seq = drop(stack);
+
+    extend_size_RawCode(program.u.quote_, 2);
+    push_rcode(program.u.quote_, make_RCL_Value_Combinator(QUOTE));
+    push_rcode(program.u.quote_, make_RCL_Value_Combinator(CAT));
+
+    RawCode *quote = malloc(sizeof *quote);
+    init_rcode(quote, 1);
+    push(stack, make_RCL_Value_Quotation(quote));
+
+    for (Iterator i = 0; i < seq.u.quote_->used; i++)
+    {
+        push(stack, seq.u.quote_->array[i]);
+        doUnquote(stack, &program, bresult);
+    }
+}
+
 static void doVq(Stack *restrict stack)
 {
     // This is just a void quote : [ ]
@@ -302,6 +343,9 @@ inline void doComb(Stack *restrict stack, const Combinator comb, BResult *restri
 
     case FLIP:
         return doFlip(stack);
+
+    case GIS:
+        return doGis(stack);
 
     case DIP:
         return doDip(stack, bresult);
@@ -357,6 +401,9 @@ inline void doComb(Stack *restrict stack, const Combinator comb, BResult *restri
 
     case STEP:
         return doStep(stack, bresult);
+
+    case STEQ:
+        return doSteq(stack, bresult);
 
     case NPREC:
         return do_nprec(stack);
