@@ -56,122 +56,6 @@ void atex()
     printf("----\n\n");
 }
 
-int main(int argc, String argv[])
-{
-    atexit(atex);
-
-/*     rcl__expr_t cst_n1 = rcl_expr__cst_int(10);
-    rcl__expr_t cst_n2 = rcl_expr__cst_int(5);
-    rcl__expr_t my_exp = rcl_expr__div(cst_n1, cst_n2);
-
-    printf("%s\n", rcl__show_ir_expr(my_exp));
-    struct IResult res = rcl__evali_expr(my_exp);
-    printf("Resulting: %d\n", res.main_returned); */
-
-    // If the RCL is launch without argument
-    if (argc == 1)
-        return noarg();
-
-    //printf("%lld\n", hash_djb2("Math.rand"));
-
-    // Remove the program name from `argv`
-    remove_element(argv, argc--, 0);
-    Exec exec = get_exec(argv, &argc);
-
-    // if O3 then activate "all" the optimisations
-
-    // Don't display anything if this is the flag 'noise'
-    if (exec.noise_level == Noise)
-    {
-        putchar('\n');
-        PRINT_RCL_TEXT;
-    }
-
-    // If there are any lambda arguments, get them
-    struct RCL_Argv rcl_argv = get_lamargs(argv, &argc);
-    rcl_argv.ioc = exec.ioc;
-
-    // Initialize timers
-    uint64_t start1, end1, start2, end2;
-
-    String files[argc];
-    *files = *argv;
-
-    time_measure(&start1);
-
-    // Process the given file(s) by building the IR
-    BResult bresult = processFiles(files, argc, exec);
-    bresult.argvs = rcl_argv;
-    bresult.exec_infos = exec;
-
-    // Check the program
-    if (exec.type_check)
-    {
-        Checked_out checked = check_program(&bresult);
-
-        if (checked.infos.used)
-        {
-            prettyPrint_state(checked.infos);
-        }
-        if (!checked.able)
-        {
-            if (exec.ioc == Interpreted)
-                cc_fprintf(CC_FG_RED, stdout, "\n Can't interpret the program due to error(s).\n\n");
-            else
-                cc_fprintf(CC_FG_RED, stdout, "\n Can't compile the program due to error(s).\n\n");
-            return EXIT_FAILURE;
-        }
-    }
-
-    time_measure(&start2);
-
-    // Execute or compile the program
-
-    if (exec.ioc == Interpreted)
-    {
-        interpret(&bresult, exec.sool);
-    }
-    else if (exec.ioc == Compiled)
-    {
-        Assembled_Program assembled_asm = assemble(&bresult);
-        String assembled_asm_str = show_assembled_program(assembled_asm, bresult);
-        if (exec.kasm)
-        {
-            FILE *file = fopen("output_asm.asm", "w");
-            fputs(((const char *restrict)(assembled_asm_str)), file);
-            fclose(file);
-        }
-        printf("\n%s\n", assembled_asm_str);
-    }
-    else if (exec.ioc == Jited)
-    {
-        jit(&bresult);
-    }
-
-    time_measure(&end2);
-    time_measure(&end1);
-
-    // Display compilation or interpretation errors
-    if (bresult.state.hasError)
-        cc_fprintf(CC_FG_MAGENTA, stdout, "\n ---  Runtime interpreter errors  ---\n\n");
-    // Display errors, warnigns and infos
-    prettyPrint_state(bresult.state);
-
-    // If we want more informations about execution or compilation
-    if (exec.noise_level == Noise && exec.ioc == Interpreted)
-        make_noise(bresult, exec, files, argc, ns_to_ms(times_diff(start1, end1)), ns_to_ms(times_diff(start2, end2)), start1, start2, end1, end2);
-    else
-    {
-        printf("\n[i] All time taken: %s.\n", show_time(start1, end1));
-        printf("[i] Compilation time taken: %s.\n", show_time(start2, end2));
-    }
-
-    // Free the allocated memory areas
-    clean_heap(&bresult, exec);
-
-    return EXIT_SUCCESS;
-}
-
 void clean_heap(BResult *bresult, const Exec exec)
 {
     if (bresult->psdata.rcode.size > 0)
@@ -209,7 +93,14 @@ void clean_heap(BResult *bresult, const Exec exec)
     }
 #define _display_newline printf("\n");
 
-void make_noise(const BResult bresult, const Exec exec, const String files[], const size_t argc, const uint64_t all_time, const uint64_t eval_time, const uint64_t t1, const uint64_t t2, const uint64_t e1, const uint64_t e2)
+void make_noise(
+    const BResult bresult,
+    const Exec exec,
+    const String files[],
+    const size_t argc,
+    const long double all_time,     // Time of all RCL
+    const long double eval_time,    // Time of evaluation
+    const long double process_time) // Time of processing program, without evaluation
 {
     printf("\nInformation:");
 
@@ -236,40 +127,24 @@ void make_noise(const BResult bresult, const Exec exec, const String files[], co
         printf("\b ");
     }
 
-    _display_info("Initial operations number: %I64d", bresult.psdata.rcode.used);
-
-    _display_info("Non-native words: %I64d\n", bresult.wordico.externs.used + bresult.wordico.functions.used + bresult.wordico.structures.used);
-
-    printf("     > %I64d functions\n\
-     > %I64d structures\n\
-     > %I64d externals",
+    _display_info("Initial operations number: %I64d.", bresult.psdata.rcode.used);
+    _display_info("Non-native words: %I64d.\n", bresult.wordico.externs.used + bresult.wordico.functions.used + bresult.wordico.structures.used);
+    printf("     > %I64d functions.\n\
+     > %I64d structures.\n\
+     > %I64d externals.",
            bresult.wordico.functions.used, bresult.wordico.structures.used, bresult.wordico.externs.used);
-
-    _display_info("Included DLLs: %I64d", bresult.psdata.includes.used);
-
-    _display_info("Imported files: %I64d", bresult.psdata.imports.used);
-
-    _display_info("Recursion optimization: %s", bresult.exec_infos.optimize_rec == true ? "yes" : "no");
-
-    _display_info("Optimization level: Opt-%d", bresult.exec_infos.optimize_level);
-
+    _display_info("Included DLLs: ....................... %I64d.", bresult.psdata.includes.used);
+    _display_info("Imported files: ...................... %I64d.", bresult.psdata.imports.used);
+    _display_info("Recursion optimization: .............. %s.", bresult.exec_infos.optimize_rec == true ? "yes" : "no");
+    _display_info("Optimization level: .................. Opt-%d.", bresult.exec_infos.optimize_level);
     if (exec.ioc == Interpreted)
-        _display_info("Usage of program parameters: %s", hasArgv(bresult));
-
-    _display_info("Execution mode: %s", exec.ioc == 0 ? "interpreted" : "compiled");
-
-    _display_info("Evaluation mode: %s", exec.sool == 0 ? "strict" : exec.sool == 1 ? "optimistic" : "lazy");
-
-    _display_info("Time taken by all RCL: %I64d ms", all_time);
-    _display_info("Browing, checking, optimizing time: %I64d ms", times_diff(eval_time, all_time));
-
-    /*     if (exec.ioc == Interpreted)
-        _display_info("Execution time of the program: %I64d ms", eval_time) else _display_info("Compilation time of the program: %I64d ms", eval_time);
- */
-
+    _display_info("Usage of program parameters: ......... %s.", hasArgv(bresult));
+    _display_info("Execution mode: ...................... %s.", exec.ioc == 0 ? "interpreted" : "compiled");
+    _display_info("Evaluation mode: ..................... %s.", exec.sool == 0 ? "strict" : exec.sool == 1 ? "optimistic" : "lazy");
+    _display_info("Time taken by all RCL: ............... %s.", show_time(all_time));
+    _display_info("Browing, checking, optimizing time: .. %s.", show_time(process_time));
     if (exec.ioc == Interpreted)
-        _display_info("Execution time of the program: %s", show_time(t2, e2));
-
+    _display_info("Execution time of the program: ....... %s.", show_time(eval_time));
     printf("\n\nSuccessful end of program \\o/\n\n");
 }
 
@@ -282,4 +157,135 @@ int noarg()
     cc_fprintf(CC_FG_DARK_GREEN, stdout, " for help, or go to ");
     cc_fprintf(CC_FG_BLUE, stdout, "%s\n\n", RCL_GITHUB_LINK);
     return 0;
+}
+
+/*** Entry point ***/
+
+int main(int argc, String argv[])
+{
+    atexit(atex);
+
+    /*     rcl__expr_t cst_n1 = rcl_expr__cst_int(10);
+    rcl__expr_t cst_n2 = rcl_expr__cst_int(5);
+    rcl__expr_t my_exp = rcl_expr__div(cst_n1, cst_n2);
+
+    printf("%s\n", rcl__show_ir_expr(my_exp));
+    struct IResult res = rcl__evali_expr(my_exp);
+    printf("Resulting: %d\n", res.main_returned); */
+
+    // If the RCL is launch without argument
+    if (argc == 1)
+        return noarg();
+
+    //printf("%lld\n", hash_djb2("Math.rand"));
+
+    // Remove the program name from `argv`
+    remove_element(argv, argc--, 0);
+    Exec exec = get_exec(argv, &argc);
+
+    // if O3 then activate "all" the optimisations
+
+    // Don't display anything if this is the flag 'noise'
+    if (exec.noise_level == Noise)
+    {
+        putchar('\n');
+        PRINT_RCL_TEXT;
+    }
+
+    // If there are any lambda arguments, get them
+    struct RCL_Argv rcl_argv = get_lamargs(argv, &argc);
+    rcl_argv.ioc = exec.ioc;
+
+    // Set timers
+    struct timespec start1, end1, start2, end2, start3, end3;
+    long double all_time, eval_time, process_time;
+
+    String files[argc];
+    *files = *argv;
+
+    gettime(&start1);
+    gettime(&start3);
+
+    /*     clock_gettime(CLOCK_REALTIME, &start1);
+    clock_gettime(CLOCK_REALTIME, &start3); */
+
+    // Process the given file(s) by building the IR
+    BResult bresult = processFiles(files, argc, exec);
+    bresult.argvs = rcl_argv;
+    bresult.exec_infos = exec;
+
+    // Check the program
+    if (exec.type_check)
+    {
+        Checked_out checked = check_program(&bresult);
+
+        if (checked.infos.used)
+        {
+            prettyPrint_state(checked.infos);
+        }
+        if (!checked.able)
+        {
+            if (exec.ioc == Interpreted)
+                cc_fprintf(CC_FG_RED, stdout, "\n Can't interpret the program due to error(s).\n\n");
+            else
+                cc_fprintf(CC_FG_RED, stdout, "\n Can't compile the program due to error(s).\n\n");
+            return EXIT_FAILURE;
+        }
+    }
+
+    gettime(&end3);
+    gettime(&start2);
+
+    /*     clock_gettime(CLOCK_REALTIME, &end3);
+    clock_gettime(CLOCK_REALTIME, &start2); */
+
+    // Execute or compile the program
+
+    if (exec.ioc == Interpreted)
+    {
+        interpret(&bresult, exec.sool);
+    }
+    else if (exec.ioc == Compiled)
+    {
+        Assembled_Program assembled_asm = assemble(&bresult);
+        String assembled_asm_str = show_assembled_program(assembled_asm, bresult);
+        if (exec.kasm)
+        {
+            FILE *file = fopen("output_asm.asm", "w");
+            fputs(((const char *restrict)(assembled_asm_str)), file);
+            fclose(file);
+        }
+        printf("\n%s\n", assembled_asm_str);
+    }
+    else if (exec.ioc == Jited)
+    {
+        jit(&bresult);
+    }
+
+    gettime(&end2);
+    gettime(&end1);
+
+    all_time = timesdiff(start1, end1);
+    eval_time = timesdiff(start2, end2);
+    process_time = timesdiff(start3, end3);
+
+    // Display compilation or interpretation errors
+    if (bresult.state.hasError)
+        cc_fprintf(CC_FG_MAGENTA, stdout, "\n ---  Runtime interpreter errors  ---\n\n");
+    // Display errors, warnigns and infos
+    prettyPrint_state(bresult.state);
+
+    // If we want more informations about execution or compilation
+    if (exec.noise_level == Noise && exec.ioc == Interpreted)
+        make_noise(bresult, exec, files, argc, all_time, eval_time, process_time);
+    else
+    {
+        printf("\n[i] All time taken: %s.\n", show_time(all_time));
+        printf("[i] Compilation time taken: %s.\n", show_time(process_time));
+    }
+
+    // Free the allocated memory areas
+    clean_heap(&bresult, exec);
+
+    return EXIT_SUCCESS;
 }

@@ -23,12 +23,9 @@
  */
 
 #pragma once
-#include <stdint.h>
-
 #include <Tools\Utils\Utils.h>
+#include <time.h>
 
-void time_measure(uint64_t *);
-uint64_t times_diff(uint64_t, uint64_t);
-uint64_t ns_to_ms(uint64_t);
-uint64_t ns_to_s(uint64_t);
-String show_time(uint64_t, uint64_t);
+bool gettime(struct timespec *);
+double timesdiff(const struct timespec, const struct timespec);
+String show_time(const double);

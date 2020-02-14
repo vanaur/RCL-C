@@ -39,8 +39,3 @@
     printf(" ______________________________________________________________________________________________________\n\n");
 
 #define RCL_GITHUB_LINK "https://github.com/vanaur/RCL"
-
-int main(int, String *);
-void clean_heap(BResult *, const Exec);
-void make_noise(const BResult bresult, const Exec exec, const String files[], const size_t argc, const uint64_t all_time, const uint64_t eval_time, const uint64_t t1, const uint64_t t2, const uint64_t e1, const uint64_t e2);
-int noarg();

@@ -110,7 +110,6 @@ void jit(BResult *restrict bresult)
     Assembled_Program program = assemble(bresult);
     
     // ----- Initialize the JIT ----- //
-    uint64_t tstart1, tend1;
     RCL_JIT_t rcl_jit;
     SET_NINSTRS(rcl_jit, 2);
     fn_RCL_JIT_INFO_STATE_init(&rcl_jit, bresult);
@@ -120,17 +119,15 @@ void jit(BResult *restrict bresult)
     RET(rcl_jit.instr[1]);
 
     // ----- Run JIT ----- //
-    time_measure(&tstart1);
     jit_begin_block(rcl_jit.jstate, rcl_jit.abuffer);
     jit_emit_all(rcl_jit.jstate);
     jit_end_block(rcl_jit.jstate);
     fn_RCL_JIT_INFO_STATE_end(&rcl_jit);
-    time_measure(&tend1);
 
     // ----- End of JIT, display infirmation ----- //
     printf("Program returned: %d\n", rcl_jit.program_return);
     printf("Jerr: %d\n", rcl_jit.jerr);
-    printf("Time taken: %s\n", show_time(tstart1, tend1));
+    //printf("Time taken: %s\n", show_time(tstart1, tend1));
 }
 
 // https://github.com/hellerve/cj/tree/master/src
