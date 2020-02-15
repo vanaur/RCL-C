@@ -77,6 +77,7 @@ inline void evalop(Stack *restrict stack, Value *restrict op, BResult *restrict 
     case RCL_Value_Replicated:
     {
         int rep = op->u.repeat_.times;
+        extend_size_RawCode(&(*((RawCode *)stack)), rep);
         while (rep--)
             evalop(stack, op->u.repeat_.op, bresult);
     }

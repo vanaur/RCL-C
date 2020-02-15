@@ -105,16 +105,19 @@ void prettyPrint_state(struct State state)
         case Error:
             cc_fprintf(CC_FG_RED, stdout, "    Error: ");
             cc_fprintf(CC_FG_DARK_RED, stdout, "%s\n", state.array[i].u.error.msg);
+            free(state.array[i].u.error.msg);
             break;
 
         case Warning:
             cc_fprintf(CC_FG_YELLOW, stdout, "    Warning: ");
             cc_fprintf(CC_FG_DARK_YELLOW, stdout, "%s\n", state.array[i].u.warning.msg);
+            free(state.array[i].u.warning.msg);
             break;
 
         case Info:
             cc_fprintf(CC_FG_CYAN, stdout, "    Info: ");
             cc_fprintf(CC_FG_DARK_CYAN, stdout, "%s\n", state.array[i].u.info.msg);
+            free(state.array[i].u.info.msg);
             break;
         }
     }

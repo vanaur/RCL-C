@@ -36,7 +36,6 @@
         String msg;                                  \
         rcl_asprintf(&msg, fmt, __VA_ARGS__);        \
         state_put(&bresult->state, fn(origin, msg)); \
-        free(msg);                                   \
         return;                                      \
     }
 
@@ -45,7 +44,6 @@
         String msg;                                  \
         rcl_asprintf(&msg, fmt, __VA_ARGS__);        \
         state_put(&bresult->state, fn(origin, msg)); \
-        free(msg);                                   \
     }
 
 enum Origin { Browser, Interpreter, Compiler, Optimizer, Checker };
@@ -67,10 +65,33 @@ struct State {
     bool hasError;
 } __attribute__((packed)) State;
 
+#define S_ERR make_error
+#define S_WARN make_warning
+#define S_INFO make_info
+
+#define S_CURRENTF bresult->current_name == NULL ? "main" : bresult->current_name
 
 struct StateKind make_error(enum Origin, String);
 struct StateKind make_warning(enum Origin, String);
 struct StateKind make_info(enum Origin, String);
+
+#define state_put_err_br(fmt, ...) NewState_continue(S_ERR, Browser, fmt, __VA_ARGS__)
+#define state_put_err_it(fmt, ...) NewState_continue(S_ERR, Interpreter, fmt, __VA_ARGS__)
+#define state_put_err_co(fmt, ...) NewState_continue(S_ERR, Compiler, fmt, __VA_ARGS__)
+#define state_put_err_op(fmt, ...) NewState_continue(S_ERR, Optimizer, fmt, __VA_ARGS__)
+#define state_put_err_ch(fmt, ...) NewState_continue(S_ERR, Checker, fmt, __VA_ARGS__)
+
+#define state_put_warn_br(fmt, ...) NewState_continue(S_WARN, Browser, fmt, __VA_ARGS__)
+#define state_put_warn_it(fmt, ...) NewState_continue(S_WARN, Interpreter, fmt, __VA_ARGS__)
+#define state_put_warn_co(fmt, ...) NewState_continue(S_WARN, Compiler, fmt, __VA_ARGS__)
+#define state_put_warn_op(fmt, ...) NewState_continue(S_WARN, Optimizer, fmt, __VA_ARGS__)
+#define state_put_warn_ch(fmt, ...) NewState_continue(S_WARN, Checker, fmt, __VA_ARGS__)
+
+#define state_put_info_br(fmt, ...) NewState_continue(S_INFO, Browser, fmt, __VA_ARGS__)
+#define state_put_info_it(fmt, ...) NewState_continue(S_INFO, Interpreter, fmt, __VA_ARGS__)
+#define state_put_info_co(fmt, ...) NewState_continue(S_INFO, Compiler, fmt, __VA_ARGS__)
+#define state_put_info_op(fmt, ...) NewState_continue(S_INFO, Optimizer, fmt, __VA_ARGS__)
+#define state_put_info_ch(fmt, ...) NewState_continue(S_INFO, Checker, fmt, __VA_ARGS__)
 
 void state_init(struct State*);
 void state_put(struct State*, struct StateKind);

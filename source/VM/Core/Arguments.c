@@ -155,7 +155,8 @@ Exec get_exec(String *argv, int *argc)
         , .type_check = false       // --check-type
         , .show_res = true          // --show-res, --sr
         , .ext_bignum = false       // --ext-bignum
-        , .ext_ptr = false };       // --ext-ptr
+        , .ext_ptr = false          // --ext-ptr
+        , .low = false };           // --low
 
     while (n--)
     {
@@ -265,6 +266,12 @@ Exec get_exec(String *argv, int *argc)
         else if (!strcmp(argv[n], "--EXT-PTR"))
         {
             result.ext_ptr = true;
+            (*argc)--;
+            remove_element(argv, total, n);
+        }
+        else if (!strcmp(argv[n], "--LOW"))
+        {
+            result.low = true;
             (*argc)--;
             remove_element(argv, total, n);
         }

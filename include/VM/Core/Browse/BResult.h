@@ -52,6 +52,8 @@ typedef struct BResult
     Exec exec_infos;
     // For information reports, contains the name of the file currently being processed. 
     String current_filename;
+    // For information reports, contains the name of the function currently being processed.
+    String current_name;
 } __attribute__((packed)) BResult;
 
 // Returns an initialized `BResult` structure, but without any information.

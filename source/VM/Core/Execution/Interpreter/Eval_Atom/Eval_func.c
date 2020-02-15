@@ -118,6 +118,7 @@ and will not guarantee the success of the evaluation of the function '%s`."
 
 void eval_function(Stack *restrict stack, struct RCL_Function *restrict function, BResult *restrict bresult)
 {
+    bresult->current_name = function->name;
     if (bresult->exec_infos.optimize_rec)
     {
         NewState_continue(
@@ -162,4 +163,5 @@ void eval_function(Stack *restrict stack, struct RCL_Function *restrict function
         for (Iterator i = 0; i < function->body.used; i++)
             evalop(stack, &function->body.array[i], bresult);
     }
+    bresult->current_name = NULL;
 }

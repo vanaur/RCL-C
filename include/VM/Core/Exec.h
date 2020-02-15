@@ -85,4 +85,5 @@ typedef struct
     // extentions
     bool ext_ptr;
     bool ext_bignum;
+    bool low; // Lambda Over Write
 } __attribute__((packed)) Exec;

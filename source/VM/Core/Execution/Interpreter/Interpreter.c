@@ -40,6 +40,7 @@ inline RawCode seval(const RawCode rcode, BResult *bresult)
 
 inline void interpret(BResult *restrict bresult, const SOOL mode)
 {
+    bresult->current_name = NULL;
     switch (mode)
     {
     case Strict:

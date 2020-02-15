@@ -33,15 +33,19 @@
 
 void new_lambda(Stack *stack, BResult *restrict bresult, const Value lamdop)
 {
-    if (getSpecific_lambda(&bresult->wordico, hash_djb2(lamdop.u.lam_)))
+    struct RCL_Lambda *lam_yet_exists = getSpecific_lambda(&bresult->wordico, hash_djb2(lamdop.u.lam_));
+    if (lam_yet_exists)
     {
-        NewState_return(
-            make_error,
-            Interpreter,
-            "A lambda declaration is done over another else that wasn't unscoped (`%s') but having the same name.",
-            lamdop.u.lam_);
+        if (bresult->exec_infos.low)
+            lam_yet_exists->u.On_Interpreted.i_lam.value = drop(stack);
+        else
+        {
+            state_put_warn_it("The lambda `%s` is overwrote in function `%s`.", lam_yet_exists->name, S_CURRENTF);
+            state_put_info_it("If you need lambda overwriting, use option `--low`.", NULL);
+            state_put_info_it("Else, maybe you want unscope the lambda: `%s$`.", lam_yet_exists->name);
+            return;
+        }
     }
-
     vec_add_lambdas(&bresult->wordico.lambdas, make_rcl_Lambda(lamdop.u.lam_, bresult->argvs, drop(stack), *stack));
 }
 
@@ -49,14 +53,12 @@ void unscope_lambda(BResult *restrict bresult, const Value lamdop)
 {
     if (getSpecific_lambda(&bresult->wordico, hash_djb2(lamdop.u.endLamScope_)) == NULL)
     {
-        NewState_return(
-            make_warning,
-            Interpreter,
-            "Trying to unscope an non-existing lambda (`%s').",
-            lamdop.u.endLamScope_);
+        state_put_warn_it("Trying to unscope an non-existing lambda (`%s').", lamdop.u.endLamScope_);
     }
-
-    vec_remove_lambda(&bresult->wordico.lambdas, lamdop.u.lam_);
+    else
+    {
+        vec_remove_lambda(&bresult->wordico.lambdas, lamdop.u.lam_);
+    }
 }
 
 void eval_lambda_call(Stack *restrict stack, struct RCL_Lambda *restrict lambda, BResult *restrict bresult)
