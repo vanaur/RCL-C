@@ -44,9 +44,6 @@ void perform_builtin(const struct Builtin *restrict builtin, Stack *restrict sta
         return perform_builtin_misc(stack, *builtin, bresult);
 
     default:
-        NewState_return(make_error,
-                        Interpreter,
-                        "Unknown builtin module `%d'.",
-                        builtin->module);
+        state_put_err_it("Unknown builtin module kind: `%s'.", builtin->module);
     }
 }

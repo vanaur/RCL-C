@@ -99,6 +99,7 @@ void case_preprocessor(BResult *, Preprocessor p);
 BResult browseAbsyn(Program prog, String filename)
 {
     BResult bresult;
+    bresult.current_name = NULL;
 
     rcl_asprintf(&bresult.current_filename, "%s", filename);
 
@@ -169,8 +170,7 @@ void browsePVoid(BResult *restrict bresult)
     init_rcode(&bresult->psdata.rcode, 1);
     init_imports__(&bresult->psdata.imports, 1);
     init_includes__(&bresult->psdata.includes, 1);
-
-    NewState_continue(make_info, Browser, "`%s' is an empty program (the file is actually void).", bresult->current_filename);
+    state_put_warn_br("`%s' is an empty program (the file actually no contains any code).", bresult->current_filename);
 }
 
 void browseProg1(const Program prog, BResult *restrict bresult)
@@ -374,11 +374,9 @@ void _handle_lambda(BResult *restrict bresult, String name)
 {
     if (is_combinator(name))
     {
-        NewState_return(
-            make_error,
-            Browser,
-            "`%s' is used to initialize a lambda, but the chosen name is a combinator identifier.",
-            name);
+        state_put_info_br("In function `%s': ", S_CURRENTF);
+        state_put_err_br("`%s' is used to initialize a lambda, but the chosen name is a combinator identifier.", name);
+        return;
     }
 
     push_rcode(&bresult->psdata.rcode, make_RCL_Value_Lambda(name));
@@ -388,11 +386,9 @@ void _handle_endlambda(BResult *restrict bresult, String name)
 {
     if (is_combinator(name))
     {
-        NewState_return(
-            make_error,
-            Browser,
-            "`%s' is used to end the scope of a lambda, but the enterd lambda name is a combinator identifier.",
-            name);
+        state_put_info_br("In function `%s': ", S_CURRENTF);
+        state_put_err_br("`%s' is used to end the scope of a lambda, but the given lambda name is a combinator identifier", name);
+        return;
     }
 
     push_rcode(&bresult->psdata.rcode, make_RCL_Value_EndLamScope(name));
@@ -488,31 +484,32 @@ void handle_absynImportAs(BResult *restrict bresult, Preprocessor p)
 void handle_absynInclude(BResult *restrict bresult, Preprocessor p)
 {
     if (fopen(p->u.include_.string_, "r"))
-        if (getSpecificRCL_File(&bresult->psdata.includes, p->u.include_.uident_) != NULL)
+    {
+        RCL_File *tmp_file_already_exists = getSpecificRCL_File(&bresult->psdata.includes, p->u.include_.uident_);
+        if (tmp_file_already_exists != NULL)
         {
-            NewState_continue(
-                make_warning,
-                Browser,
-                "An included DLL named `%s' already exists in the table of external ressources.",
-                p->u.include_.uident_);
-
-            NewState_return(
-                make_info,
-                Browser,
-                "The new resource has been ignored.",
-                NULL);
+            state_put_info_br("In file `%s': ", bresult->current_filename);
+            state_put_warn_br("An included external dynamic library called `%s' already exists in the table of external ressources", p->u.include_.uident_);
+            state_put_info_br("--- The current handled library path is from `%s' ;", p->u.include_.string_);
+            state_put_info_br("--- The already existing library path is from `%s'.", tmp_file_already_exists->path);
+            if (!strcmp(p->u.include_.string_, tmp_file_already_exists->path))
+            {
+                state_put_info_br("------ Since they redirect to the same location, nothing's changed.", NULL);
+            }
+            else
+            {
+                state_put_info_br("------ Please change the name of the included library.", NULL);
+                state_put_info_br("       The current one has no been added.", NULL);
+            }
         }
         else
         {
             add_RCL_File(&bresult->psdata.includes, new_RCL_File(p->u.include_.string_, p->u.include_.uident_));
         }
+    }
     else
     {
-        NewState_return(
-            make_error,
-            Browser,
-            "The DLL named `%s' wasn't found in the given path: \"%s\".",
-            p->u.include_.uident_, p->u.include_.string_);
+        state_put_err_br("The included dynamic library called `%s' wasn't found in the given path: \"%s\".", p->u.include_.uident_, p->u.include_.string_);
     }
 }
 

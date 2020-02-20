@@ -57,8 +57,7 @@ struct RCL_Structure_field make_enum_field(String);
 struct RCL_Structure_field make_free_field(String);
 struct RCL_Structure_field make_spec_field(String, String);
 
-size_t sizeofFields(ListRCL_Structure_Field);
-struct RCL_Structure make_rcl_structure(UIdent, ListRCL_Structure_Field);
+size_t count_fields(ListRCL_Structure_Field);
 
 signed int field_index(struct RCL_Structure, String);
 

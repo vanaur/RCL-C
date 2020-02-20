@@ -64,6 +64,9 @@ inline void evalop(Stack *restrict stack, Value *restrict op, BResult *restrict 
     case RCL_Value_Array ... RCL_Value_String:
         return push(stack, *op);
 
+    case RCL_Value_DataStruct:
+        return push(stack, *op);
+
     case RCL_Value_Combinator:
         return doComb(stack, op->u.comb_, bresult);
 

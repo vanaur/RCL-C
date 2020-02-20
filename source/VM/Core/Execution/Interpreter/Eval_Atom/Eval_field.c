@@ -33,16 +33,6 @@
 
 void eval_field(Stack *restrict stack, BResult *restrict bresult, RCL_Structure_Field field)
 {
-
-    if (top_ptr(stack)->kind != RCL_Value_DataStruct)
-    {
-        NewState_return(
-            make_error,
-            Interpreter,
-            "A field operator needs a structure, but the top of the stack is a %s.",
-            show_kind(top_ptr(stack)->kind));
-    }
-
     String field_name;
 
     switch (field->kind)
@@ -58,6 +48,13 @@ void eval_field(Stack *restrict stack, BResult *restrict bresult, RCL_Structure_
     case is_SpecField:
         rcl_asprintf(&field_name, "%s", field->u.specfield_.lident_);
         break;
+    }
+
+    if (top_ptr(stack)->kind != RCL_Value_DataStruct)
+    {
+        state_put_info_it("In function `%s':", S_CURRENTF);
+        state_put_err_it("A field operator (`.%s' here) needs a structure, but the top of the stack is a %s.", field_name, show_kind(top_ptr(stack)->kind));
+        return;
     }
 
     struct RCL_Value_DataStruct _struct = drop(stack).u.dataStruct_;

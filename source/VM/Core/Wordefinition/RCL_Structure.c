@@ -73,7 +73,7 @@ void add_field(struct RCL_Structure *restrict rcl_struct, struct RCL_Structure_f
     rcl_struct->fields[rcl_struct->field_alloc_used++] = rcl_field;
 }
 
-size_t sizeofFields(ListRCL_Structure_Field fields)
+size_t count_fields(ListRCL_Structure_Field fields)
 {
     ListRCL_Structure_Field cpy = fields;
     size_t result = 0;
@@ -85,6 +85,12 @@ size_t sizeofFields(ListRCL_Structure_Field fields)
 struct RCL_Structure make_rcl_structure(UIdent name, ListRCL_Structure_Field fields)
 {
     struct RCL_Structure result = {.name = name, .hash_code = hash_djb2(name)};
+
+    const size_t fields_size = count_fields(fields);
+
+    result.fields = (struct RCL_Structure_field *)malloc(fields_size * sizeof(struct RCL_Structure_field));
+    result.field_alloc_used = 0;
+    result.field_alloc_size = fields_size;
 
     while (fields != NULL)
     {
@@ -124,10 +130,9 @@ void vec_init_structures(struct VEC_Structures *restrict rcl_structure, size_t s
 
 void vec_add_structures(struct VEC_Structures *restrict rcl_structure, Definition def)
 {
-    struct RCL_Structure *struct_ = (struct RCL_Structure *)malloc(sizeof(*struct_));
-    *struct_ = make_rcl_structure(def->u.structure_.uident_, def->u.structure_.listrcl_structure_field_);
-    vec_add_structure_data(rcl_structure, *struct_);
-    //PushToVector(rcl_structure, struct RCL_Structure, *struct_);
+    vec_add_structure_data(
+        rcl_structure,
+        make_rcl_structure(def->u.structure_.uident_, def->u.structure_.listrcl_structure_field_));
 }
 
 void vec_add_structure_data(struct VEC_Structures *restrict vec, struct RCL_Structure rcl_structure)
