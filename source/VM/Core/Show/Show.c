@@ -31,6 +31,8 @@
 #include <Tools\Utils\Utils.h>
 #include <VM\Core\Show\Show.h>
 
+static String show_structure_whole(const struct RCL_Value_DataStruct rcl_struct);
+
 static String show_array(RCL_Value_Array_t array)
 {
     String result;
@@ -85,7 +87,7 @@ String show_value(Value value)
     case RCL_Value_Word:
     {
         if (!strcmp(value.u.word_.word_str, RCL_NIL_WRD))
-            return "<null>";
+            return "<nil>";
         else
             rcl_asprintf(&result, "%s", value.u.word_.word_str);
         break;
@@ -122,7 +124,8 @@ String show_value(Value value)
 
     case RCL_Value_DataStruct:
     {
-        rcl_asprintf(&result, "'Structure<:%s>", value.u.dataStruct_.template->name);
+        //rcl_asprintf(&result, "'Structure<:%s>", value.u.dataStruct_.template->name);
+        return show_structure_whole(value.u.dataStruct_);
         break;
     }
     case RCL_Value_Field:
@@ -256,4 +259,58 @@ String show_quote(RawCode rcode)
     }
     rcl_asprintf(&result, "%s\b]", result);
     return result;
+}
+
+static String show_indent(int n)
+{
+    String res = "";
+    while (n--)
+        rcl_asprintf(&res, "%s   ", res);
+    return res;
+}
+
+static void indent(String *str, int n)
+{
+    rcl_asprintf(str, "%s%s", *str, show_indent(n));
+}
+
+static String show_structure(const struct RCL_Value_DataStruct rcl_struct, const int deepness)
+{
+    String res = rcl_sprintf_s("\n%s'Structure<:%s>", show_indent(deepness / 2), rcl_struct.template->name);
+    for (Iterator i = 0; i < rcl_struct.template->field_alloc_used; i++)
+    {
+
+        if (i + 1 < rcl_struct.template->field_alloc_used)
+            if (rcl_struct.fields[i + 1].field_value->kind != RCL_Value_DataStruct)
+                rcl_asprintf(&res, "%s\n", res);
+
+        indent(&res, deepness);
+        switch (rcl_struct.fields[i].field_type_info->kind)
+        {
+        case _is_Spec:
+        case _is_Field:
+            if (rcl_struct.fields[i].field_value->kind == RCL_Value_DataStruct)
+                rcl_asprintf(&res, "%s%s", res, show_structure(rcl_struct.fields[i].field_value->u.dataStruct_, deepness + 2));
+            else
+                rcl_asprintf(&res, "%s.%s(%s)", res, rcl_struct.fields[i].field_type_info->name, show_value(*rcl_struct.fields[i].field_value));
+            break;
+
+        default:
+            break;
+        }
+
+        if (i + 1 < rcl_struct.template->field_alloc_used)
+            if (rcl_struct.fields[i + 1].field_value->kind != RCL_Value_DataStruct)
+                rcl_asprintf(&res, "%s\n", res);
+    }
+    return res;
+}
+
+String show_structure_whole(const struct RCL_Value_DataStruct rcl_struct)
+{
+    if (rcl_struct.fields == NULL)
+        return rcl_sprintf_s("'RawStructure<:%s>", rcl_struct.template->name);
+    String res = show_structure(rcl_struct, 2);
+    rcl_asprintf(&res, "%s\n", res);
+    return res;
 }

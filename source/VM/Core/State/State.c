@@ -117,7 +117,7 @@ void prettyPrint_state(struct State state)
         case Info:
             cc_fprintf(CC_FG_CYAN, stdout, "    Info: ");
             cc_fprintf(CC_FG_DARK_CYAN, stdout, "%s\n", state.array[i].u.info.msg);
-            free(state.array[i].u.info.msg);
+            //free(state.array[i].u.info.msg);
             break;
         }
     }

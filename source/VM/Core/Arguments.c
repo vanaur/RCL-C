@@ -140,23 +140,24 @@ Exec get_exec(String *argv, int *argc)
     bool error = false;
 
     Exec result =
-        { .ioc = Interpreted        // --i, --jit, --c
-        , .sool = Strict            // --s, --o, --l
-        , .noise_level = Noise      // --noise, --silent
-        , .prehandle = P_no         // --pno, --pprog, --plib, --pfn
-        , .optimize_rec = false     // --orec
-        , .optimize_level = O0      // --O0, --O1, --O3
-        , .gc_free = false          // --Ogc
-        , .osize = false            // --Os, --Osize
-        , .kasm = false             // --kasm
-        , .kir = false              // --kir
-        , .docasm = true            // --docasm, --dasm
-        , .show_steps = false       // --st
-        , .type_check = false       // --check-type
-        , .show_res = true          // --show-res, --sr
-        , .ext_bignum = false       // --ext-bignum
-        , .ext_ptr = false          // --ext-ptr
-        , .low = false };           // --low
+        { .ioc = Interpreted            // --i, --jit, --c
+        , .sool = Strict                // --s, --o, --l
+        , .noise_level = Noise          // --noise, --silent
+        , .prehandle = P_no             // --pno, --pprog, --plib, --pfn
+        , .optimize_rec = false         // --orec
+        , .optimize_level = O0          // --O0, --O1, --O3
+        , .gc_free = false              // --Ogc
+        , .osize = false                // --Os, --Osize
+        , .kasm = false                 // --kasm
+        , .kir = false                  // --kir
+        , .docasm = true                // --docasm, --dasm
+        , .show_steps = false           // --st
+        , .type_check = false           // --check-type
+        , .show_res = true              // --show-res, --sr
+        , .ext_bignum = false           // --ext-bignum
+        , .ext_ptr = false              // --ext-ptr
+        , .low = false                  // --low
+        , .shw_inside_struct = false};  // --shw=insd-struct
 
     while (n--)
     {
@@ -206,6 +207,12 @@ Exec get_exec(String *argv, int *argc)
         else if (!strcmp(argv[n], "--NOISE"))
         {
             result.noise_level = Noise;
+            (*argc)--;
+            remove_element(argv, total, n);
+        }
+        else if (!strcmp(argv[n], "--SHW=INSD-STRUCT"))
+        {
+            result.shw_inside_struct = true;
             (*argc)--;
             remove_element(argv, total, n);
         }
