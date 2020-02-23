@@ -38,15 +38,15 @@ void eval_field(Stack *restrict stack, BResult *restrict bresult, RCL_Structure_
     switch (field->kind)
     {
     case is_FreeField:
-        rcl_asprintf(&field_name, "%s", field->u.freefield_.lident_);
+        {field_name = field->u.freefield_.lident_;}
         break;
 
     case is_EnumField:
-        rcl_asprintf(&field_name, "%s", field->u.enumfield_.lident_);
+        {field_name = field->u.enumfield_.lident_;}
         break;
 
     case is_SpecField:
-        rcl_asprintf(&field_name, "%s", field->u.specfield_.lident_);
+        {field_name = field->u.specfield_.lident_;}
         break;
     }
 

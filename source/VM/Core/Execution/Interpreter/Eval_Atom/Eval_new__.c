@@ -48,7 +48,7 @@ void eval_new(Stack *restrict stack, BResult *restrict bresult)
         NewState_return(
             make_error,
             Interpreter,
-            "The data structure `%s' has %d fields to fill with the `new` operator, but the stack contains %d values.",
+            "The data structure `%s' has %d fields to fill with the `new__` operator, but the stack contains %d values.",
             _struct.template->name,
             (int)_struct.template->field_alloc_used,
             (int)stack->used);

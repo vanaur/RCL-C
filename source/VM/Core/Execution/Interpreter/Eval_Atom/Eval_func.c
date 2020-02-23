@@ -160,6 +160,7 @@ void eval_function(Stack *restrict stack, struct RCL_Function *restrict function
     }
     else
     {
+        extend_size_RawCode(((RawCode *)stack), function->body.used);
         for (Iterator i = 0; i < function->body.used; i++)
             evalop(stack, &function->body.array[i], bresult);
     }

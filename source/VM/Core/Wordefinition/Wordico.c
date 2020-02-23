@@ -154,26 +154,6 @@ struct RCL_Lambda *getSpecific_lambda(struct Wordico *restrict wordico, const ha
         if (wordico->lambdas.array[i].hash_code == hash_word)
             return &wordico->lambdas.array[i];
     return NULL;
-
-/*     int left = 0;
-    int right = wordico->lambdas.used;
-    int mid = 0;
-
-    while (left <= right)
-    {
-        mid = left + (right - left) / 2;
-
-        if (wordico->lambdas.array[mid].hash_code == hash_word)
-            return &wordico->lambdas.array[mid];
-
-        if (wordico->lambdas.array[mid].hash_code < hash_word)
-            left = mid + 1;
-
-        else
-            right = mid - 1;
-    }
-
-    return NULL; */
 }
 
 struct RCL_Structure_field *getSpecific_field(struct Wordico *restrict wordico, const String word)
