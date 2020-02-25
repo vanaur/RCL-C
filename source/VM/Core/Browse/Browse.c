@@ -42,6 +42,7 @@
 #include <VM\Core\Wordefinition\Wordico.h>
 #include <VM\Core\Wordefinition\Sort_hash\Sort_hash.h>
 #include <VM\Core\Preprocessor\Import.h>
+#include <VM\Core\Preprocessor\Defines.h>
 #include <VM\Core\Show\Show.h>
 #include <VM\Core\State\State.h>
 #include <VM\Core\Optimize\Optimizer.h>
@@ -59,6 +60,7 @@ void browseProg8(Program, BResult *); // Simple preprocessor
 void handle_absynInclude(BResult *, Preprocessor);
 void handle_absynImportAs(BResult *, Preprocessor);
 void handle_absynImport(BResult *, Preprocessor);
+void handle_absynDefine(BResult *, Preprocessor);
 
 int canHandleLiteralOp(RawCode, LiteralOperation);
 int rcodeContainsEOSV(RawCode *, char *);
@@ -423,8 +425,17 @@ void handle_definitions(struct Definition_handler *def_h)
 
 void handle_preprocessor(struct Preprocessor_handler *idata_h)
 {
-    init_imports__(&idata_h->bresult->psdata.imports, count_imports(idata_h->lp));
-    init_includes__(&idata_h->bresult->psdata.includes, count_includes(idata_h->lp));
+    const int nbr_imports = count_imports(idata_h->lp);
+    const int nbr_includes = count_includes(idata_h->lp);
+
+    if (nbr_imports)
+    {
+        init_imports__(&idata_h->bresult->psdata.imports, nbr_imports);
+    }
+    if (nbr_includes)
+    {
+        init_includes__(&idata_h->bresult->psdata.includes, nbr_includes);
+    }
 
     while (idata_h->lp != NULL)
     {
@@ -465,8 +476,12 @@ void case_preprocessor(BResult *restrict bresult, Preprocessor p)
         handle_absynInclude(bresult, p);
         break;
 
+    case is_Define:
+        handle_absynDefine(bresult, p);
+        break;
+
     default:
-        printf("TOFO");
+        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unknown preprocessor kind: %d.", p->kind);
     }
 }
 
@@ -479,6 +494,41 @@ void handle_absynImportAs(BResult *restrict bresult, Preprocessor p)
 {
     perror("TO4DO!");
     exit(1);
+}
+
+#define EXEC bresult->exec_infos
+#define IFDEF(val, then) if (def_hash == hash_djb2(OPT val)) { then; }
+
+void handle_absynDefine(BResult *restrict bresult, Preprocessor p)
+{
+    const String def_name = to_lower_s(p->u.define_.uident_);
+    const hash_t def_hash = hash_djb2(def_name);
+
+         IFDEF("strict", EXEC.sool = Strict)
+    else IFDEF("optimistic", EXEC.sool = Optimistic)
+    else IFDEF("lazy", EXEC.sool = Lazy)
+    else IFDEF("interp", EXEC.ioc = Interpreted)
+    else IFDEF("jit", EXEC.ioc = Jited)
+    else IFDEF("compile", EXEC.ioc = Compiled)
+    else IFDEF("noise", EXEC.noise_level = Noise)
+    else IFDEF("silent", EXEC.noise_level = Silent)
+    else IFDEF("oz0", EXEC.optimize_level = O0)
+    else IFDEF("oz1", EXEC.optimize_level = O1)
+    else IFDEF("oz2", EXEC.optimize_level = O2)
+    else IFDEF("oz3", EXEC.optimize_level = O3)
+    else IFDEF("orec", EXEC.optimize_rec = true)
+    else IFDEF("ogc", EXEC.gc_free = true)
+    else IFDEF("osize", EXEC.osize = true)
+    else IFDEF("kasm", EXEC.kasm = true)
+    else IFDEF("kir", EXEC.kir = true)
+    else IFDEF("docasm", EXEC.docasm = true)
+    else IFDEF("st", EXEC.show_steps = true)
+    else IFDEF("tcheck", EXEC.type_check = true)
+    else IFDEF("ext_bignum", EXEC.ext_bignum = true)
+    else IFDEF("ext_ptr", EXEC.ext_ptr = true)
+    else IFDEF("low", EXEC.low = true)
+    else IFDEF("shw_inside_struct", EXEC.shw_inside_struct = true)
+    else state_put_warn_br("`%s' is a unknown preprocessor definition, at now RCL don't handle them.", p->u.define_.uident_);
 }
 
 void handle_absynInclude(BResult *restrict bresult, Preprocessor p)

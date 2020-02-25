@@ -21,3 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+#include <Tools\Hash\djb2.h>
+
+#define OPT "rcl_opt__"

@@ -215,6 +215,16 @@ String to_upper_s(String str)
     return result;
 }
 
+String to_lower_s(String str)
+{
+    String result = strdup(str);
+    for (int index = 0; result[index] != '\0'; ++index)
+    {
+        result[index] = tolower(result[index]);
+    }
+    return result;
+}
+
 int first_digit(int n)
 {
     while (n >= 10)

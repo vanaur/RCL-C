@@ -177,8 +177,6 @@ int main(int argc, String argv[])
     if (argc == 1)
         return noarg();
 
-    //printf("%lld\n", hash_djb2("Math.rand"));
-
     // Remove the program name from `argv`
     remove_element(argv, argc--, 0);
     Exec exec = get_exec(argv, &argc);
@@ -206,9 +204,6 @@ int main(int argc, String argv[])
     gettime(&start1);
     gettime(&start3);
 
-    /*     clock_gettime(CLOCK_REALTIME, &start1);
-    clock_gettime(CLOCK_REALTIME, &start3); */
-
     // Process the given file(s) by building the IR
     BResult bresult = processFiles(files, argc, exec);
     bresult.argvs = rcl_argv;
@@ -235,9 +230,6 @@ int main(int argc, String argv[])
 
     gettime(&end3);
     gettime(&start2);
-
-    /*     clock_gettime(CLOCK_REALTIME, &end3);
-    clock_gettime(CLOCK_REALTIME, &start2); */
 
     // Execute or compile the program
 

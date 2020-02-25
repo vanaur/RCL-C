@@ -91,6 +91,7 @@ String getline(void);
 void *array_concat(const void *, size_t, const void *, size_t, size_t);
 size_t allocated_size(void *);
 String to_upper_s(String);
+String to_lower_s(String);
 int first_digit(int);
 int rcl_vasprintf(String *, const String, va_list);
 int rcl_asprintf(String *, const String, ...);
