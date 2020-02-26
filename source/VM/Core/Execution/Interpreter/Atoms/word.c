@@ -35,13 +35,13 @@
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 #include <VM\Core\Execution\Interpreter\Stack\Combinators\Basics.h>
 #include <VM\Core\Execution\Interpreter\Builtin\Perform.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_op.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_word.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_new__.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_lambda.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_func.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_field.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_FFI.h>
+#include <VM\Core\Execution\Interpreter\Atoms\operation.h>
+#include <VM\Core\Execution\Interpreter\Atoms\word.h>
+#include <VM\Core\Execution\Interpreter\Atoms\new__.h>
+#include <VM\Core\Execution\Interpreter\Atoms\lambda.h>
+#include <VM\Core\Execution\Interpreter\Atoms\func.h>
+#include <VM\Core\Execution\Interpreter\Atoms\field.h>
+#include <VM\Core\Execution\Interpreter\Atoms\FFI.h>
 
 inline void evalword(Stack *restrict stack, BResult *restrict bresult, RCL_Value_Word_t *restrict word)
 {

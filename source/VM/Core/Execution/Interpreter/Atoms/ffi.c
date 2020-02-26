@@ -29,7 +29,7 @@
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Wordefinition\RCL_Extern.h>
 #include <VM\Core\FFI\Types.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_FFI.h>
+#include <VM\Core\Execution\Interpreter\Atoms\FFI.h>
 
 inline void eval_external_call(Stack *restrict stack, BResult *restrict bresult, struct RCL_Extern *restrict external)
 {

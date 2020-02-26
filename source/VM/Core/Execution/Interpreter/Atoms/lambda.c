@@ -28,8 +28,8 @@
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 #include <VM\Core\RawCode\RawCode.h>
 #include <VM\Core\Browse\BResult.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_lambda.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_op.h>
+#include <VM\Core\Execution\Interpreter\Atoms\lambda.h>
+#include <VM\Core\Execution\Interpreter\Atoms\operation.h>
 
 void new_lambda(Stack *stack, BResult *restrict bresult, const Value lamdop)
 {

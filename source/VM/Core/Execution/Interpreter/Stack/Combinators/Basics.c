@@ -28,7 +28,7 @@
 
 #include <VM\Core\RawCode\Combinator\Combinators.h>
 #include <VM\Core\Browse\BResult.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_op.h>
+#include <VM\Core\Execution\Interpreter\Atoms\operation.h>
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 #include <VM\Core\Execution\Interpreter\Stack\Combinators\Basics.h>
 #include <VM\Core\Show\Show.h>

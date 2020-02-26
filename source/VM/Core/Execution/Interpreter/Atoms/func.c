@@ -37,7 +37,7 @@
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Wordefinition\RCL_Function.h>
 #include <VM\Core\Show\Show.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_op.h>
+#include <VM\Core\Execution\Interpreter\Atoms\operation.h>
 
 #define FOREVER(instr) \
     while (true)       \

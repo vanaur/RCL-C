@@ -29,7 +29,7 @@
 #include <VM\Core\Wordefinition\Wordico.h>
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\State\State.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_field.h>
+#include <VM\Core\Execution\Interpreter\Atoms\field.h>
 
 void eval_field(Stack *restrict stack, BResult *restrict bresult, RCL_Structure_Field field)
 {

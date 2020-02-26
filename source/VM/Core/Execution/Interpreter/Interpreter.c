@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 #include <VM\Core\Execution\Interpreter\Interpreter.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_op.h>
+#include <VM\Core\Execution\Interpreter\Atoms\operation.h>
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 
 inline RawCode seval(const RawCode rcode, BResult *bresult)

@@ -28,7 +28,7 @@
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Wordefinition\RCL_Structure.h>
-#include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_new__.h>
+#include <VM\Core\Execution\Interpreter\Atoms\new__.h>
 
 void eval_new(Stack *restrict stack, BResult *restrict bresult)
 {
