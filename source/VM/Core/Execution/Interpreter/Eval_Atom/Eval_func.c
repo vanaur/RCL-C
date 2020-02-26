@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdbool.h>
 #include <pthread.h>
 
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
@@ -38,131 +39,178 @@
 #include <VM\Core\Show\Show.h>
 #include <VM\Core\Execution\Interpreter\Eval_Atom\Eval_op.h>
 
-TDef_Trampoline_Params(
-    Eval_function,
-    Field(Stack *, stack); // The main stack
-    Field(Stack *, rest);  // The rest of the function to execute after each trampoline call
-    Field(Stack *, tmp);   // A temporar stack
-    Field(size_t, nbr);
-    Field(Stack *, result);                 // The resulting stack
-    Field(struct RCL_Function *, func_ptr); // The function to run
-    Field(BResult *, bresult));             // The dictionnary
+#define FOREVER(instr) \
+    while (true)       \
+    {                  \
+        instr;         \
+    }
 
-static bool is_expected_function(Value value, String name)
+inline void simple_eval_rcode(Stack *stack, const RawCode rcode, BResult *bresult)
+{
+    for (Iterator i = 0; i < rcode.used; i++)
+        evalop(stack, &rcode.array[i], bresult);
+}
+
+struct th_simple_eval_rcode_args_t
+{
+    Stack *stack;
+    const RawCode rcode;
+    BResult *bresult;
+};
+
+static void th_simple_eval_rcode(struct th_simple_eval_rcode_args_t args)
+{
+    FOREVER(simple_eval_rcode(args.stack, args.rcode, args.bresult));
+}
+
+static bool value_is_fname(const Value value, hash_t f_hash)
 {
     if (value.kind == RCL_Value_Word)
-        if (!strcmp(value.u.word_.word_str, name))
+        if (value.u.word_.hash_code == f_hash)
             return true;
     return false;
 }
 
-static void tramp_Eval_function(Trampoline_t *data)
+// Linear recursive call (LRC) ==> infinite loop
+static bool optimized_eval_func__linear_reccall(Stack *stack, struct RCL_Function *function, BResult *bresult)
 {
+    const RawCode body = function->body;
+    Iterator i = body.used;
 
-    Tramp_Update(Tramp_Eval_function_params, parameters, data);
+    if (value_is_fname(body.array[0], function->hash_code))
+        FOREVER(); // When there is no instruction to evaluate
 
-    if (parameters->stack->overflow)
-        Tramp_Stop(data);
+    for (i; i > 0; i--)
+        if (value_is_fname(body.array[i], function->hash_code))
+            break;
 
-    if (parameters->tmp->used > 0)
-        *parameters->stack = *parameters->tmp;
-
-    concatStack(parameters->tmp, parameters->result, parameters->nbr);
-    concatStack(parameters->rest, parameters->result, 0);
-
-    parameters->nbr = parameters->tmp->used;
-
-    resetStack(parameters->tmp);
-    resetStack(parameters->rest);
-
-    Iterator i = 0;
-
-    parameters->stack->in_rec = true;
-    for (i = 0; i < parameters->func_ptr->body.used; i++)
-        evalop(parameters->stack, &parameters->func_ptr->body.array[i], parameters->bresult);
-    parameters->stack->in_rec = false;
-
-    size_t stack_used = parameters->stack->used;
-
-    for (i = 0; i < stack_used; i++)
+    if (i > 0)
     {
-        if (is_expected_function(parameters->stack->array[i], parameters->func_ptr->name))
-        {
-            for (i += 1; i < stack_used; i++)
-                push(parameters->rest, parameters->stack->array[i]);
-            resetStack(parameters->stack); // C'était pas là avant ==> Permet aucune fuite de mémoire inutile
-            return;
-            //return concatStackUntil(parameters->rest, parameters->stack, i + 1, stack_used);
-        }
-        evalop(parameters->tmp, &parameters->stack->array[i], parameters->bresult);
+        const int j = body.used - i;
+        const RawCode undead_real_body = fast_rcode_subv(body, 0, body.used - j);
+        struct th_simple_eval_rcode_args_t th_args = {stack, undead_real_body, bresult};
+        pthread_t th_fn_eval;
+        pthread_create(&th_fn_eval, NULL, (void *(*)(void *))th_simple_eval_rcode, (void *)&th_args);
+        pthread_join(th_fn_eval, NULL);
+        return true;
     }
 
-    concatStack(parameters->result, parameters->stack, parameters->result->used);
-
-    resetStack(parameters->stack);
-
-    for (i = 0; i < parameters->result->used; i++)
-        evalop(parameters->stack, &parameters->result->array[i], parameters->bresult);
-
-/*     printf("Stack:  %s\n", show_stack(*parameters->stack));
-    printf("Tmp:    %s\n", show_stack(*parameters->tmp));
-    printf("Rest:   %s\n", show_stack(*parameters->rest));
-    printf("Result: %s\n\n", show_stack(*parameters->result)); */
-
-    Tramp_Stop(data);
+    return false;
 }
 
-#define Orec_infoState_msg \
-    "The recursion optimization is experimental (and slower) in the interpreter, \
-and will not guarantee the success of the evaluation of the function '%s`."
+static bool optimized_eval_func__combinator_reccal_ifte(Stack *stack, struct RCL_Function *function, BResult *bresult)
+{
+    const RawCode body = function->body;
 
-void eval_function(Stack *restrict stack, struct RCL_Function *restrict function, BResult *restrict bresult)
+    RawCode q_else = *(topx_ptr(RCODE_TO_STACK_PTR(&body), 2)->u.quote_);
+    RawCode q_then = *topx_ptr(RCODE_TO_STACK_PTR(&body), 3)->u.quote_;
+    RawCode q_cond = fast_rcode_subv(body, 0, body.used - 3);
+
+    bool rec_in_else = false,
+         rec_in_then = false;
+
+    if (value_is_fname(top_rcode(&q_else), function->hash_code))
+    {
+        rec_in_else = true;
+        pop_rcode(&q_else);
+    }
+    if (value_is_fname(top_rcode(&q_then), function->hash_code))
+    {
+        rec_in_then = true;
+        pop_rcode(&q_then);
+    }
+
+    // --- Handle when recursion is in ELSE part of an IFTE expression --- //
+
+    if (rec_in_else && !rec_in_then)
+    {
+    else__eval_cond:
+
+        simple_eval_rcode(stack, q_cond, bresult);
+
+        Value s_cond = drop(stack);
+
+        if (mpz_cmp_d(s_cond.u.quote_->array[0].u.int_, false))
+        {
+            simple_eval_rcode(stack, q_then, bresult);
+        }
+        else
+        {
+            simple_eval_rcode(stack, q_else, bresult);
+            goto else__eval_cond;
+        }
+    }
+
+    // --- Handle when recursion is in THEN part of an IFTE expression --- //
+
+    if (rec_in_then && !rec_in_else)
+    {
+    then__eval_cond:
+
+        simple_eval_rcode(stack, q_cond, bresult);
+
+        Value s_cond = drop(stack);
+
+        if (mpz_cmp_d(s_cond.u.quote_->array[0].u.int_, false))
+        {
+            simple_eval_rcode(stack, q_then, bresult);
+            goto then__eval_cond;
+        }
+        else
+        {
+            simple_eval_rcode(stack, q_else, bresult);
+        }
+    }
+
+    return true;
+}
+
+// Combinator recursive call (CRC) => case-by-case basis
+// Applies to => IFTE, DIP, UNQUOTE, REP, KAP, PAK, UNCONS, SAP, REC
+static bool optimized_eval_func__combinator_reccall(Stack *stack, struct RCL_Function *function, BResult *bresult)
+{
+    if (top_rcode(&function->body).kind != RCL_Value_Combinator)
+        return false;
+    switch (top_rcode(&function->body).u.comb_)
+    {
+    case IFTE:
+        return optimized_eval_func__combinator_reccal_ifte(stack, function, bresult);
+
+    case DIP:
+    case UNQUOTE:
+    case REP:
+    case KAP:
+    case PAK:
+    case UNCONS:
+    case SAP:
+    case REC:
+    default:
+        return false;
+    }
+    return true;
+}
+
+static void optimized_eval_func(Stack *stack, struct RCL_Function *function, BResult *bresult)
+{
+    const RawCode body = function->body;
+    const Value top_body = top_rcode(&body);
+
+    if (optimized_eval_func__linear_reccall(stack, function, bresult))
+        return;
+
+    else if (optimized_eval_func__combinator_reccall(stack, function, bresult))
+        return;
+
+    else
+        simple_eval_rcode(stack, body, bresult);
+}
+
+void eval_function(Stack *stack, struct RCL_Function *function, BResult *bresult)
 {
     bresult->current_name = function->name;
     if (bresult->exec_infos.optimize_rec)
-    {
-        NewState_continue(
-            make_info, Interpreter,
-            Orec_infoState_msg,
-            function->name);
-
-        Stack rest, tmp, result;
-        init_stack(&rest, 1);
-        init_stack(&tmp, 1);
-        init_stack(&result, 1);
-
-        stack->fname = function->name;
-        rest.fname = function->name;
-        tmp.fname = function->name;
-        result.fname = function->name;
-
-        Tramp_Eval_function_params params =
-            {stack, &rest, &tmp, tmp.used, &result, function, bresult};
-
-        //Trampoline_t t = {&tramp_Eval_function, &params};
-
-        Tramp_Def(t, tramp_Eval_function, params);
-
-        trampoline(&t);
-
-        if (stack->overflow)
-        {
-            NewState_return(make_warning, Interpreter, "The function `%s' produced an overflow by filling the allocated stack about %d.", function->name, (int)stack->size);
-        }
-
-        totalyFreeStack(&rest);
-        totalyFreeStack(&tmp);
-        totalyFreeStack(&result);
-
-        Tramp_Update(Tramp_Eval_function_params, updated, (&t));
-        stack = updated->stack;
-        stack->fname = "\0";
-    }
+        optimized_eval_func(stack, function, bresult);
     else
-    {
-        extend_size_RawCode(((RawCode *)stack), function->body.used);
-        for (Iterator i = 0; i < function->body.used; i++)
-            evalop(stack, &function->body.array[i], bresult);
-    }
+        simple_eval_rcode(stack, function->body, bresult);
     bresult->current_name = NULL;
 }

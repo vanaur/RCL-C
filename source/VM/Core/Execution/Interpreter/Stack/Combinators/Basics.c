@@ -443,6 +443,9 @@ inline void doComb(Stack *restrict stack, const Combinator comb, BResult *restri
     case IFTE:
         return do_ifte(stack, bresult);
 
+    case EQ:
+        return push(stack, RCL_Integer_I((int)(mpz_cmp(drop(stack).u.int_, drop(stack).u.int_) == 0 ? true : false)));
+
     default:
         printf("Combinator not implemented yet\n");
     }

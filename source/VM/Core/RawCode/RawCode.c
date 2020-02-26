@@ -455,3 +455,12 @@ size_t count_operations_bykind(RawCode rcode, enum Value_Kind kind)
             result += 1;
     return result;
 }
+
+RawCode fast_rcode_subv(const RawCode src, const size_t from, const size_t until)
+{
+    const size_t size = abs(until - from);
+    RawCode result = new_RawCode(size);
+    for (Iterator i = from; i < until; i++)
+        result.array[result.used++] = src.array[i];
+    return result;
+}

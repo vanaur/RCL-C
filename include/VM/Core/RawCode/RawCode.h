@@ -217,6 +217,11 @@ Value otov(Operation);
 
 typedef Vector(RawCode, Value);
 
+#define RCODE_TO_STACK(rcode)     (*((Stack *)&rcode))
+#define STACK_TO_RCODE(stack)     (*((RawCode *)&stack))
+#define RCODE_TO_STACK_PTR(rcode) ((Stack *)rcode)
+#define STACK_TO_RCODE_PTR(stack) ((RawCode *)stack)
+
 void init_rcode(RawCode *, size_t);
 void push_rcode(RawCode *, Value);
 void pop_rcode(RawCode *);
@@ -227,6 +232,8 @@ void concat_rcode(RawCode *, RawCode *);
 void concat_rcode_from(RawCode *, RawCode *, size_t);
 // Concatenates the first `RawCode` with the second given but between the given indexes.
 void concat_rcode_until(RawCode *, RawCode *, size_t, size_t);
+// Get a subvector of the given raw code.
+RawCode fast_rcode_subv(const RawCode src, const size_t from, const size_t until);
 
 // Replace all sequences corresponding to `seq1` with `seq2` in the sent `RawCode`.
 // Length must be specified.
