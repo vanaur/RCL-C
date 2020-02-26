@@ -648,11 +648,11 @@ static void cgen(const RawCode rcode, struct Bunch *bunch_ptr)
     assemble_function(bunch_ptr, &bunch_ptr->result, ENTRY_NAME, "This is the entry point", &bunch_ptr->bresult->psdata.rcode);
 }
 
-static void *th_assemble_externs(struct VEC_Externs *restrict externs) {}
-static void *th_assemble_structure(struct VEC_Structures *restrict structures) {}
-static void *th_assemble_functions(struct VEC_Functions *restrict functions) {}
+static void *th_assemble_externs(struct VEC_Externs * externs) {}
+static void *th_assemble_structure(struct VEC_Structures * structures) {}
+static void *th_assemble_functions(struct VEC_Functions * functions) {}
 
-static Labels assemble_main(RawCode *restrict main, struct Wordico *wordico, label_count_t *lbl_count)
+static Labels assemble_main(RawCode * main, struct Wordico *wordico, label_count_t *lbl_count)
 {
     Labels result;
     init_Labels(&result, count_operations_bykind(*main, RCL_Value_Quotation + 1));
@@ -660,7 +660,7 @@ static Labels assemble_main(RawCode *restrict main, struct Wordico *wordico, lab
     return result;
 }
 
-Assembled_Program assemble(const BResult *restrict bresult)
+Assembled_Program assemble(const BResult * bresult)
 {
     pthread_t
         th_fn, // Assemble functions

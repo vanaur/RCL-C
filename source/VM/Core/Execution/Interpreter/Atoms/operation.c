@@ -44,7 +44,7 @@
 
 #include <VM\Core\Show\Show.h>
 
-inline void evalop(Stack *restrict stack, Value *restrict op, BResult *restrict bresult)
+inline void evalop(Stack * stack, Value * op, BResult * bresult)
 {
     if (bresult->exec_infos.show_steps)
         printf("step>\t\t%s%s\n", show_stack_nobraces(*stack), show_value(*op));

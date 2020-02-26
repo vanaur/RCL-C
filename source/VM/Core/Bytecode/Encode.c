@@ -28,7 +28,7 @@
 #include <VM\Core\Browse\BResult.h>
 #include <Tools\Utils\Utils.h>
 
-void encode_bytecode(const RawCode rcode, BResult *restrict bresult)
+void encode_bytecode(const RawCode rcode, BResult * bresult)
 {
     // TODO
 }

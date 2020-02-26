@@ -35,7 +35,7 @@
 #include <VM\Core\Execution\Interpreter\Stack\Combinators\Basics.h>
 #include <VM\Core\Execution\Interpreter\Builtin\Math\Math.h>
 
-static void f_min(Stack *restrict stack)
+static void f_min(Stack * stack)
 {
 
     int result = mpz_cmp(drop(stack).u.int_, drop(stack).u.int_);
@@ -52,12 +52,12 @@ static void f_min(Stack *restrict stack)
     }
 }
 
-static void f_lowereq_int(Stack *restrict stack)
+static void f_lowereq_int(Stack * stack)
 {
     push(stack, RCL_Integer_I(mpz_cmp(drop(stack).u.int_, drop(stack).u.int_) <= 0 ? false : true));
 }
 
-static void f_lower_int(Stack *restrict stack)
+static void f_lower_int(Stack * stack)
 {
 
     int result = mpz_cmp(drop(stack).u.int_, drop(stack).u.int_);
@@ -74,7 +74,7 @@ static void f_lower_int(Stack *restrict stack)
     }
 }
 
-static void f_lowereq_float(Stack *restrict stack)
+static void f_lowereq_float(Stack * stack)
 {
 
     int result = mpf_cmp(drop(stack).u.float_, drop(stack).u.float_);
@@ -91,7 +91,7 @@ static void f_lowereq_float(Stack *restrict stack)
     }
 }
 
-static void f_sin(Stack *restrict stack)
+static void f_sin(Stack * stack)
 {
     if (top_ptr(stack)->kind == RCL_Value_Float)
     {
@@ -109,7 +109,7 @@ static void f_sin(Stack *restrict stack)
     }
 }
 
-static void f_cos(Stack *restrict stack)
+static void f_cos(Stack * stack)
 {
     if (top_ptr(stack)->kind == RCL_Value_Float)
     {
@@ -127,7 +127,7 @@ static void f_cos(Stack *restrict stack)
     }
 }
 
-static void f_tan(Stack *restrict stack)
+static void f_tan(Stack * stack)
 {
     if (top_ptr(stack)->kind == RCL_Value_Float)
     {
@@ -145,7 +145,7 @@ static void f_tan(Stack *restrict stack)
     }
 }
 
-static void f_atan(Stack *restrict stack)
+static void f_atan(Stack * stack)
 {
     if (top_ptr(stack)->kind == RCL_Value_Float)
     {
@@ -163,7 +163,7 @@ static void f_atan(Stack *restrict stack)
     }
 }
 
-static void f_asin(Stack *restrict stack)
+static void f_asin(Stack * stack)
 {
     if (top_ptr(stack)->kind == RCL_Value_Float)
     {
@@ -180,7 +180,7 @@ static void f_asin(Stack *restrict stack)
         push(stack, RCL_Integer(m));
     }
 }
-static void f_acos(Stack *restrict stack)
+static void f_acos(Stack * stack)
 {
     if (top_ptr(stack)->kind == RCL_Value_Float)
     {
@@ -211,7 +211,7 @@ int rand_lim(int limit)
     return retval;
 }
 
-static void f_rand(Stack *restrict stack)
+static void f_rand(Stack * stack)
 {
     struct timeval tv;
     srand(time(NULL));
@@ -223,7 +223,7 @@ static void f_rand(Stack *restrict stack)
     push(stack, make_RCL_Value_Integer_i(abs(rand() * (tv.tv_sec + tv.tv_usec)) / stack->size + 1));
 }
 
-void perform_builtin_math(Stack *restrict stack, struct Builtin builtin_infos, BResult *restrict bresult)
+void perform_builtin_math(Stack * stack, struct Builtin builtin_infos, BResult * bresult)
 {
     switch (builtin_infos.u.math_function)
     {

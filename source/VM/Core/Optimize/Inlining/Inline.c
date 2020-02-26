@@ -30,7 +30,7 @@
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Wordefinition\RCL_Function.h>
 
-void inline_optimization_function(BResult *restrict bresult)
+void inline_optimization_function(BResult * bresult)
 {
     size_t n = bresult->wordico.functions.used;
     // The current function in process
@@ -61,7 +61,7 @@ void inline_optimization_function(BResult *restrict bresult)
 }
 
 // To improve
-void inline_optimization_code(BResult *restrict bresult)
+void inline_optimization_code(BResult * bresult)
 {
     struct RCL_Function *fcpy = NULL;
 

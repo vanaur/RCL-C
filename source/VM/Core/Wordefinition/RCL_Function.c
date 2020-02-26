@@ -46,12 +46,12 @@ struct RCL_Function make_RCL_function(LIdent id, Operation op, BrowsedAbsyn *psd
     return (struct RCL_Function){.name = id, .body = rcode, .hash_code = hash_djb2(id)};
 }
 
-void vec_init_function(struct VEC_Functions *restrict rcl_f, size_t size)
+void vec_init_function(struct VEC_Functions * rcl_f, size_t size)
 {
     InitVector(rcl_f, size, struct RCL_Function);
 }
 
-void vec_add_function(struct VEC_Functions *restrict rcl_f, BrowsedAbsyn *psdata, Definition def)
+void vec_add_function(struct VEC_Functions * rcl_f, BrowsedAbsyn *psdata, Definition def)
 {
     PushToVector(rcl_f, struct RCL_Function, make_RCL_function(def->u.def_.lident_, def->u.def_.operation_, psdata));
 }

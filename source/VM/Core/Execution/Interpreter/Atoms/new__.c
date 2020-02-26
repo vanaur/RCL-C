@@ -30,7 +30,7 @@
 #include <VM\Core\Wordefinition\RCL_Structure.h>
 #include <VM\Core\Execution\Interpreter\Atoms\new__.h>
 
-void eval_new(Stack *restrict stack, BResult *restrict bresult)
+void eval_new(Stack * stack, BResult * bresult)
 {
     if (top_ptr(stack)->kind != RCL_Value_DataStruct)
     {

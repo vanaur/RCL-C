@@ -28,7 +28,7 @@
 #include <..\Stack\Combinators\Basics>
 #include <..\Browse\Browse>
 
-void handleOps(Stack *restrict stack, Value value, BResult *restrict bresult)
+void handleOps(Stack * stack, Value value, BResult * bresult)
 {
     switch (value.kind)
     {
@@ -41,7 +41,7 @@ void handleOps(Stack *restrict stack, Value value, BResult *restrict bresult)
     }
 }
 
-void computeParallel_strict(Stack *restrict runtimeStack, Value *f1, Value *f2, size_t f1_args, size_t f2_args, BResult *restrict bresult)
+void computeParallel_strict(Stack * runtimeStack, Value *f1, Value *f2, size_t f1_args, size_t f2_args, BResult * bresult)
 {
     if (runtimeStack->used < f1_args + f2_args)
     {

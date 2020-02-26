@@ -31,10 +31,13 @@
 #include <VM\Core\Syntax\Absyn.h>
 
 // To improve: 10 5 / 2 + => 0.5 2 + => 2.5 ==> To reach
-static void integer_arithmetic(Stack *restrict stack, const LiteralOperation lo)
+static void integer_arithmetic(Stack * stack, const LiteralOperation lo)
 {
     mpz_t result;
     mpz_init(result);
+
+    if (lo->kind != is_Inc && lo->kind != is_Dec)
+        doComb(stack, SWAP, NULL);
 
     switch (lo->kind)
     {
@@ -107,7 +110,30 @@ static void integer_arithmetic(Stack *restrict stack, const LiteralOperation lo)
     push(stack, make_RCL_Value_Integer(result));
 }
 
-void doArithmetic(Stack *restrict stack, const LiteralOperation lo, BResult *restrict bresult)
+/* static void integer_arithmetic(Stack * stack, const LiteralOperation lo)
+{
+    if (lo->kind == lo_inc)
+    {
+        if (top(stack).kind == RCL_Value_Integer)
+            mpz_add_ui(top_ptr(stack)->u.int_, top_ptr(stack)->u.int_, 1);
+
+        if (top(stack).kind == RCL_Value_Float)
+            mpf_add_ui(top_ptr(stack)->u.float_, top_ptr(stack)->u.float_, 1);
+
+        return;
+    }
+
+    const Value a = drop(stack);
+    const Value b = drop(stack);
+
+    if (a.kind == RCL_Value_Integer && b.kind == RCL_Value_Integer);
+    if (a.kind == RCL_Value_Integer && b.kind == RCL_Value_Float);
+    if (a.kind == RCL_Value_Float && b.kind == RCL_Value_Integer);
+    if (a.kind == RCL_Value_Float && b.kind == RCL_Value_Float);
+
+} */
+
+void doArithmetic(Stack * stack, const LiteralOperation lo, BResult * bresult)
 {
     if (top_ptr(stack)->kind == RCL_Value_Integer)
         integer_arithmetic(stack, lo);

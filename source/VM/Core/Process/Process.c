@@ -58,7 +58,7 @@ inline size_t refsize(char *s[], size_t nbr)
     return result;
 }
 
-inline void concatWordico(BResult *restrict dest, const BResult source)
+inline void concatWordico(BResult * dest, const BResult source)
 {
     for (Iterator i = 0; i < source.wordico.externs.used; i++)
         vec_add_externs_data(&dest->wordico.externs, source.wordico.externs.array[i]);
@@ -70,7 +70,7 @@ inline void concatWordico(BResult *restrict dest, const BResult source)
         vec_add_structure_data(&dest->wordico.structures, source.wordico.structures.array[i]);
 }
 
-inline void concatBResult(BResult *restrict dest, const BResult source)
+inline void concatBResult(BResult * dest, const BResult source)
 {
     concatWordico(dest, source);
 

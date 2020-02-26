@@ -37,7 +37,7 @@
 #include <VM\Core\Wordefinition\RCL_Structure.h>
 #include <VM\Core\Wordefinition\Wordico.h>
 
-void init_wordico(struct Wordico *restrict wordico, ListDefinition ld)
+void init_wordico(struct Wordico * wordico, ListDefinition ld)
 {
     vec_init_externs(&wordico->externs, count_externs(ld) + 1);
     vec_init_function(&wordico->functions, count_functions(ld) + 1);
@@ -45,7 +45,7 @@ void init_wordico(struct Wordico *restrict wordico, ListDefinition ld)
     vec_init_lambdas(&wordico->lambdas, 1);
 }
 
-void init_wordico_nbr(struct Wordico *restrict wordico, size_t nbr)
+void init_wordico_nbr(struct Wordico * wordico, size_t nbr)
 {
     vec_init_externs(&wordico->externs, nbr);
     vec_init_function(&wordico->functions, nbr);
@@ -53,7 +53,7 @@ void init_wordico_nbr(struct Wordico *restrict wordico, size_t nbr)
     vec_init_lambdas(&wordico->lambdas, 1);
 }
 
-void set_wordico(struct Wordico *restrict wordico, BrowsedAbsyn *restrict psdata, ListDefinition ld)
+void set_wordico(struct Wordico * wordico, BrowsedAbsyn * psdata, ListDefinition ld)
 {
     while (ld != NULL)
     {
@@ -79,7 +79,7 @@ void set_wordico(struct Wordico *restrict wordico, BrowsedAbsyn *restrict psdata
     }
 }
 
-struct RCL_Function *getSpecific_function(struct Wordico *restrict wordico, const hash_t hash_word)
+struct RCL_Function *getSpecific_function(struct Wordico * wordico, const hash_t hash_word)
 {
     int left = 0;
     int right = wordico->functions.used;
@@ -102,7 +102,7 @@ struct RCL_Function *getSpecific_function(struct Wordico *restrict wordico, cons
     return NULL;
 }
 
-struct RCL_Extern *getSpecific_extern(struct Wordico *restrict wordico, const hash_t hash_word)
+struct RCL_Extern *getSpecific_extern(struct Wordico * wordico, const hash_t hash_word)
 {
     int left = 0;
     int right = wordico->externs.used;
@@ -125,7 +125,7 @@ struct RCL_Extern *getSpecific_extern(struct Wordico *restrict wordico, const ha
     return NULL;
 }
 
-struct RCL_Structure *getSpecific_structure(struct Wordico *restrict wordico, const hash_t hash_word)
+struct RCL_Structure *getSpecific_structure(struct Wordico * wordico, const hash_t hash_word)
 {
     int left = 0;
     int right = wordico->structures.used;
@@ -148,7 +148,7 @@ struct RCL_Structure *getSpecific_structure(struct Wordico *restrict wordico, co
     return NULL;
 }
 
-struct RCL_Lambda *getSpecific_lambda(struct Wordico *restrict wordico, const hash_t hash_word)
+struct RCL_Lambda *getSpecific_lambda(struct Wordico * wordico, const hash_t hash_word)
 {
     for (Iterator i = 0; i < wordico->lambdas.used; i++)
         if (wordico->lambdas.array[i].hash_code == hash_word)
@@ -156,7 +156,7 @@ struct RCL_Lambda *getSpecific_lambda(struct Wordico *restrict wordico, const ha
     return NULL;
 }
 
-struct RCL_Structure_field *getSpecific_field(struct Wordico *restrict wordico, const String word)
+struct RCL_Structure_field *getSpecific_field(struct Wordico * wordico, const String word)
 {
     for (Iterator i = 0; i < wordico->structures.used; i++)
         for (Iterator j = 0; j < wordico->structures.array[i].field_alloc_used; j++)
@@ -204,7 +204,7 @@ size_t count_structures(ListDefinition ld)
     return result;
 }
 
-bool yetDefined(String *kst, struct Wordico *restrict wordico, const String name)
+bool yetDefined(String *kst, struct Wordico * wordico, const String name)
 {
 /*     if (wordico->functions.used)
         if (getSpecific_function(wordico, hash_djb2(name)) != NULL)

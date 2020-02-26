@@ -31,7 +31,7 @@
 #include <VM\Core\FFI\Types.h>
 #include <VM\Core\Execution\Interpreter\Atoms\FFI.h>
 
-inline void eval_external_call(Stack *restrict stack, BResult *restrict bresult, struct RCL_Extern *restrict external)
+inline void eval_external_call(Stack * stack, BResult * bresult, struct RCL_Extern * external)
 {
 
     //printf("%s\n", bresult->psdata.includes.used);

@@ -28,4 +28,4 @@
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 #include <VM\Core\RCLIB\builtin.h>
 
-void perform_builtin_math(Stack *restrict stack, struct Builtin builtin_infos,  BResult *restrict bresult);
+void perform_builtin_math(Stack * stack, struct Builtin builtin_infos,  BResult * bresult);

@@ -42,7 +42,13 @@ typedef enum
     , SAP, TAKE, TAKEX
     , COMB_MAP, REC, STEQ
     , STEP, NPREC, PUTC, PUTS, NVSHOW
-    , IFTE, EQ }
+    , IFTE, CASE, SELECT
+    , EQ, LW, LEQ, GR, GEQ, NEQ, NOT
+    , NEG
+    , FTOI, ITOF, ITOC, CTOI, ITOB
+    , QLEN, ALEN
+    , WTDO, HALT
+    , GENREC, LINREC, BINREC, TAILREC, PRIMREC }
 Combinator;
 
 static const char Combinators[][8] =
@@ -54,7 +60,13 @@ static const char Combinators[][8] =
     , "sap", "take", "takex"
     , "comb_map", "rec", "steq"
     , "step", "nprec", "putc", "puts", "nvshow"
-    , "ifte", "eq" };
+    , "ifte", "case", "select"
+    , "eq", "lw", "leq", "gr", "geq", "neq", "not"
+    , "neg"
+    , "ftoi", "itof", "itoc", "ctoi", "itob"
+    , "qlen", "alen"
+    , "wtdo", "halt"
+    , "genrec", "linrec", "binrec", "tailrec", "primrec" };
 
 Combinator str_to_comb(const String);
 bool is_combinator(String);

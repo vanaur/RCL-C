@@ -40,7 +40,7 @@ bool can_imports(const String path)
     return fopen(path, "r") != NULL;
 }
 
-void imports(BResult *restrict bresult, Preprocessor prec)
+void imports(BResult * bresult, Preprocessor prec)
 {
     if (!can_imports(prec->u.import_.string_))
         NewState_return(make_error, Browser, "Can't impote file: `%s'.", prec->u.import_.string_);

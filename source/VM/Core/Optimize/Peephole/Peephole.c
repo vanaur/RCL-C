@@ -65,11 +65,11 @@
 #define SEQ_FREP(vals...) (const Value[]){vals}, NUMARGS(const Value, vals)
 #define SEQ_VOID SEQ_FREP()
 
-static void peepholise(RawCode *restrict rcode, const hash_t curr_fhash);
-static void peephole_quote(RawCode *restrict rcode, const hash_t curr_fhash);
-static void peephole_table(RawCode *restrict rcode, const hash_t curr_fhash);
+static void peepholise(RawCode * rcode, const hash_t curr_fhash);
+static void peephole_quote(RawCode * rcode, const hash_t curr_fhash);
+static void peephole_table(RawCode * rcode, const hash_t curr_fhash);
 
-static void peephole_table(RawCode *restrict rcode, const hash_t curr_fhash)
+static void peephole_table(RawCode * rcode, const hash_t curr_fhash)
 {
     // dup dup flip => dup dup
     seq_replace(
@@ -192,20 +192,20 @@ static void peephole_table(RawCode *restrict rcode, const hash_t curr_fhash)
 }
 
 // TODO
-static void spec_loop1(RawCode *restrict rcode, const hash_t curr_fhash)
+static void spec_loop1(RawCode * rcode, const hash_t curr_fhash)
 {
     // if ...  klw0 unit [Q] [swap inc swap dec <curr_fhash>] ifte  ...
     // => ...  dup flip + swap Q  ...
 }
 
-static void peephole_quote(RawCode *restrict rcode, const hash_t curr_fhash)
+static void peephole_quote(RawCode * rcode, const hash_t curr_fhash)
 {
     for (Iterator i = 0; i < rcode->used; i++)
         if (rcode->array[i].kind == RCL_Value_Quotation)
             peepholise(rcode->array[i].u.quote_, curr_fhash);
 }
 
-static void peepholise(RawCode *restrict rcode, const hash_t curr_fhash)
+static void peepholise(RawCode * rcode, const hash_t curr_fhash)
 {
     // We perform 2 peephole optimization runs, because some reductions that have been made may in turn,
     // with the original code preceding and preceding the sequences, also contain elements to be reduced.
@@ -215,7 +215,7 @@ static void peepholise(RawCode *restrict rcode, const hash_t curr_fhash)
     peephole_quote(rcode, curr_fhash);
 }
 
-void peephole_main(RawCode *restrict rcode)
+void peephole_main(RawCode * rcode)
 {
     peepholise(rcode, (hash_t)0);
 }
@@ -224,7 +224,7 @@ void peephole_main(RawCode *restrict rcode)
 // https://en.wikipedia.org/wiki/peephole_main
 // Inline les fonctions non-récursives :o
 
-void peephole_functions(BResult *restrict bresult)
+void peephole_functions(BResult * bresult)
 {
     size_t i = bresult->wordico.functions.used;
     while (i-- > 0)

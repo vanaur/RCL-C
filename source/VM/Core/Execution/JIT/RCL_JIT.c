@@ -47,7 +47,7 @@ typedef struct RCL_JIT_INFO_STATE RCL_JIT_t;
 
 #include <VM\Core\Execution\Compiler\Assembler\Opcode.h>
 
-static Assembled_Program jit_assemble(RCL_JIT_t *rcl_jit, BResult *restrict bresult)
+static Assembled_Program jit_assemble(RCL_JIT_t *rcl_jit, BResult * bresult)
 {
     Assembled_Program result;
     result.Format = NULL;
@@ -75,11 +75,11 @@ struct RCL_JIT_INFO_STATE
 // Main return
 typedef int (*p_fn)(void);
 
-static void encode_jit_program(RCL_JIT_t *rcl_jit, BResult *restrict bresult)
+static void encode_jit_program(RCL_JIT_t *rcl_jit, BResult * bresult)
 {
 }
 
-static void fn_RCL_JIT_INFO_STATE_init(RCL_JIT_t *rcl_jit, BResult *restrict bresult)
+static void fn_RCL_JIT_INFO_STATE_init(RCL_JIT_t *rcl_jit, BResult * bresult)
 {
     assert(rcl_jit != NULL);
     *rcl_jit->instr = malloc(rcl_jit->num_instrs * sizeof(*rcl_jit->instr));
@@ -104,7 +104,7 @@ int test()
     return 73;
 }
 
-void jit(BResult *restrict bresult)
+void jit(BResult * bresult)
 {
     // ----- Create the assembly program ----- //
     Assembled_Program program = assemble(bresult);

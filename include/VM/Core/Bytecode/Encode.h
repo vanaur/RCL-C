@@ -27,4 +27,4 @@
 #include <VM\Core\Browse\BResult.h>
 
 // Encodes the given program as a bytecode, readable by the function `decode`.
-void encode_bytecode(const RawCode, BResult *restrict);
+void encode_bytecode(const RawCode, BResult *);

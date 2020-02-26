@@ -33,7 +33,7 @@
 #include <VM\Core\Execution\Interpreter\Builtin\Math\Math.h>
 #include <VM\Core\Execution\Interpreter\Builtin\Misc\Misc.h>
 
-void perform_builtin(const struct Builtin *restrict builtin, Stack *restrict stack, BResult *restrict bresult, const String name)
+void perform_builtin(const struct Builtin * builtin, Stack * stack, BResult * bresult, const String name)
 {
     switch (builtin->module)
     {

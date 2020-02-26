@@ -29,4 +29,4 @@
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\RCLIB\builtin.h>
 
-void perform_builtin_misc(Stack *restrict stack, struct Builtin builtin_infos, BResult *restrict bresult);
+void perform_builtin_misc(Stack * stack, struct Builtin builtin_infos, BResult * bresult);

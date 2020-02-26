@@ -238,7 +238,7 @@ RawCode fast_rcode_subv(const RawCode src, const size_t from, const size_t until
 // Replace all sequences corresponding to `seq1` with `seq2` in the sent `RawCode`.
 // Length must be specified.
 void seq_replace(
-    RawCode *restrict rcode,
+    RawCode * rcode,
     const Value seq1[], size_t size1,
     const Value seq2[], size_t size2);
 

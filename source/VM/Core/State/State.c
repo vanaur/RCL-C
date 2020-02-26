@@ -47,13 +47,13 @@ struct StateKind make_info(enum Origin origin, const String msg)
     return (struct StateKind){.kind = Info, .u = {.info = {.msg = msg}}};
 }
 
-void state_init(struct State *restrict state)
+void state_init(struct State * state)
 {
     state->hasError = false;
     InitVector(state, 1, struct StateKind);
 }
 
-void state_put(struct State *restrict state, struct StateKind statekind)
+void state_put(struct State * state, struct StateKind statekind)
 {
     if (statekind.kind == Error)
         state->hasError = true;

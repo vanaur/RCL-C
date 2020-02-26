@@ -61,17 +61,17 @@ struct RCL_Lambda make_rcl_Lambda(String name, struct RCL_Argv rcl_argv, Value v
     return result;
 }
 
-void vec_init_lambdas(struct VEC_Lambdas *restrict rcl_lam, size_t size)
+void vec_init_lambdas(struct VEC_Lambdas * rcl_lam, size_t size)
 {
     InitVector(rcl_lam, size, struct RCL_Lambda);
 }
 
-void vec_add_lambdas(struct VEC_Lambdas *restrict rcl_lam, struct RCL_Lambda lam)
+void vec_add_lambdas(struct VEC_Lambdas * rcl_lam, struct RCL_Lambda lam)
 {
     PushToVector(rcl_lam, struct RCL_Lambda, lam);
 }
 
-void vec_remove_lambda(struct VEC_Lambdas *restrict rcl_lam, String name)
+void vec_remove_lambda(struct VEC_Lambdas * rcl_lam, String name)
 {
     rcl_lam->size = --rcl_lam->used == 0 ? 1 : rcl_lam->used;
     rcl_lam->array = (struct RCL_Lambda *)realloc(rcl_lam->array, rcl_lam->size * sizeof(struct RCL_Lambda));

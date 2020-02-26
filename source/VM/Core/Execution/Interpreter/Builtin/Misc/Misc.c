@@ -35,7 +35,7 @@
 #include <VM\Core\Execution\Interpreter\Stack\Combinators\Basics.h>
 #include <VM\Core\Execution\Interpreter\Builtin\Misc\Misc.h>
 
-static inline void f_case(Stack *restrict stack, BResult *restrict bresult)
+static inline void f_case(Stack * stack, BResult * bresult)
 {
     // [to_case] {cases} {results} [default] case
 
@@ -64,12 +64,12 @@ static inline void f_case(Stack *restrict stack, BResult *restrict bresult)
     return doUnquote(stack, &default_case, bresult);
 }
 
-static inline void f_ifthen(Stack *restrict stack, BResult *restrict bresult)
+static inline void f_ifthen(Stack * stack, BResult * bresult)
 {
     // TODO == [x] [y] [id] ift
 }
 
-static inline void f_if(Stack *restrict stack, BResult *restrict bresult)
+static inline void f_if(Stack * stack, BResult * bresult)
 {
     Value _else = drop(stack);
     Value _then = drop(stack);
@@ -110,7 +110,7 @@ static inline void f_dual(Stack *stack, BResult *bresult)
     pthread_join(t2, NULL);
 }
 
-void perform_builtin_misc(Stack *restrict stack, struct Builtin builtin_infos, BResult *restrict bresult)
+void perform_builtin_misc(Stack * stack, struct Builtin builtin_infos, BResult * bresult)
 {
     switch (builtin_infos.u.misc_function)
     {

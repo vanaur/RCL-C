@@ -42,7 +42,7 @@ typedef struct Stack
 } __attribute__((packed)) Stack;
 
 void init_stack(Stack *, size_t);
-void multinit_stack(Stack *restrict stacks[], size_t);
+void multinit_stack(Stack * stacks[], size_t);
 void resetStack(Stack *);
 void totalyFreeStack(Stack *);
 void concatStack(Stack *, Stack *, size_t);

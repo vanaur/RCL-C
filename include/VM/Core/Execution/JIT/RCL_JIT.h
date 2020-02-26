@@ -25,4 +25,4 @@
 #pragma once
 #include <VM\Core\Browse\BResult.h>
 
-void jit(BResult *restrict bresult);
+void jit(BResult * bresult);

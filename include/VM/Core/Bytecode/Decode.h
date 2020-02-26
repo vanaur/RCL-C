@@ -28,4 +28,4 @@
 #include <stdio.h>
 #include <VM\Core\Browse\BResult.h>
 
-void decode_bytecode(BResult *restrict, FILE *);
+void decode_bytecode(BResult *, FILE *);

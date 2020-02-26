@@ -43,7 +43,7 @@
 #include <VM\Core\Execution\Interpreter\Atoms\field.h>
 #include <VM\Core\Execution\Interpreter\Atoms\FFI.h>
 
-inline void evalword(Stack *restrict stack, BResult *restrict bresult, RCL_Value_Word_t *restrict word)
+inline void evalword(Stack * stack, BResult * bresult, RCL_Value_Word_t * word)
 {
     struct RCL_Function *cpytmp_function = getSpecific_function(&bresult->wordico, word->hash_code);
     if (cpytmp_function != NULL)

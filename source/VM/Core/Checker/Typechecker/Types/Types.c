@@ -53,7 +53,7 @@ RCL_Type make_RCL_Type_stack(size_t n, RCL_Type types[n])
 
 #define _sk_vof_array__byref(v, i) show_kind(v->u.array_.array->array[i].kind)
 
-static RCL_Type type_of_array(const Value *value, String function_name, BResult *restrict bresult)
+static RCL_Type type_of_array(const Value *value, String function_name, BResult * bresult)
 {
     size_t len = value->u.array_.length;
     RCL_Type ref_type = type_of(&value->u.array_.array->array[0], function_name, bresult);
@@ -80,7 +80,7 @@ RCL_Type type_of_rcode(RawCode rcode)
 {
 }
 
-RCL_Type type_of(const Value *value, const String function_name, const BResult *restrict bresult)
+RCL_Type type_of(const Value *value, const String function_name, const BResult * bresult)
 {
     switch (value->kind)
     {

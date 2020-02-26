@@ -244,7 +244,7 @@ int main(int argc, String argv[])
         if (exec.kasm)
         {
             FILE *file = fopen("output_asm.asm", "w");
-            fputs(((const char *restrict)(assembled_asm_str)), file);
+            fputs(((const char *)(assembled_asm_str)), file);
             fclose(file);
         }
         printf("\n%s\n", assembled_asm_str);

@@ -40,7 +40,7 @@
 #include <VM\Core\RawCode\rawcodecmp.h>
 #include <VM\Core\Show\Show.h>
 
-Checked_out check_program(BResult *restrict bresult)
+Checked_out check_program(BResult * bresult)
 {
     Env_map_t env;
     init_Env(&env, bresult->psdata.rcode.used);

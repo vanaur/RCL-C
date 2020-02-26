@@ -36,7 +36,7 @@
 #include <VM\Core\RawCode\RawCode.h>
 #include <VM\Core\State\State.h>
 
-static void optimize_O1(BResult *restrict bresult)
+static void optimize_O1(BResult * bresult)
 {
     pthread_t th;
     pthread_create(&th, NULL, (void *(*)(void *))peephole_functions, (void *)bresult);
@@ -44,7 +44,7 @@ static void optimize_O1(BResult *restrict bresult)
     pthread_join(th, NULL);
 }
 
-static void optimize_O2(BResult *restrict bresult)
+static void optimize_O2(BResult * bresult)
 {
     inline_optimization_function(bresult);
     inline_optimization_function(bresult);
@@ -54,12 +54,12 @@ static void optimize_O2(BResult *restrict bresult)
     peephole_main(&bresult->psdata.rcode);
 }
 
-static void optimize_O3(BResult *restrict bresult)
+static void optimize_O3(BResult * bresult)
 {
     precompute_main(bresult);
 }
 
-void optimize(BResult *restrict bresult)
+void optimize(BResult * bresult)
 {
     //printf("\n--> Before: %s\n", show_stack(*((Stack *)&bresult->psdata.rcode)));
     switch (bresult->exec_infos.optimize_level)

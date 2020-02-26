@@ -25,5 +25,5 @@
 #pragma once
 #include <VM\Core\Browse\BResult.h>
 
-void inline_optimization_function(BResult *restrict bresult);
-void inline_optimization_code(BResult *restrict bresult);
+void inline_optimization_function(BResult * bresult);
+void inline_optimization_code(BResult * bresult);

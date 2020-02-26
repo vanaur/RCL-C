@@ -165,7 +165,7 @@ BResult browseAbsyn(Program prog, String filename)
     return bresult;
 }
 
-void browsePVoid(BResult *restrict bresult)
+void browsePVoid(BResult * bresult)
 {
     state_init(&bresult->state);
     init_wordico_nbr(&bresult->wordico, 1);
@@ -175,7 +175,7 @@ void browsePVoid(BResult *restrict bresult)
     state_put_warn_br("`%s' is an empty program (the file actually no contains any code).", bresult->current_filename);
 }
 
-void browseProg1(const Program prog, BResult *restrict bresult)
+void browseProg1(const Program prog, BResult * bresult)
 {
     ListPreprocessor lp = prog->u.prog1_.listpreprocessor_;
     ListDefinition ld = prog->u.prog1_.listdefinition_;
@@ -212,7 +212,7 @@ void browseProg1(const Program prog, BResult *restrict bresult)
     pthread_join(def_th, NULL);
 }
 
-void browseProg2(Program prog, BResult *restrict bresult)
+void browseProg2(Program prog, BResult * bresult)
 {
     ListPreprocessor lp = prog->u.prog2_.listpreprocessor_;
     ListDefinition ld = prog->u.prog2_.listdefinition_;
@@ -239,7 +239,7 @@ void browseProg2(Program prog, BResult *restrict bresult)
     pthread_join(idata_th, NULL);
 }
 
-void browseProg3(Program prog, BResult *restrict bresult)
+void browseProg3(Program prog, BResult * bresult)
 {
     ListPreprocessor lp = prog->u.prog3_.listpreprocessor_;
     ListOperation lo = prog->u.prog3_.operation_->u.concatenation_.listoperation_;
@@ -265,7 +265,7 @@ void browseProg3(Program prog, BResult *restrict bresult)
     pthread_join(idata_th, NULL);
 }
 
-void browseProg4(Program prog, BResult *restrict bresult)
+void browseProg4(Program prog, BResult * bresult)
 {
     ListDefinition ld = prog->u.prog4_.listdefinition_;
     ListOperation lo = prog->u.prog4_.operation_->u.concatenation_.listoperation_;
@@ -292,7 +292,7 @@ void browseProg4(Program prog, BResult *restrict bresult)
     pthread_join(def_th, NULL);
 }
 
-void browseProg5(Program prog, BResult *restrict bresult)
+void browseProg5(Program prog, BResult * bresult)
 {
     ListDefinition ld = prog->u.prog5_.listdefinition_;
 
@@ -309,7 +309,7 @@ void browseProg5(Program prog, BResult *restrict bresult)
     handle_definitions(&def_h);
 }
 
-void browseProg6(Program prog, BResult *restrict bresult)
+void browseProg6(Program prog, BResult * bresult)
 {
     ListOperation lo = prog->u.prog6_.operation_->u.concatenation_.listoperation_;
 
@@ -324,7 +324,7 @@ void browseProg6(Program prog, BResult *restrict bresult)
     handle_code(&code_h);
 }
 
-void browseProg7(Program prog, BResult *restrict bresult)
+void browseProg7(Program prog, BResult * bresult)
 {
     ListOperation lo = prog->u.prog7_.operation_->u.concatenation_.listoperation_;
 
@@ -339,7 +339,7 @@ void browseProg7(Program prog, BResult *restrict bresult)
     handle_code(&code_h);
 }
 
-void browseProg8(Program prog, BResult *restrict bresult)
+void browseProg8(Program prog, BResult * bresult)
 {
     ListPreprocessor lp = prog->u.prog8_.listpreprocessor_;
 
@@ -365,14 +365,14 @@ void handle_code(struct Code_handler *code_h)
     }
 }
 
-void _handle_word(BResult *restrict bresult, String word)
+void _handle_word(BResult * bresult, String word)
 {
     if (is_combinator(word))
         return push_rcode(&bresult->psdata.rcode, make_RCL_Value_Combinator(str_to_comb(word)));
     push_rcode(&bresult->psdata.rcode, make_RCL_Value_Word(word));
 }
 
-void _handle_lambda(BResult *restrict bresult, String name)
+void _handle_lambda(BResult * bresult, String name)
 {
     if (is_combinator(name))
     {
@@ -384,7 +384,7 @@ void _handle_lambda(BResult *restrict bresult, String name)
     push_rcode(&bresult->psdata.rcode, make_RCL_Value_Lambda(name));
 }
 
-void _handle_endlambda(BResult *restrict bresult, String name)
+void _handle_endlambda(BResult * bresult, String name)
 {
     if (is_combinator(name))
     {
@@ -396,7 +396,7 @@ void _handle_endlambda(BResult *restrict bresult, String name)
     push_rcode(&bresult->psdata.rcode, make_RCL_Value_EndLamScope(name));
 }
 
-void case_operation(BResult *restrict bresult, const Operation op)
+void case_operation(BResult * bresult, const Operation op)
 {
     switch (op->kind)
     {
@@ -444,7 +444,7 @@ void handle_preprocessor(struct Preprocessor_handler *idata_h)
     }
 }
 
-void case_preprocessor(BResult *restrict bresult, Preprocessor p)
+void case_preprocessor(BResult * bresult, Preprocessor p)
 {
     switch (p->kind)
     {
@@ -485,12 +485,12 @@ void case_preprocessor(BResult *restrict bresult, Preprocessor p)
     }
 }
 
-void handle_absynImport(BResult *restrict bresult, Preprocessor p)
+void handle_absynImport(BResult * bresult, Preprocessor p)
 {
     imports(bresult, p);
 }
 
-void handle_absynImportAs(BResult *restrict bresult, Preprocessor p)
+void handle_absynImportAs(BResult * bresult, Preprocessor p)
 {
     perror("TO4DO!");
     exit(1);
@@ -499,7 +499,7 @@ void handle_absynImportAs(BResult *restrict bresult, Preprocessor p)
 #define EXEC bresult->exec_infos
 #define IFDEF(val, then) if (def_hash == hash_djb2(OPT val)) { then; }
 
-void handle_absynDefine(BResult *restrict bresult, Preprocessor p)
+void handle_absynDefine(BResult * bresult, Preprocessor p)
 {
     const String def_name = to_lower_s(p->u.define_.uident_);
     const hash_t def_hash = hash_djb2(def_name);
@@ -531,7 +531,7 @@ void handle_absynDefine(BResult *restrict bresult, Preprocessor p)
     else state_put_warn_br("`%s' is a unknown preprocessor definition, at now RCL don't handle them.", p->u.define_.uident_);
 }
 
-void handle_absynInclude(BResult *restrict bresult, Preprocessor p)
+void handle_absynInclude(BResult * bresult, Preprocessor p)
 {
     if (fopen(p->u.include_.string_, "r"))
     {
@@ -563,7 +563,7 @@ void handle_absynInclude(BResult *restrict bresult, Preprocessor p)
     }
 }
 
-void handle_parallelConcat(RawCode *restrict rcode, Operation fx, Operation gx)
+void handle_parallelConcat(RawCode * rcode, Operation fx, Operation gx)
 {
     push_rcode(rcode, make_RCL_Value_Parallel(otov(fx), otov(gx)));
 }

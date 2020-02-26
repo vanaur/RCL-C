@@ -31,7 +31,7 @@
 #include <VM\Core\Execution\Interpreter\Atoms\lambda.h>
 #include <VM\Core\Execution\Interpreter\Atoms\operation.h>
 
-void new_lambda(Stack *stack, BResult *restrict bresult, const Value lamdop)
+void new_lambda(Stack *stack, BResult * bresult, const Value lamdop)
 {
     struct RCL_Lambda *lam_yet_exists = getSpecific_lambda(&bresult->wordico, hash_djb2(lamdop.u.lam_));
     if (lam_yet_exists)
@@ -49,7 +49,7 @@ void new_lambda(Stack *stack, BResult *restrict bresult, const Value lamdop)
     vec_add_lambdas(&bresult->wordico.lambdas, make_rcl_Lambda(lamdop.u.lam_, bresult->argvs, drop(stack), *stack));
 }
 
-void unscope_lambda(BResult *restrict bresult, const Value lamdop)
+void unscope_lambda(BResult * bresult, const Value lamdop)
 {
     if (getSpecific_lambda(&bresult->wordico, hash_djb2(lamdop.u.endLamScope_)) == NULL)
     {
@@ -61,7 +61,7 @@ void unscope_lambda(BResult *restrict bresult, const Value lamdop)
     }
 }
 
-void eval_lambda_call(Stack *restrict stack, struct RCL_Lambda *restrict lambda, BResult *restrict bresult)
+void eval_lambda_call(Stack * stack, struct RCL_Lambda * lambda, BResult * bresult)
 {
     switch (lambda->kind)
     {

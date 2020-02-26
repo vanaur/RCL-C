@@ -39,7 +39,7 @@
 #define SEQ_KIND(kinds...) (const enum Value_Kind[]){kinds}, NUMARGS_KIND(kinds)
 #define SEQ_VOID SEQ_FREP()
 
-static void seq_replace_fval_kind(BResult *restrict bresult, RawCode *restrict rcode, const enum Value_Kind seq_kind[], size_t size1)
+static void seq_replace_fval_kind(BResult * bresult, RawCode * rcode, const enum Value_Kind seq_kind[], size_t size1)
 {
     Value *p = rcode->array, *end = rcode->array + rcode->used;
 
@@ -63,19 +63,19 @@ static void seq_replace_fval_kind(BResult *restrict bresult, RawCode *restrict r
     }
 }
 
-static void precompute_table(BResult *restrict bresult)
+static void precompute_table(BResult * bresult)
 {
     // Replace an arithmetic computation by its result
     seq_replace_fval_kind(bresult, &bresult->psdata.rcode, SEQ_KIND(RCL_Value_Integer, RCL_Value_Integer, RCL_Value_LiteralOperation));
     seq_replace_fval_kind(bresult, &bresult->psdata.rcode, SEQ_KIND(RCL_Value_Float, RCL_Value_Float, RCL_Value_LiteralOperation));
 }
 
-void precompute_main(BResult *restrict bresult)
+void precompute_main(BResult * bresult)
 {
     precompute_table(bresult);
     printf("\n%s", show_quote(bresult->psdata.rcode));
 }
 
-void precompute_defs(BResult *restrict bresult)
+void precompute_defs(BResult * bresult)
 {
 }

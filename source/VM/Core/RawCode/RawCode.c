@@ -340,29 +340,29 @@ Value otov(Operation op)
     }
 }
 
-void init_rcode(RawCode *restrict rcode, size_t initSize)
+void init_rcode(RawCode * rcode, size_t initSize)
 {
     InitVector(rcode, sizeof(Value), Value);
 }
 
-void push_rcode(RawCode *restrict rcode, Value item)
+void push_rcode(RawCode * rcode, Value item)
 {
     PushToVector(rcode, Value, item);
 }
 
-void pop_rcode(RawCode *restrict rcode)
+void pop_rcode(RawCode * rcode)
 {
     PopVector(rcode);
 }
 
-Value drop_rcode(RawCode *restrict rcode)
+Value drop_rcode(RawCode * rcode)
 {
     Value last = top_rcode(rcode);
     pop_rcode(rcode);
     return last;
 }
 
-Value top_rcode(RawCode *restrict rcode)
+Value top_rcode(RawCode * rcode)
 {
     if (rcode->size == 0)
         return emptyRawCodeValue;
@@ -383,13 +383,13 @@ size_t count_operations(ListOperation ls)
     return result;
 }
 
-void concat_rcode(RawCode *restrict dest_ptr, RawCode *restrict src_ptr)
+void concat_rcode(RawCode * dest_ptr, RawCode * src_ptr)
 {
     for (Iterator i = 0; i < src_ptr->used; i++)
         push_rcode(dest_ptr, src_ptr->array[i]);
 }
 
-void concat_rcode_from(RawCode *restrict dest_ptr, RawCode *restrict src_ptr, size_t from)
+void concat_rcode_from(RawCode * dest_ptr, RawCode * src_ptr, size_t from)
 {
     assert(src_ptr->used >= from);
 
@@ -404,7 +404,7 @@ void concat_rcode_from(RawCode *restrict dest_ptr, RawCode *restrict src_ptr, si
         dest_ptr->size = 2 * dest_ptr->used;
 }
 
-void concat_rcode_until(RawCode *restrict dest_ptr, RawCode *restrict src_ptr, size_t from, size_t until)
+void concat_rcode_until(RawCode * dest_ptr, RawCode * src_ptr, size_t from, size_t until)
 {
     if (from >= until)
         return;
@@ -424,7 +424,7 @@ void concat_rcode_until(RawCode *restrict dest_ptr, RawCode *restrict src_ptr, s
 }
 
 inline void seq_replace(
-    RawCode *restrict rcode,
+    RawCode * rcode,
     const Value seq1[], size_t size1,
     const Value seq2[], size_t size2)
 {

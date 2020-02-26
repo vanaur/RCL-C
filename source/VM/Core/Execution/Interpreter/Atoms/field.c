@@ -31,7 +31,7 @@
 #include <VM\Core\State\State.h>
 #include <VM\Core\Execution\Interpreter\Atoms\field.h>
 
-void eval_field(Stack *restrict stack, BResult *restrict bresult, RCL_Structure_Field field)
+void eval_field(Stack * stack, BResult * bresult, RCL_Structure_Field field)
 {
     String field_name;
 

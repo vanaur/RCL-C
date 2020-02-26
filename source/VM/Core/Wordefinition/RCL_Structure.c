@@ -50,7 +50,7 @@ struct RCL_Structure_field make_spec_field(String name, String typename)
     return (struct RCL_Structure_field){.kind = _is_Spec, .name = name, .u._typed = typename};
 }
 
-void init_rcl_structure(struct RCL_Structure *restrict rcl_struct, String name, size_t fields_alloc_size)
+void init_rcl_structure(struct RCL_Structure * rcl_struct, String name, size_t fields_alloc_size)
 {
     rcl_struct->name = name;
     rcl_struct->field_alloc_size = fields_alloc_size;
@@ -58,7 +58,7 @@ void init_rcl_structure(struct RCL_Structure *restrict rcl_struct, String name, 
     rcl_struct->fields = malloc(fields_alloc_size * sizeof(struct RCL_Structure_field));
 }
 
-void add_field(struct RCL_Structure *restrict rcl_struct, struct RCL_Structure_field rcl_field)
+void add_field(struct RCL_Structure * rcl_struct, struct RCL_Structure_field rcl_field)
 {
     if (rcl_struct->field_alloc_used == rcl_struct->field_alloc_size)
     {
@@ -123,19 +123,19 @@ signed int field_index(struct RCL_Structure rcl_structure, String name)
     return -1;
 }
 
-void vec_init_structures(struct VEC_Structures *restrict rcl_structure, size_t size)
+void vec_init_structures(struct VEC_Structures * rcl_structure, size_t size)
 {
     InitVector(rcl_structure, size, struct RCL_Structure);
 }
 
-void vec_add_structures(struct VEC_Structures *restrict rcl_structure, Definition def)
+void vec_add_structures(struct VEC_Structures * rcl_structure, Definition def)
 {
     vec_add_structure_data(
         rcl_structure,
         make_rcl_structure(def->u.structure_.uident_, def->u.structure_.listrcl_structure_field_));
 }
 
-void vec_add_structure_data(struct VEC_Structures *restrict vec, struct RCL_Structure rcl_structure)
+void vec_add_structure_data(struct VEC_Structures * vec, struct RCL_Structure rcl_structure)
 {
     PushToVector(vec, struct RCL_Structure, rcl_structure);
 }

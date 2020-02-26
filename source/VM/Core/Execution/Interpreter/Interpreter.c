@@ -38,7 +38,7 @@ inline RawCode seval(const RawCode rcode, BResult *bresult)
     return *((RawCode *)&runtime_stack);
 }
 
-inline void interpret(BResult *restrict bresult, const SOOL mode)
+inline void interpret(BResult * bresult, const SOOL mode)
 {
     bresult->current_name = NULL;
     switch (mode)
@@ -57,7 +57,7 @@ inline void interpret(BResult *restrict bresult, const SOOL mode)
     }
 }
 
-inline void executeStrict(BResult *restrict bresult)
+inline void executeStrict(BResult * bresult)
 {
     Stack runtimeStack;
     init_stack(&runtimeStack, bresult->psdata.rcode.used);
@@ -69,7 +69,7 @@ inline void executeStrict(BResult *restrict bresult)
     bresult->resulting.array = runtimeStack.array;
 }
 
-inline void executeLazy(BResult *restrict bresult)
+inline void executeLazy(BResult * bresult)
 {
     Stack runtimeStack;
     Iterator itr = bresult->psdata.rcode.used;
@@ -79,4 +79,4 @@ inline void executeLazy(BResult *restrict bresult)
     bresult->resulting.array = runtimeStack.array;
 }
 
-inline void executeOptimistic(BResult *restrict bresult) {}
+inline void executeOptimistic(BResult * bresult) {}
