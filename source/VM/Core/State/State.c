@@ -47,13 +47,13 @@ struct StateKind make_info(enum Origin origin, const String msg)
     return (struct StateKind){.kind = Info, .u = {.info = {.msg = msg}}};
 }
 
-void state_init(struct State * state)
+void state_init(struct State *state)
 {
     state->hasError = false;
     InitVector(state, 1, struct StateKind);
 }
 
-void state_put(struct State * state, struct StateKind statekind)
+void state_put(struct State *state, struct StateKind statekind)
 {
     if (statekind.kind == Error)
         state->hasError = true;
@@ -89,6 +89,15 @@ size_t count_infos(const struct State state)
 
 void prettyPrint_state(struct State state)
 {
+    const int errs = (int)count_errors(state);
+    const int warns = (int)count_warnigns(state);
+    const int infos = (int)count_infos(state);
+
+    if (errs + warns + infos == 0)
+        return;
+
+    printf("\n");
+
     for (Iterator i = 0; i < state.used; i++)
     {
         if (i >= 25 && i > 25)
@@ -97,25 +106,25 @@ void prettyPrint_state(struct State state)
             cc_fprintf(
                 CC_FG_MAGENTA,
                 stdout, "\n... %d errors in all (+ %d warnings and %d information)\n",
-                count_errors(state), count_warnigns(state), count_infos(state));
+                errs, warns, infos);
             return;
         }
         switch (state.array[i].kind)
         {
         case Error:
-            cc_fprintf(CC_FG_RED, stdout, "    Error: ");
-            cc_fprintf(CC_FG_DARK_RED, stdout, "%s\n", state.array[i].u.error.msg);
+            cc_fprintf(CC_FG_DARK_RED, stdout, "Error: ");
+            cc_fprintf(CC_FG_RED, stdout, "%s\n", state.array[i].u.error.msg);
             free(state.array[i].u.error.msg);
             break;
 
         case Warning:
-            cc_fprintf(CC_FG_YELLOW, stdout, "    Warning: ");
+            cc_fprintf(CC_FG_YELLOW, stdout, "Warning: ");
             cc_fprintf(CC_FG_DARK_YELLOW, stdout, "%s\n", state.array[i].u.warning.msg);
             free(state.array[i].u.warning.msg);
             break;
 
         case Info:
-            cc_fprintf(CC_FG_CYAN, stdout, "    Info: ");
+            cc_fprintf(CC_FG_CYAN, stdout, "Info: ");
             cc_fprintf(CC_FG_DARK_CYAN, stdout, "%s\n", state.array[i].u.info.msg);
             //free(state.array[i].u.info.msg);
             break;

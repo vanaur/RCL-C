@@ -52,33 +52,39 @@ typedef enum Type_kind Type_kind;
 
 // + Creatre a type for pointers
 
+typedef char TVar_t;
+
 typedef SIGMA_TYPE(
     RCL_Type, Type_kind,
-    SIGMA_CTOR(rcl_type_literal, Value_type tlit);
-    SIGMA_CTOR(rcl_type_any, String tany);
-    SIGMA_CTOR(rcl_type_array, struct RCL_Type *tarray);
-    SIGMA_CTOR(rcl_type_quote, struct RCL_Type *tquote);
-    SIGMA_CTOR(rcl_type_arrow, struct RCL_Type *t1; struct RCL_Type *t2);
-    SIGMA_CTOR(rcl_type_stack, struct RCL_Type **tstack; size_t nbr);
+    SIGMA_CTOR(rcl_type_literal,  Value_type tlit);
+    SIGMA_CTOR(rcl_type_any,      TVar_t tany);
+    SIGMA_CTOR(rcl_type_array,    struct RCL_Type *tarray);
+    SIGMA_CTOR(rcl_type_quote,    struct RCL_Type *tquote);
+    SIGMA_CTOR(rcl_type_arrow,    struct RCL_Type *t1; struct RCL_Type *t2);
+    SIGMA_CTOR(rcl_type_stack,    struct RCL_Type **tstack; size_t nbr);
     SIGMA_CTOR(rcl_type_variable, String name);
     bool err);
 
 RCL_Type make_RCL_Type_stack(size_t n, RCL_Type[n]);
 
 // When there is an error:
-#define T_ERR             (RCL_Type){.u.err = true}
-#define T_EMPTY           (RCL_Type){.kind = TYPE_EMPTY}
-#define T_ANY(vt)         (SIGMA_FILL_CTOR(RCL_Type, TYPE_ANY, rcl_type_any, vt))
-#define T_LITERAL(tk)     (SIGMA_FILL_CTOR(RCL_Type, TYPE_LITERAL, rcl_type_literal, tk))
-#define T_ARRAY(tk)       (SIGMA_FILL_CTOR(RCL_Type, TYPE_ARRAY, rcl_type_array, &tk))
-#define T_QUOTE(tk)       (SIGMA_FILL_CTOR(RCL_Type, TYPE_QUOTE, rcl_type_quote, &tk))
-#define T_ARROW(tk1, tk2) (SIGMA_FILL_CTOR(RCL_Type, TYPE_ARROW, rcl_type_arrow, &tk1, &tk2))
-#define T_STACK(ts...)    (RCL_Type){ .kind = TYPE_STACK, .u.rcl_type_stack_ = (RCL_Type *[]){ts}, COUNT_VARARGS(ts)}
-#define T_VARIABLE(name)  (SIGMA_FILL_CTOR(RCL_Type, TYPE_VARIABLE, rcl_type_variable, name))
+#define T_ERR                 (RCL_Type){.u.err = true}
+#define T_EMPTY               (RCL_Type){.kind = TYPE_EMPTY}
+#define T_ANY(vt)             (SIGMA_FILL_CTOR(RCL_Type, TYPE_ANY, rcl_type_any, vt))
+#define T_LITERAL(tk)         (SIGMA_FILL_CTOR(RCL_Type, TYPE_LITERAL, rcl_type_literal, tk))
+#define T_ARRAY(tk)           (SIGMA_FILL_CTOR(RCL_Type, TYPE_ARRAY, rcl_type_array, &tk))
+#define T_ARRAY_PTR(tk)       (SIGMA_FILL_CTOR(RCL_Type, TYPE_ARRAY, rcl_type_array, tk))
+#define T_QUOTE(tk)           (SIGMA_FILL_CTOR(RCL_Type, TYPE_QUOTE, rcl_type_quote, &tk))
+#define T_QUOTE_PTR(tk)       (SIGMA_FILL_CTOR(RCL_Type, TYPE_QUOTE, rcl_type_quote, tk))
+#define T_ARROW(tk1, tk2)     (SIGMA_FILL_CTOR(RCL_Type, TYPE_ARROW, rcl_type_arrow, &tk1, &tk2))
+#define T_ARROW_PTR(tk1, tk2) (SIGMA_FILL_CTOR(RCL_Type, TYPE_ARROW, rcl_type_arrow, tk1, tk2))
+#define T_STACK(ts...)        (RCL_Type){ .kind = TYPE_STACK, .u.rcl_type_stack_ = (RCL_Type *[]){ts}, COUNT_VARARGS(ts)}
+#define T_VARIABLE(name)      (SIGMA_FILL_CTOR(RCL_Type, TYPE_VARIABLE, rcl_type_variable, name))
 
 RCL_Type type_of(const Value *, const String, const BResult *);
 bool cmp_types(RCL_Type, RCL_Type);
 size_t arity(RCL_Type);
+size_t trace(RCL_Type);
 
 // This environment groups the type of each function
 Map(Env, hash_t, RCL_Type);

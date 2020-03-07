@@ -40,6 +40,7 @@
 #include <VM\Core\Checker\Typechecker\Types\Primitives.h>
 #include <VM\Core\Checker\Typechecker\Types\Types.h>
 #include <VM\Core\Checker\Typechecker\Types\TypeError.h>
+#include <VM\Core\Checker\Typechecker\Types\Infer.h>
 
 RCL_Type make_RCL_Type_stack(size_t n, RCL_Type types[n])
 {
@@ -53,7 +54,7 @@ RCL_Type make_RCL_Type_stack(size_t n, RCL_Type types[n])
 
 #define _sk_vof_array__byref(v, i) show_kind(v->u.array_.array->array[i].kind)
 
-static RCL_Type type_of_array(const Value *value, String function_name, BResult * bresult)
+static RCL_Type type_of_array(const Value *value, String function_name, BResult *bresult)
 {
     size_t len = value->u.array_.length;
     RCL_Type ref_type = type_of(&value->u.array_.array->array[0], function_name, bresult);
@@ -80,7 +81,7 @@ RCL_Type type_of_rcode(RawCode rcode)
 {
 }
 
-RCL_Type type_of(const Value *value, const String function_name, const BResult * bresult)
+RCL_Type type_of(const Value *value, const String function_name, const BResult *bresult)
 {
     switch (value->kind)
     {
@@ -94,7 +95,8 @@ RCL_Type type_of(const Value *value, const String function_name, const BResult *
         break;
 
     case RCL_Value_Lambda:
-        break;
+        // TODO: Add to environment
+        return T_ARROW(T_ANY('a'), T_EMPTY);
 
     case RCL_Value_EndLamScope:
         return T_EMPTY;
@@ -105,7 +107,7 @@ RCL_Type type_of(const Value *value, const String function_name, const BResult *
     case RCL_Value_Combinator:
         return combinator_types[(short)value->u.comb_];
 
-    case RCL_Value_Parallel: // Utiliser les instructions SIMD
+    case RCL_Value_Parallel:
         break;
 
     case RCL_Value_Field:
@@ -114,34 +116,33 @@ RCL_Type type_of(const Value *value, const String function_name, const BResult *
     case RCL_Value_DataStruct:
         break;
 
-    case RCL_Value_Replicated:
+    case RCL_Value_Replicated: // Todo
         return type_of(value->u.repeat_.op, function_name, bresult);
 
     case RCL_Value_Empty:
         return T_EMPTY;
 
     case RCL_Value_All:
-        return T_ANY("a");
+        return T_ANY('a');
+
+    case RCL_Value_Quotation:
+        break;
 
     default:
         printf("%d\n", value->kind);
         printf("TODO types: %s:%d\n", __FILE__, __LINE__);
-        //exit(EXIT_FAILURE);
     }
-    printf("cc %d\n", value->kind);
 }
 
 bool cmp_types(const RCL_Type t1, const RCL_Type t2)
 {
-    if (t1.u.err || t2.u.err)
+    if (t1.kind != t2.kind)
         return false;
 
     switch (t1.kind)
     {
     case TYPE_ANY:
-        return !strcmp(
-            SIGMA_GETV_BYVAL(t1, rcl_type_any, tany),
-            SIGMA_GETV_BYVAL(t2, rcl_type_any, tany));
+        return (SIGMA_GETV_BYVAL(t1, rcl_type_any, tany) == SIGMA_GETV_BYVAL(t2, rcl_type_any, tany));
 
     case TYPE_LITERAL:
         return (SIGMA_GETV_BYVAL(t1, rcl_type_literal, tlit) == SIGMA_GETV_BYVAL(t2, rcl_type_literal, tlit)) // t1 == t2
@@ -186,10 +187,9 @@ bool cmp_types(const RCL_Type t1, const RCL_Type t2)
 size_t arity(RCL_Type t)
 {
     if (t.kind == TYPE_STACK)
-    {
         return SIGMA_GETV_BYVAL(t, rcl_type_stack, nbr);
-    }
-    else if (t.kind == TYPE_ARROW)
+
+    if (t.kind == TYPE_ARROW)
     {
         size_t a = arity(*t.u.rcl_type_arrow_.t1);
         if (t.u.rcl_type_arrow_.t2->kind == TYPE_ARROW)
@@ -201,4 +201,11 @@ size_t arity(RCL_Type t)
 
 size_t trace(RCL_Type t)
 {
+    if (t.kind == TYPE_STACK)
+        return SIGMA_GETV_BYVAL(t, rcl_type_stack, nbr);
+
+    if (t.kind == TYPE_ARROW)
+        return arity(*t.u.rcl_type_arrow_.t2);
+
+    return 0;
 }

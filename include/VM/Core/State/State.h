@@ -46,6 +46,21 @@
         state_put(&bresult->state, fn(origin, msg)); \
     }
 
+#define NewState_return_cst(s, fn, origin, fmt, ...) \
+    {                                                \
+        String msg;                                  \
+        rcl_asprintf(&msg, fmt, __VA_ARGS__);        \
+        state_put(s, fn(origin, msg));               \
+        return;                                      \
+    }
+
+#define NewState_continue_cst(s, fn, origin, fmt, ...) \
+    {                                                  \
+        String msg;                                    \
+        rcl_asprintf(&msg, fmt, __VA_ARGS__);          \
+        state_put(s, fn(origin, msg));                 \
+    }
+
 enum Origin { Browser, Interpreter, Compiler, Optimizer, Checker };
 
 struct StateKind {
@@ -92,6 +107,25 @@ struct StateKind make_info(enum Origin, String);
 #define state_put_info_co(fmt, ...) NewState_continue(S_INFO, Compiler, fmt, __VA_ARGS__)
 #define state_put_info_op(fmt, ...) NewState_continue(S_INFO, Optimizer, fmt, __VA_ARGS__)
 #define state_put_info_ch(fmt, ...) NewState_continue(S_INFO, Checker, fmt, __VA_ARGS__)
+
+
+#define state_put_err_br_cst(state, fmt, ...) NewState_continue_cst(state, S_ERR, Browser, fmt, __VA_ARGS__)
+#define state_put_err_it_cst(state, fmt, ...) NewState_continue_cst(state, S_ERR, Interpreter, fmt, __VA_ARGS__)
+#define state_put_err_co_cst(state, fmt, ...) NewState_continue_cst(state, S_ERR, Compiler, fmt, __VA_ARGS__)
+#define state_put_err_op_cst(state, fmt, ...) NewState_continue_cst(state, S_ERR, Optimizer, fmt, __VA_ARGS__)
+#define state_put_err_ch_cst(state, fmt, ...) NewState_continue_cst(state, S_ERR, Checker, fmt, __VA_ARGS__)
+
+#define state_put_warn_br_cst(state, fmt, ...) NewState_continue_cst(state, S_WARN, Browser, fmt, __VA_ARGS__)
+#define state_put_warn_it_cst(state, fmt, ...) NewState_continue_cst(state, S_WARN, Interpreter, fmt, __VA_ARGS__)
+#define state_put_warn_co_cst(state, fmt, ...) NewState_continue_cst(state, S_WARN, Compiler, fmt, __VA_ARGS__)
+#define state_put_warn_op_cst(state, fmt, ...) NewState_continue_cst(state, S_WARN, Optimizer, fmt, __VA_ARGS__)
+#define state_put_warn_ch_cst(state, fmt, ...) NewState_continue_cst(state, S_WARN, Checker, fmt, __VA_ARGS__)
+
+#define state_put_info_br_cst(state, fmt, ...) NewState_continue_cst(state, S_INFO, Browser, fmt, __VA_ARGS__)
+#define state_put_info_it_cst(state, fmt, ...) NewState_continue_cst(state, S_INFO, Interpreter, fmt, __VA_ARGS__)
+#define state_put_info_co_cst(state, fmt, ...) NewState_continue_cst(state, S_INFO, Compiler, fmt, __VA_ARGS__)
+#define state_put_info_op_cst(state, fmt, ...) NewState_continue_cst(state, S_INFO, Optimizer, fmt, __VA_ARGS__)
+#define state_put_info_ch_cst(state, fmt, ...) NewState_continue_cst(state, S_INFO, Checker, fmt, __VA_ARGS__)
 
 void state_init(struct State*);
 void state_put(struct State*, struct StateKind);

@@ -31,14 +31,13 @@
 
 typedef struct
 {
-    struct State infos;
     bool able;
 } Checked_out;
 
 #define DOT_CODE_NAME "main"
-#define CHECKED_OUT(i, a)  (Checked_out) { .infos = i, .able = a }
-#define CHECKED_OUT_OK(i)  (CHECKED_OUT(i, true))
-#define CHECKED_OUT_ERR(i) (CHECKED_OUT(i, false)
+#define CHECKED_OUT(a)     (Checked_out) { .able = a }
+#define CHECKED_OUT_OK(i)  (CHECKED_OUT(true))
+#define CHECKED_OUT_ERR(i) (CHECKED_OUT(false))
 
 // Performs an analysis of the program sent.
 Checked_out check_program(BResult *);

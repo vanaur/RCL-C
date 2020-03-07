@@ -138,13 +138,13 @@ void make_noise(
     _display_info("Recursion optimization: .............. %s.", bresult.exec_infos.optimize_rec == true ? "yes" : "no");
     _display_info("Optimization level: .................. Opt-%d.", bresult.exec_infos.optimize_level);
     if (exec.ioc == Interpreted)
-    _display_info("Usage of program parameters: ......... %s.", hasArgv(bresult));
+        _display_info("Usage of program parameters: ......... %s.", hasArgv(bresult));
     _display_info("Execution mode: ...................... %s.", exec.ioc == 0 ? "interpreted" : "compiled");
     _display_info("Evaluation mode: ..................... %s.", exec.sool == 0 ? "strict" : exec.sool == 1 ? "optimistic" : "lazy");
     _display_info("Time taken by all RCL: ............... %s.", show_time(all_time));
     _display_info("Browing, checking, optimizing time: .. %s.", show_time(process_time));
     if (exec.ioc == Interpreted)
-    _display_info("Execution time of the program: ....... %s.", show_time(eval_time));
+        _display_info("Execution time of the program: ....... %s.", show_time(eval_time));
     printf("\n\nSuccessful end of program \\o/\n\n");
 }
 
@@ -209,23 +209,13 @@ int main(int argc, String argv[])
     bresult.argvs = rcl_argv;
     bresult.exec_infos = exec;
 
-    // Check the program
-    if (exec.type_check)
-    {
-        Checked_out checked = check_program(&bresult);
+    Checked_out checked = check_program(&bresult);
 
-        if (checked.infos.used)
-        {
-            prettyPrint_state(checked.infos);
-        }
-        if (!checked.able)
-        {
-            if (exec.ioc == Interpreted)
-                cc_fprintf(CC_FG_RED, stdout, "\n Can't interpret the program due to error(s).\n\n");
-            else
-                cc_fprintf(CC_FG_RED, stdout, "\n Can't compile the program due to error(s).\n\n");
-            return EXIT_FAILURE;
-        }
+    if (!checked.able)
+    {
+        prettyPrint_state(bresult.state);
+        cc_fprintf(CC_FG_WHITE, stdout, "Can't evaluate the program due to error(s) :(\n\n");
+        return EXIT_FAILURE;
     }
 
     gettime(&end3);
@@ -261,9 +251,6 @@ int main(int argc, String argv[])
     eval_time = timesdiff(start2, end2);
     process_time = timesdiff(start3, end3);
 
-    // Display compilation or interpretation errors
-    if (bresult.state.hasError)
-        cc_fprintf(CC_FG_MAGENTA, stdout, "\n ---  Runtime interpreter errors  ---\n\n");
     // Display errors, warnigns and infos
     prettyPrint_state(bresult.state);
 

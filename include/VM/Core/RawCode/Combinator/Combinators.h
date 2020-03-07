@@ -33,6 +33,11 @@
  * As well as the combinator `pop` and `id`.
  */
 
+
+// Note: the order of enumeration is important, as it allows you to directly target the element
+// in an array which references the combinators in the stack, as is the case below for `Combinators[][]`.
+
+
 typedef enum
     { VQ, POP, DUP, SWAP
     , FLIP, ID, DIP, GIS
@@ -45,7 +50,7 @@ typedef enum
     , IFTE, CASE, SELECT
     , EQ, LW, LEQ, GR, GEQ, NEQ, NOT
     , NEG
-    , FTOI, ITOF, ITOC, CTOI, ITOB
+    , FTOI, ITOF, ITOC, CTOI, ITOB, STOI, ITOS
     , QLEN, ALEN
     , WTDO, HALT
     , GENREC, LINREC, BINREC, TAILREC, PRIMREC }
@@ -63,7 +68,7 @@ static const char Combinators[][8] =
     , "ifte", "case", "select"
     , "eq", "lw", "leq", "gr", "geq", "neq", "not"
     , "neg"
-    , "ftoi", "itof", "itoc", "ctoi", "itob"
+    , "ftoi", "itof", "itoc", "ctoi", "itob", "stoi", "itos"
     , "qlen", "alen"
     , "wtdo", "halt"
     , "genrec", "linrec", "binrec", "tailrec", "primrec" };

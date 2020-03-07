@@ -26,22 +26,44 @@
 #include <VM\Core\Checker\Typechecker\Types\Types.h>
 #include <VM\Core\Checker\Typechecker\Types\Combinator.h>
 
+/*
+    { VQ, POP, DUP, SWAP
+    , FLIP, ID, DIP, GIS
+    , QUOTE, UNQUOTE
+    , QAP, CAT, REP
+    , KAP, PAK, CONS, UNCONS
+    , SAP, TAKE, TAKEX
+    , COMB_MAP, REC, STEQ
+    , STEP, NPREC, PUTC, PUTS, NVSHOW
+    , IFTE, CASE, SELECT
+    , EQ, LW, LEQ, GR, GEQ, NEQ, NOT
+    , NEG
+    , FTOI, ITOF, ITOC, CTOI, ITOB
+    , QLEN, ALEN
+    , WTDO, HALT
+    , GENREC, LINREC, BINREC, TAILREC, PRIMREC }
+*/
+
+// (Δ -> Δ a)  ==  (Δ a)
+
 const RCL_Type combinator_types[] =
     {
+        // VQ : Δ []
+        T_QUOTE(T_EMPTY),
         // POP : Δ α -> Δ
-        T_ARROW(T_STACK(&T_ANY("a")), T_EMPTY),
+        T_ARROW(T_STACK(&T_ANY('a')), T_EMPTY),
         // DUP : Δ α -> Δ α α
-        T_ARROW(T_STACK(&T_ANY("a")), T_STACK(&T_ANY("a"), &T_ANY("a"))),
+        T_ARROW(T_STACK(&T_ANY('a')), T_STACK(&T_ANY('a'), &T_ANY('a'))),
         // SWAP : Δ α β -> Δ β α
-        T_ARROW(T_STACK(&T_ANY("a"), &T_ANY("b")), T_STACK(&T_ANY("b"), &T_ANY("a"))),
+        T_ARROW(T_STACK(&T_ANY('a'), &T_ANY('b')), T_STACK(&T_ANY('b'), &T_ANY('a'))),
         // FLIP : Δ α β γ -> Δ γ β α
-        T_ARROW(T_STACK(&T_ANY("a"), &T_ANY("b"), &T_ANY("c")), T_STACK(&T_ANY("c"), &T_ANY("b"), &T_ANY("a"))),
+        T_ARROW(T_STACK(&T_ANY('a'), &T_ANY('b'), &T_ANY('c')), T_STACK(&T_ANY('c'), &T_ANY('b'), &T_ANY('a'))),
         // ID : Δ α -> Δ α
-        T_ARROW(T_STACK(&T_ANY("a")), T_STACK(&T_ANY("a"))),
+        T_ARROW(T_STACK(&T_ANY('a')), T_STACK(&T_ANY('a'))),
         // DIP
         // QUOTE : Δ α -> [α]
-        T_ARROW(T_STACK(&T_ANY("a")), T_STACK(&T_QUOTE(T_ANY("a")))),
+        T_ARROW(T_STACK(&T_ANY('a')), T_STACK(&T_QUOTE(T_ANY('a')))),
         // UQUOTE : Δ [α] -> α
-        T_ARROW(T_STACK(&T_QUOTE(T_ANY("a"))), T_STACK(&T_ANY("a"))),
+        T_ARROW(T_STACK(&T_QUOTE(T_ANY('a'))), T_STACK(&T_ANY('a'))),
         // UNCONS : Δ [α β] -> Δ [α] β
 };

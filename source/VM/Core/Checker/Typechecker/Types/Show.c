@@ -77,6 +77,9 @@ static String show_type_quote(RCL_Type type)
 
 static String show_type_stack(RCL_Type type)
 {
+    if (type.u.rcl_type_stack_.nbr == 0)
+        return "()"; // Empty stack
+
     String result = show_type(*type.u.rcl_type_stack_.tstack[0]);
     for (Iterator i = 1; i < type.u.rcl_type_stack_.nbr; i++)
     {
@@ -89,9 +92,9 @@ static String show_type_stack(RCL_Type type)
     return result;
 }
 
-static String show_arrow_type(RCL_Type t)
+static String show_arrow_type(const RCL_Type t)
 {
-    String result;
+    String result = "";
     if (t.u.rcl_type_arrow_.t2->kind == TYPE_ARROW)
         rcl_asprintf(
             &result, "%s -> (%s)",
@@ -105,7 +108,7 @@ static String show_arrow_type(RCL_Type t)
     return result;
 }
 
-String show_type(RCL_Type type)
+String show_type(const RCL_Type type)
 {
     switch (type.kind)
     {
@@ -125,7 +128,7 @@ String show_type(RCL_Type type)
         return show_arrow_type(type);
 
     case TYPE_ANY:
-        return SIGMA_GETV_BYVAL(type, rcl_type_any, tany);
+        return rcl_sprintf_s("%c", SIGMA_GETV_BYVAL(type, rcl_type_any, tany));
 
     case TYPE_VARIABLE:
         return SIGMA_GETV_BYVAL(type, rcl_type_variable, name);

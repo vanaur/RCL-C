@@ -25,6 +25,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <gmp.h>
+#include <assert.h>
 
 #include <VM\Core\RawCode\Combinator\Combinators.h>
 #include <VM\Core\Browse\BResult.h>
@@ -488,6 +489,24 @@ static void th_simple_eval_rcode(struct th_simple_eval_rcode_args_t args)
     simple_eval_rcode(args.stack, args.rcode, args.bresult);
 }
 
+static void do_stoi(Stack *stack)
+{
+    const Value v = drop(stack);
+    assert(v.kind == RCL_Value_String);
+    const String s = v.u.string_;
+    mpz_t res;
+    mpz_init_set_str(res, s, 10);
+    push(stack, RCL_Integer(res));
+}
+
+static void do_itos(Stack *stack)
+{
+    const Value v = drop(stack);
+    assert(v.kind == RCL_Value_Integer);
+    String res = mpz_get_str(res, 10, v.u.int_);
+    push(stack, RCL_String(res));
+}
+
 inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
 {
     switch (comb)
@@ -610,6 +629,12 @@ inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
     case BINREC:
     case TAILREC:
     case PRIMREC:
+
+    case STOI:
+        return do_stoi(stack);
+    
+    case ITOS:
+        return do_itos(stack);
 
     case FTOI:
     case ITOF:

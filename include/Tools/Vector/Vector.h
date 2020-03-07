@@ -74,6 +74,24 @@
     {                                                                                                   \
         PopVector(vec_ptr);                                                                             \
     }                                                                                                   \
+    inline T ctop_##name(struct name vec)                                                               \
+    {                                                                                                   \
+        if (!vec.size)                                                                                  \
+        {                                                                                               \
+            _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Uninitialized vector `%s`", #name); \
+            exit(0);                                                                                    \
+        }                                                                                               \
+        return vec.array[vec.used - 1];                                                                 \
+    }                                                                                                   \
+    inline T *top_ptr_##name(struct name *vec_ptr)                                                      \
+    {                                                                                                   \
+        if (!vec_ptr->size)                                                                             \
+        {                                                                                               \
+            _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Uninitialized vector `%s`", #name); \
+            exit(0);                                                                                    \
+        }                                                                                               \
+        return &vec_ptr->array[vec_ptr->used - 1];                                                      \
+    }                                                                                                   \
     inline void extend_size_##name(struct name *vec_ptr, const size_t add_size)                         \
     {                                                                                                   \
         vec_ptr->size += add_size;                                                                      \

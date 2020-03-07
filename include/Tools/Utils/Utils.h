@@ -36,7 +36,9 @@
 
 typedef char *String;
 typedef void *GenericT;
-typedef long long unsigned int Iterator;
+typedef long long int Iterator;
+
+#define S_ITR "%I64d"
 
 typedef struct
 {
