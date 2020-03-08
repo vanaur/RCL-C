@@ -43,6 +43,7 @@
 #include <VM\Core\Execution\Compiler\Compiler.h>
 #include <VM\Core\Execution\Compiler\Assembler\Assemble.h>
 #include <VM\Core\Execution\Compiler\Assembler\Show.h>
+#include <VM\REPL\REPL.h>
 #include <Tools\Map\Map.h>
 #include <Tools\Utils\Utils.h>
 #include <Tools\console-color\console-color.h>
@@ -262,6 +263,9 @@ int main(int argc, String argv[])
         printf("\n[i] All time taken: %s.\n", show_time(all_time));
         printf("[i] Compilation time taken: %s.\n", show_time(process_time));
     }
+
+    if (bresult.exec_infos.repl)
+        run_repl(&bresult);
 
     // Free the allocated memory areas
     clean_heap(&bresult, exec);

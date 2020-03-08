@@ -98,3 +98,4 @@ int first_digit(int);
 int rcl_vasprintf(String *, const String, va_list);
 int rcl_asprintf(String *, const String, ...);
 String rcl_sprintf_s(const String, ...);
+String trim(const String);

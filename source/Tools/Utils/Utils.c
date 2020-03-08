@@ -273,3 +273,24 @@ String rcl_sprintf_s(const String format, ...)
     va_end(ap);
     return result;
 }
+
+String trim(const String str)
+{
+    String res = strdup(str);
+
+    char *end;
+
+    while (isspace((unsigned char)*res))
+        res++;
+
+    if (*res == 0)
+        return res;
+
+    end = res + strlen(res) - 1;
+    while (end > res && isspace((unsigned char)*end))
+        end--;
+
+    end[1] = '\0';
+
+    return res;
+}

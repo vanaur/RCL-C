@@ -87,4 +87,6 @@ typedef struct
     bool ext_bignum;
     bool low; // Lambda Over Write
     bool shw_inside_struct;
+    
+    bool repl;
 } __attribute__((packed)) Exec;

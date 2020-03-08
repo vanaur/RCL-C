@@ -79,7 +79,7 @@ void display_help()
     printf("                                                                                + ");
     cc_fprintf(CC_FG_DARK_BLUE, stdout, "loop\n\n");
 
-    cc_fprintf(CC_FG_CYAN, stdout, "    RCL -repl\n");
+    cc_fprintf(CC_FG_CYAN, stdout, "        --repl\n");
     printf("        To simply enter the interactive environment of the RCL IR, and play with it, to better understand it.\n\n");
 
     printf("For the complete list of all options, type ");
@@ -157,6 +157,7 @@ Exec get_exec(String *argv, int *argc)
         , .ext_bignum = false           // --ext-bignum
         , .ext_ptr = false              // --ext-ptr
         , .low = false                  // --low
+        , .repl = false                 // --repl
         , .shw_inside_struct = false};  // --shw=insd-struct
 
     while (n--)
@@ -315,6 +316,12 @@ Exec get_exec(String *argv, int *argc)
         else if (!strcmp(argv[n], "--KASM"))
         {
             result.kasm = true;
+            (*argc)--;
+            remove_element(argv, total, n);
+        }
+        else if (!strcmp(argv[n], "--REPL"))
+        {
+            result.repl = true;
             (*argc)--;
             remove_element(argv, total, n);
         }
