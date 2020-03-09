@@ -37,7 +37,19 @@
 #include <Tools\Time_Measure\Time_Measure.h>
 
 static const String repl_help =
-"\
+    "RCL REPL HELP:\n\
+    : stack ................... display the final stack of the evaluated program ;\n\
+    : quit .................... quit the REPL ;\n\
+    : free .................... free all the lambdas and functions ;\n\
+    : help .................... display this help menu ;\n\
+    : typeof E ................ display the type of the expression E ;\n\
+    : oof F ................... display the time complexity (big O) of the function F ;\n\
+    : exec E .................. evaluate the expression E ;\n\
+    : exect E ................. evaluate the expression E and display the time taken ;\n\
+    : exec .define <f> = <E> .. define a new function F equal to the expression E\n\
+                                (You can define many at once by separing them with ';') ;\n\
+    : step E .................. evaluate the expression E and display every steps of evaluation ;\n\
+    : set O ................... appends a new RCL compilation option O.\n\n\
 ";
 
 static RawCode parse_expr(const String str)
@@ -50,6 +62,18 @@ static RawCode parse_expr(const String str)
     fclose(tmp);
     remove("repl_tmp");
     return b.psdata.rcode;
+}
+
+static BResult parse_expr_bresult(const String str)
+{
+    FILE *tmp = fopen("repl_tmp", "w");
+    fprintf(tmp, "%s", str);
+    fclose(tmp);
+    tmp = fopen("repl_tmp", "r");
+    BResult b = browseAbsyn(pProgram(tmp), "REPL");
+    fclose(tmp);
+    remove("repl_tmp");
+    return b;
 }
 
 static void handle_cmd(const REPL_AST cmd, BResult *bresult_ptr)
@@ -71,8 +95,10 @@ static void handle_cmd(const REPL_AST cmd, BResult *bresult_ptr)
 
     case REPL_EXEC:
     {
-        RawCode exp = parse_expr(cmd.u.repl_exec_.expr);
-        RawCode res = seval(exp, bresult_ptr);
+        BResult tmp_bres = parse_expr_bresult(cmd.u.repl_exec_.expr);
+        for (Iterator i = 0; i < tmp_bres.wordico.functions.used; i++)
+            push_VEC_Functions(&bresult_ptr->wordico.functions, tmp_bres.wordico.functions.array[i]);
+        RawCode res = seval(tmp_bres.psdata.rcode, bresult_ptr);
         if (res.used)
             cc_fprintf(CC_FG_WHITE, stdout, "%s\n", show_rcode(res));
         break;
@@ -124,6 +150,10 @@ static void handle_cmd(const REPL_AST cmd, BResult *bresult_ptr)
     case REPL_QUIT:
         printf("Bye bye.\n");
         exit(EXIT_SUCCESS);
+        break;
+
+    case REPL_HELP:
+        printf("%s\n", repl_help);
         break;
 
     case CMDERR:
