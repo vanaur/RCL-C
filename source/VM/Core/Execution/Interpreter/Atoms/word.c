@@ -25,16 +25,12 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
-
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Wordefinition\RCL_Lambda.h>
 #include <VM\Core\Wordefinition\Wordico.h>
-#include <VM\Core\RCLIB\builtin.h>
 #include <VM\Core\RawCode\RawCode.h>
-
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 #include <VM\Core\Execution\Interpreter\Stack\Combinators\Basics.h>
-#include <VM\Core\Execution\Interpreter\Builtin\Perform.h>
 #include <VM\Core\Execution\Interpreter\Atoms\operation.h>
 #include <VM\Core\Execution\Interpreter\Atoms\word.h>
 #include <VM\Core\Execution\Interpreter\Atoms\new__.h>
@@ -49,12 +45,6 @@ inline void evalword(Stack * stack, BResult * bresult, RCL_Value_Word_t * word)
     if (cpytmp_function != NULL)
     {
         return eval_function(stack, cpytmp_function, bresult);
-    }
-
-    if (is_builtin(word->hash_code))
-    {
-        const struct Builtin builtin = make_builtin(word->hash_code);
-        return perform_builtin(&builtin, stack, bresult, word->word_str);
     }
 
     struct RCL_Extern *cpytmp_extern = getSpecific_extern(&bresult->wordico, word->hash_code);
