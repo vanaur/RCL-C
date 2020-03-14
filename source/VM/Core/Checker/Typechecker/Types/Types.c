@@ -178,6 +178,9 @@ bool cmp_types(const RCL_Type t1, const RCL_Type t2)
 
     case TYPE_VARIABLE: // Replace String by hash
         return (!strcmp(SIGMA_GETV_BYVAL(t1, rcl_type_variable, name), SIGMA_GETV_BYVAL(t2, rcl_type_variable, name)));
+    
+    case TYPE_ERROR:
+        return false;
     }
 
     // May no reach

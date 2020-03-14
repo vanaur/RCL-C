@@ -87,6 +87,21 @@ static String show_tstack(const type_stack_t ts)
     return res;
 }
 
+static String print_context(const Context_map_t context)
+{
+    for (Iterator i = 0; i < context.used; i++)
+        printf("%c <=> %s\n", context.array[i].key, show_type(context.array[i].val));
+    printf("\n");
+}
+
+static void substcontext(type_stack_t *ts_ptr, Context_map_t *ctx_ptr)
+{
+    for (Iterator i = 0; i < ts_ptr->used; i++)
+    {
+        // TODO
+    }
+}
+
 // Returns the next variable type depending on the context.
 // For example the next variable type with a context containing [a, b] will be `c`.
 TVar_t set_tvar_str(Context_map_t *context_ptr)
@@ -95,8 +110,16 @@ TVar_t set_tvar_str(Context_map_t *context_ptr)
         return 'a';
 
     TVar_t c = get_last_key_Context(context_ptr) + sizeof(char);
+
+    if (c < 'a')
+    {
+        c += 'a';
+    }
+
     if (c > 'z')
+    {
         _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Too large context of variable types.\n", NULL);
+    }
 
     return c;
 }
@@ -116,7 +139,7 @@ void remove_tvar_str(Context_map_t *context_ptr, TVar_t tvar)
 // Individually places all types of a concatenation type in a vector.
 // For example if concatenation type is `t1 . t2 . t3`, the returned vector
 //  will be [t1, t2, t3].
-type_stack_t individualize(Context_map_t *context_ptr, RCL_Type t)
+type_stack_t individualize(const RCL_Type t)
 {
     type_stack_t result;
     if (t.kind != TYPE_STACK)
@@ -132,15 +155,6 @@ type_stack_t individualize(Context_map_t *context_ptr, RCL_Type t)
             push_type_stack_t(&result, *t.u.rcl_type_stack_.tstack[i]);
     }
     return result;
-}
-
-// Checks if stack's types matches the constant vector of type sent.
-static bool stackt_match_vecT(type_stack_t stackt, RCL_Type *vecT)
-{
-    for (Iterator i = 0; i < stackt.used; i++)
-        if (!cmp_types(stackt.array[i], vecT[i]))
-            return false;
-    return true;
 }
 
 static RCL_Type unify_tlit(const RCL_Type t1, const RCL_Type t2, struct State *state)
@@ -161,15 +175,29 @@ static RCL_Type unify_tlit(const RCL_Type t1, const RCL_Type t2, struct State *s
         if (t2.u.rcl_type_literal_.tlit == RCL_Value_Float)
             return T_LITERAL(RCL_Value_Float);
     }
-    state_put_err_ch_cst(state, "Can't unify `%s` with `%s`.\n", show_type(t2), show_type(t1));
+    //state_put_err_ch_cst(state, "Can't unify(2) `%s` with `%s`.\n", show_type(t2), show_type(t1));
+    return t1;
+}
+
+static RCL_Type unify_cmp_types(const RCL_Type t1, const RCL_Type t2)
+{
+    if (cmp_types(t1, t2))
+    {
+        if (t1.kind == TYPE_LITERAL)
+            if (t1.u.rcl_type_literal_.tlit == RCL_Value_Number)
+                return t2;
+        return t1;
+    }
     return T_ERR;
 }
 
 // Unifies type T1 with type T2
 static RCL_Type unify(const RCL_Type t1, const RCL_Type t2, struct State *state)
 {
-    if (cmp_types(t1, t2))
-        return t1;
+    const RCL_Type t = unify_cmp_types(t1, t2);
+
+    if (t.kind != TYPE_ERROR)
+        return t;
 
     if (t2.kind == TYPE_ANY)
         return t1;
@@ -177,8 +205,8 @@ static RCL_Type unify(const RCL_Type t1, const RCL_Type t2, struct State *state)
     if (t2.kind == TYPE_LITERAL)
         return unify_tlit(t1, t2, state);
 
-    state_put_err_ch_cst(state, "Can't unify `%s` with `%s`.\n", show_type(t2), show_type(t1));
-    return T_ERR;
+    state_put_err_ch_cst(state, "Can't unify(1) `%s` with `%s`.\n", show_type(t2), show_type(t1));
+    return t;
 }
 
 static void fill_type_stack_tany(args_t *args, const RCL_Type current_type, type_stack_t *dest)
@@ -271,12 +299,12 @@ static void update_type_stack(args_t *args, const type_stack_t *src, const type_
     const bool is_partial = args->current_arity > args->ts_ptr->used;
 
     if (is_partial)
-        update_type_stack__partial(args, src, targs);
-    else
-        update_type_stack__total(args, src);
+        return update_type_stack__partial(args, src, targs);
+
+    return update_type_stack__total(args, src);
 }
 
-static void subst(Context_map_t *context_ptr, const type_stack_t *stackt_ptr, const type_stack_t *targs, const size_t arity)
+static void subststack(Context_map_t *context_ptr, const type_stack_t *stackt_ptr, const type_stack_t *targs, const size_t arity)
 {
     const int sub_ts = stackt_ptr->used - arity;
 
@@ -331,6 +359,31 @@ static void inferiT(args_t *args)
     return push_type_stack_t(args->ts_ptr, args->current_type);
 }
 
+static void compose_arrow(RCL_Type *dest, const RCL_Type *t1_ptr, const RCL_Type *t2_ptr)
+{
+    // (+ flip) : (Num . Num -> (a . b -> Num . b . a))
+    // =>       : a . b . Num . Num -> Num . b . a
+
+    // ==> a . b . ... . z -> (a' . b' . ... . z' -> T)
+    // === a' . b' . ... . z' . a . b . ... . z -> z' T
+
+    const RCL_Type *tmp_arrt1_t1 = t2_ptr->u.rcl_type_stack_.tstack[0]->u.rcl_type_arrow_.t1;
+    const RCL_Type *tmp_arrt1_t2 = t2_ptr->u.rcl_type_stack_.tstack[0]->u.rcl_type_arrow_.t2;
+
+    type_stack_t tmp_ts_t1 = individualize(*tmp_arrt1_t1);
+    type_stack_t tmp_ts_t2 = individualize(*tmp_arrt1_t2);
+
+    concat_type_stack_t(&tmp_ts_t1, individualize(*t1_ptr));
+
+    RCL_Type *tt1 = (RCL_Type *)malloc(sizeof *tt1);
+    RCL_Type *tt2 = (RCL_Type *)malloc(sizeof *tt2);
+
+    *tt1 = make_RCL_Type_stack(tmp_ts_t1.used, tmp_ts_t1.array);
+    *tt2 = make_RCL_Type_stack(tmp_ts_t2.used, tmp_ts_t2.array);
+
+    *dest = T_ARROW_PTR(tt1, tt2);
+}
+
 // 4 'x' flip flip
 // flip_1 => a -> Char Int a
 // flip_2 => Char Int a -> a Int Char
@@ -339,7 +392,7 @@ static void infer_type__arrow_on_tstack(args_t *args)
     const RCL_Type ts_top = *top_ptr_type_stack_t(args->ts_ptr);
     RCL_Type *t1 = (RCL_Type *)malloc(sizeof *t1);
     *t1 = *ts_top.u.rcl_type_arrow_.t1;
-    type_stack_t t2_indvs = individualize(args->context_ptr, *ts_top.u.rcl_type_arrow_.t2);
+    type_stack_t t2_indvs = individualize(*ts_top.u.rcl_type_arrow_.t2);
 
     args_t tmp_args = new_uncurrent_infert_args(args->env_ptr, args->context_ptr, &t2_indvs, args->state, args->rcode_len);
     fill_current_infert_args(args->current_val, &tmp_args, args->current_type, args->current_arity, args->current_trace, args->current_itr);
@@ -348,18 +401,31 @@ static void infer_type__arrow_on_tstack(args_t *args)
 
     RCL_Type *t2 = (RCL_Type *)malloc(sizeof *t2);
     *t2 = make_RCL_Type_stack(t2_indvs.used, t2_indvs.array);
-    const RCL_Type final_type = T_ARROW_PTR(t1, t2);
+
+    RCL_Type final_type;
+
+    if (t2->u.rcl_type_stack_.tstack[0]->kind == TYPE_ARROW)
+    {
+        compose_arrow(&final_type, t1, t2);
+    }
+    else
+    {
+        final_type = T_ARROW_PTR(t1, t2);
+    }
+
     *args->ts_ptr = new_type_stack_t(1);
     push_type_stack_t(args->ts_ptr, final_type);
 }
 
 static void infer_type__arrow(args_t *args)
 {
-    type_stack_t targs = individualize(args->context_ptr, *SIGMA_GETV_BYVAL(args->current_type, rcl_type_arrow, t1));
-    type_stack_t new_types = individualize(args->context_ptr, *SIGMA_GETV_BYVAL(args->current_type, rcl_type_arrow, t2));
+    type_stack_t targs = individualize(*SIGMA_GETV_BYVAL(args->current_type, rcl_type_arrow, t1));
+    type_stack_t new_types = individualize(*SIGMA_GETV_BYVAL(args->current_type, rcl_type_arrow, t2));
 
-    subst(args->context_ptr, args->ts_ptr, &targs, args->current_arity);
+    subststack(args->context_ptr, args->ts_ptr, &targs, args->current_arity);
     update_type_stack(args, &new_types, &targs);
+
+    // print_context(*args->context_ptr);
 
     // To reconsider:
     free_Context(args->context_ptr);
@@ -388,6 +454,7 @@ RCL_Type infer_type(Env_map_t *env, RawCode *rcode, struct State *state)
         fill_current_infert_args(current_val, &infert_args, current_type, current_arity, current_trace, i);
 
         inferiT(&infert_args);
+        // Type context freeing !
     }
 
     if (vacc_type_stack.used == 0)

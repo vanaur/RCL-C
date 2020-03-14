@@ -44,7 +44,8 @@ enum Type_kind
     TYPE_ANY,       // a, b, c, ... => Variable type / undefined
     TYPE_EMPTY,     // Empty stack (ex: [])
     TYPE_STACK,     // Type of a stack
-    TYPE_VARIABLE   // Type of a variable (function, structure, lambda, ...)
+    TYPE_VARIABLE,  // Type of a variable (function, structure, lambda, ...)
+    TYPE_ERROR
 };
 
 typedef enum Value_Kind Value_type;
@@ -63,12 +64,12 @@ typedef SIGMA_TYPE(
     SIGMA_CTOR(rcl_type_arrow,    struct RCL_Type *t1; struct RCL_Type *t2);
     SIGMA_CTOR(rcl_type_stack,    struct RCL_Type **tstack; size_t nbr);
     SIGMA_CTOR(rcl_type_variable, String name);
-    bool err);
+    SIGMA_CTOR(rcl_type_error));
 
 RCL_Type make_RCL_Type_stack(size_t n, RCL_Type[n]);
 
 // When there is an error:
-#define T_ERR                 (RCL_Type){.u.err = true}
+#define T_ERR                 (RCL_Type){.kind = TYPE_ERROR}
 #define T_EMPTY               (RCL_Type){.kind = TYPE_EMPTY}
 #define T_ANY(vt)             (SIGMA_FILL_CTOR(RCL_Type, TYPE_ANY, rcl_type_any, vt))
 #define T_LITERAL(tk)         (SIGMA_FILL_CTOR(RCL_Type, TYPE_LITERAL, rcl_type_literal, tk))

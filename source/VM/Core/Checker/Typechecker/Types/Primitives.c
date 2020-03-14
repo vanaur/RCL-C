@@ -39,7 +39,7 @@ const RCL_Type primitive_types[] =
         // mul
         T_ARROW(T_STACK(&T_LITERAL(RCL_Value_Number), &T_LITERAL(RCL_Value_Number)), T_STACK(&T_LITERAL(RCL_Value_Number))),
         // div
-        T_ARROW(T_STACK(&T_LITERAL(RCL_Value_Number), &T_LITERAL(RCL_Value_Number)), T_STACK(&T_LITERAL(RCL_Value_Number))),
+        T_ARROW(T_STACK(&T_LITERAL(RCL_Value_Number), &T_LITERAL(RCL_Value_Number)), T_STACK(&T_LITERAL(RCL_Value_Float))),
         // mod
         T_ARROW(T_STACK(&T_LITERAL(RCL_Value_Number), &T_LITERAL(RCL_Value_Number)), T_STACK(&T_LITERAL(RCL_Value_Number))),
         // inc

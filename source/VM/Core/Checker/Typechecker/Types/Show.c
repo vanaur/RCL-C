@@ -102,7 +102,7 @@ static String show_arrow_type(const RCL_Type t)
             show_type(*SIGMA_GETV_BYVAL(t, rcl_type_arrow, t2)));
     else
         rcl_asprintf(
-            &result, "%s -> %s",
+            &result, "(%s -> %s)",
             show_type(*SIGMA_GETV_BYVAL(t, rcl_type_arrow, t1)),
             show_type(*SIGMA_GETV_BYVAL(t, rcl_type_arrow, t2)));
     return result;
@@ -135,6 +135,9 @@ String show_type(const RCL_Type type)
 
     case TYPE_EMPTY:
         return "()";
+
+    case TYPE_ERROR:
+        return "#error#";
 
     default:
         _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unknown type kind: %d.", type.kind);
