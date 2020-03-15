@@ -23,7 +23,8 @@
  */
 
 #pragma once
-#include <VM\Core\Checker\Typechecker\Types\Types.h>
+#include <Tools\Utils\Utils.h>
+#include <VM\Core\Types\Types.h>
 
-extern const RCL_Type primitive_types[];
+String show_type(RCL_Type type);
 

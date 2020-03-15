@@ -23,8 +23,8 @@
  */
 
 #include <Tools\Utils\Utils.h>
-#include <VM\Core\Checker\Typechecker\Types\Types.h>
-#include <VM\Core\Checker\Typechecker\Types\Primitives.h>
+#include <VM\Core\Types\Types.h>
+#include <VM\Core\Types\Primitives.h>
 
 // In order: is_Add, is_Sub, is_Pow, is_Mul, is_Div, is_Mod, is_Inc, is_Dec, is_BAnd, is_BOr, is_BXor, is_BLeft, is_BRight
 

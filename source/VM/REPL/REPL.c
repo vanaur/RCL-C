@@ -26,8 +26,8 @@
 #include <VM\REPL\CmdParser.h>
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Show\Show.h>
-#include <VM\Core\Checker\Typechecker\Types\Infer.h>
-#include <VM\Core\Checker\Typechecker\Types\Show.h>
+#include <VM\Core\Types\Infer.h>
+#include <VM\Core\Types\Show.h>
 #include <VM\Core\Execution\Interpreter\Interpreter.h>
 #include <VM\Core\Syntax\Parser.h>
 #include <VM\Core\Browse\Browse.h>

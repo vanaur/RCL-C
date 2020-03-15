@@ -23,8 +23,7 @@
  */
 
 #pragma once
-#include <Tools\Utils\Utils.h>
-#include <VM\Core\Checker\Typechecker\Types\Types.h>
+#include <VM\Core\Types\Types.h>
 
-String show_type(RCL_Type type);
-
+// An array containing the type of all stack combinators
+extern const RCL_Type combinator_types[];

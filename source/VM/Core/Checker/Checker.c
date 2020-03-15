@@ -27,12 +27,12 @@
 #include <string.h>
 
 #include <VM\Core\Checker\Checker.h>
-#include <VM\Core\Checker\Typechecker\Types\Show.h>
+#include <VM\Core\Types\Show.h>
 #include <VM\Core\Checker\Typechecker\Typechecker.h>
-#include <VM\Core\Checker\Typechecker\Types\Types.h>
-#include <VM\Core\Checker\Typechecker\Types\Combinator.h>
-#include <VM\Core\Checker\Typechecker\Types\Primitives.h>
-#include <VM\Core\Checker\Typechecker\Types\Infer.h>
+#include <VM\Core\Types\Types.h>
+#include <VM\Core\Types\Combinator.h>
+#include <VM\Core\Types\Primitives.h>
+#include <VM\Core\Types\Infer.h>
 
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\State\State.h>

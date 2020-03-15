@@ -26,10 +26,10 @@
 #include <stdlib.h>
 #include <Tools\Utils\Utils.h>
 #include <Tools\Internal\Internal.h>
-#include <VM\Core\Checker\Typechecker\Types\Combinator.h>
-#include <VM\Core\Checker\Typechecker\Types\Primitives.h>
-#include <VM\Core\Checker\Typechecker\Types\Types.h>
-#include <VM\Core\Checker\Typechecker\Types\Show.h>
+#include <VM\Core\Types\Combinator.h>
+#include <VM\Core\Types\Primitives.h>
+#include <VM\Core\Types\Types.h>
+#include <VM\Core\Types\Show.h>
 
 static String show_type_value(RCL_Type type)
 {

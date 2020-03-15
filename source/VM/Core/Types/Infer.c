@@ -33,10 +33,10 @@
 #include <Tools\Vector\Vector.h>
 #include <VM\Core\State\State.h>
 #include <VM\Core\Show\Show.h>
-#include <VM\Core\Checker\Typechecker\Types\Show.h>
-#include <VM\Core\Checker\Typechecker\Types\Infer.h>
-#include <VM\Core\Checker\Typechecker\Types\Types.h>
-#include <VM\Core\Checker\Typechecker\Types\TypeError.h>
+#include <VM\Core\Types\Show.h>
+#include <VM\Core\Types\Infer.h>
+#include <VM\Core\Types\Types.h>
+#include <VM\Core\Types\TypeError.h>
 
 // This is the type of the stack, evolving as the expressions are analyzed.
 typedef Vector(type_stack_t, RCL_Type);

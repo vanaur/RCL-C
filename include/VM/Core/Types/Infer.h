@@ -23,7 +23,7 @@
  */
 
 #pragma once
-#include <VM\Core\Checker\Typechecker\Types\Types.h>
+#include <VM\Core\Types\Types.h>
 
 // A table of functions that are non-typed again
 typedef Vector(fununtyped_table_t, hash_t);

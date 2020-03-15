@@ -23,8 +23,8 @@
  */
 
 #include <Tools\Utils\Utils.h>
-#include <VM\Core\Checker\Typechecker\Types\Types.h>
-#include <VM\Core\Checker\Typechecker\Types\Combinator.h>
+#include <VM\Core\Types\Types.h>
+#include <VM\Core\Types\Combinator.h>
 
 /*
     { VQ, POP, DUP, SWAP

@@ -39,7 +39,7 @@
 #include <VM\Core\RawCode\cmpvalue.h>
 #include <VM\Core\Browse\BResult.h>
 
-#include <VM\Core\Checker\Typechecker\Types\Combinator.h>
-#include <VM\Core\Checker\Typechecker\Types\Primitives.h>
-#include <VM\Core\Checker\Typechecker\Types\Types.h>
+#include <VM\Core\Types\Combinator.h>
+#include <VM\Core\Types\Primitives.h>
+#include <VM\Core\Types\Types.h>
 

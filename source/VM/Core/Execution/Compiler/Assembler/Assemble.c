@@ -39,9 +39,9 @@
 #include <VM\Core\Wordefinition\RCL_Lambda.h>
 #include <VM\Core\Wordefinition\RCL_Structure.h>
 
-#include <VM\Core\Checker\Typechecker\Types\Infer.h>
-#include <VM\Core\Checker\Typechecker\Types\Types.h>
-#include <VM\Core\Checker\Typechecker\Types\Show.h>
+#include <VM\Core\Types\Infer.h>
+#include <VM\Core\Types\Types.h>
+#include <VM\Core\Types\Show.h>
 
 #include <VM\Core\Execution\Compiler\Assembler\Assemble.h>
 #include <VM\Core\Execution\Compiler\Assembler\Opcode.h>
