@@ -49,6 +49,8 @@ struct infer_type__args_t
     Context_map_t *context_ptr;
     // The environment of functions and typed names
     Env_map_t *env_ptr;
+    // A table of functions that are non-typed again
+    fununtyped_table_t *fununtyped_table_ptr;
     // The type of the expression to be infered
     // It is updated at each new operation on the stack
     type_stack_t *ts_ptr;
@@ -76,8 +78,10 @@ typedef struct infer_type__args_t args_t;
 
 static void infer_type__arrow_on_tstack(args_t *);
 static void infer_type__arrow(args_t *);
+static RCL_Type get_current_type(const Value, Env_map_t *, fununtyped_table_t *fununtyped_table_ptr, struct State *);
 
 bool cmp_tvars(const TVar_t t1, const TVar_t t2) { return t1 == t2; }
+bool cmp_hashs(const hash_t h1, const hash_t h2) { return h1 == h2; }
 
 static String show_tstack(const type_stack_t ts)
 {
@@ -312,18 +316,19 @@ static void subststack(Context_map_t *context_ptr, const type_stack_t *stackt_pt
         add_Context(context_ptr, set_tvar_str(context_ptr), stackt_ptr->array[i]);
 }
 
-static RCL_Type type_of_quote(Env_map_t *env, RawCode *rcode, struct State *state)
+static RCL_Type type_of_quote(Env_map_t *env, fununtyped_table_t *fununtyped_table_ptr, RawCode *rcode, struct State *state)
 {
     RCL_Type *quote_type = (RCL_Type *)malloc(sizeof(*quote_type));
-    *quote_type = infer_type(env, rcode, state);
+    *quote_type = infer_type(env, rcode, fununtyped_table_ptr, state);
     return T_QUOTE(*quote_type);
 }
 
-static args_t new_uncurrent_infert_args(Env_map_t *env_ptr, Context_map_t *context_ptr, type_stack_t *ts_ptr, struct State *state, size_t rcode_len)
+static args_t new_uncurrent_infert_args(Env_map_t *env_ptr, fununtyped_table_t *fununtyped_table_ptr, Context_map_t *context_ptr, type_stack_t *ts_ptr, struct State *state, size_t rcode_len)
 {
     args_t res;
     res.env_ptr = env_ptr;
     res.context_ptr = context_ptr;
+    res.fununtyped_table_ptr = fununtyped_table_ptr;
     res.ts_ptr = ts_ptr;
     res.state = state;
     res.rcode_len = rcode_len;
@@ -339,15 +344,15 @@ static void fill_current_infert_args(const Value curr_val, args_t *args_ptr, RCL
     args_ptr->current_val = curr_val;
 }
 
-static void infer_type__quote(type_stack_t *ts_ptr, Env_map_t *env_ptr, const Value current_val, struct State *state)
+static void infer_type__quote(type_stack_t *ts_ptr, Env_map_t *env_ptr, fununtyped_table_t *fununtyped_table_ptr, const Value current_val, struct State *state)
 {
-    push_type_stack_t(ts_ptr, type_of_quote(env_ptr, current_val.u.quote_, state));
+    push_type_stack_t(ts_ptr, type_of_quote(env_ptr, fununtyped_table_ptr, current_val.u.quote_, state));
 }
 
 static void inferiT(args_t *args)
 {
     if (args->current_val.kind == RCL_Value_Quotation)
-        return infer_type__quote(args->ts_ptr, args->env_ptr, args->current_val, args->state);
+        return infer_type__quote(args->ts_ptr, args->env_ptr, args->fununtyped_table_ptr, args->current_val, args->state);
 
     if (args->ts_ptr->used > 0)
         if (top_ptr_type_stack_t(args->ts_ptr)->kind == TYPE_ARROW)
@@ -394,7 +399,7 @@ static void infer_type__arrow_on_tstack(args_t *args)
     *t1 = *ts_top.u.rcl_type_arrow_.t1;
     type_stack_t t2_indvs = individualize(*ts_top.u.rcl_type_arrow_.t2);
 
-    args_t tmp_args = new_uncurrent_infert_args(args->env_ptr, args->context_ptr, &t2_indvs, args->state, args->rcode_len);
+    args_t tmp_args = new_uncurrent_infert_args(args->env_ptr, args->fununtyped_table_ptr, args->context_ptr, &t2_indvs, args->state, args->rcode_len);
     fill_current_infert_args(args->current_val, &tmp_args, args->current_type, args->current_arity, args->current_trace, args->current_itr);
 
     inferiT(&tmp_args);
@@ -432,7 +437,7 @@ static void infer_type__arrow(args_t *args)
     init_Context(args->context_ptr, args->rcode_len - args->current_itr);
 }
 
-RCL_Type infer_type(Env_map_t *env, RawCode *rcode, struct State *state)
+RCL_Type infer_type(Env_map_t *env, RawCode *rcode, fununtyped_table_t *fununtyped_table_ptr, struct State *state)
 {
     const size_t rcode_len = rcode->used;
 
@@ -442,19 +447,20 @@ RCL_Type infer_type(Env_map_t *env, RawCode *rcode, struct State *state)
     Context_map_t context;
     init_Context_map_t(&context, rcode_len);
 
-    args_t infert_args = new_uncurrent_infert_args(env, &context, &vacc_type_stack, state, rcode_len);
+    args_t infert_args = new_uncurrent_infert_args(env, fununtyped_table_ptr, &context, &vacc_type_stack, state, rcode_len);
 
     for (Iterator i = 0; i < rcode_len; i++)
     {
         const Value current_val = rcode->array[i];
-        const RCL_Type current_type = type_of(&current_val, NULL, NULL);
+        const RCL_Type current_type = get_current_type(current_val, env, fununtyped_table_ptr, state);
+        if (current_type.kind == TYPE_ERROR)
+            break;
         const size_t current_arity = arity(current_type);
         const size_t current_trace = trace(current_type);
 
         fill_current_infert_args(current_val, &infert_args, current_type, current_arity, current_trace, i);
 
         inferiT(&infert_args);
-        // Type context freeing !
     }
 
     if (vacc_type_stack.used == 0)
@@ -463,19 +469,65 @@ RCL_Type infer_type(Env_map_t *env, RawCode *rcode, struct State *state)
     return make_RCL_Type_stack(vacc_type_stack.used, vacc_type_stack.array);
 }
 
-/* --- Note to self:
+static RCL_Type get_current_type(const Value value, Env_map_t *env, fununtyped_table_t *fununtyped_table_ptr, struct State *state)
+{
+    if (value.kind != RCL_Value_Word)
+        return type_of(&value, value.u.word_.word_str, NULL);
 
-Take care about T_ARROW and T_ARROW_PTR when the value to be put in this type
-need to be a pointer.
+    const int found = key_find_Env(env, value.u.word_.hash_code, &cmp_hashs);
 
-*/
+    if (found != map_unfound)
+        return env->array[found].val;
 
-/* TODO:
+    if (fununtyped_table_ptr == NULL)
+    {
+        state_put_err_ch_cst(state, "Can't find function `%s'.", value.u.word_.word_str);
+        return T_ERR;
+    }
 
-    + When expression returns nothing, like `pop`
-    + When we can unify past expression type with actual, like `dup +` ==> Num
-    + When function asking for more arguments, like `swap flip`
-    + Context freeing (linked to ^)
-    + General environment
+    push_fununtyped_table_t(fununtyped_table_ptr, value.u.word_.hash_code);
 
- */
+    return T_VARIABLE(value.u.word_.word_str);
+}
+
+Env_map_t inferall(BResult *bresult_ptr, struct State *state)
+{
+    const struct VEC_Functions *functions = &bresult_ptr->wordico.functions;
+    fununtyped_table_t fununtyped_table = new_fununtyped_table_t((int)(functions->used / 2) + 1);
+    Env_map_t result = new_Env_map_t(functions->used);
+    for (Iterator i = 0; i < functions->used; i++)
+        add_Env(&result, functions->array[i].hash_code, infer_type(&result, &functions->array[i].body, &fununtyped_table, state));
+
+    // Subst:
+    for (Iterator i = 0; i < result.used; i++)
+    {
+        for (Iterator j = 0; j < result.array[i].val.u.rcl_type_stack_.nbr; j++)
+        {
+            if (result.array[i].val.u.rcl_type_stack_.tstack[j]->kind == TYPE_VARIABLE)
+            {
+                /*                 Context_map_t tmp_ctx = new_Context_map_t(3);
+                type_stack_t tmp_vacc_res = new_type_stack_t(3);
+                const RCL_Type current_type =
+                    get_val_Env(
+                        &result,
+                        hash_djb2(result.array[i].val.u.rcl_type_stack_.tstack[j]->u.rcl_type_variable_.name),
+                        &cmp_hashs);
+                const size_t current_arity = arity(current_type);
+
+                type_stack_t current_ts = new_type_stack_t(result.array[i].val.u.rcl_type_stack_.nbr - j);
+                for (Iterator k = 0; k <= i; k++)
+                    push_type_stack_t(&current_ts, *result.array[i].val.u.rcl_type_stack_.tstack[k]);
+                push_type_stack_t(&tmp_vacc_res, make_RCL_Type_stack(j, current_ts.array)); */
+
+                *result.array[i].val.u.rcl_type_stack_.tstack[j] = get_val_Env(&result, hash_djb2(result.array[i].val.u.rcl_type_stack_.tstack[j]->u.rcl_type_variable_.name), &cmp_hashs);
+            }
+        }
+    }
+
+    return result;
+}
+
+// Créer une nouvelle branche dans Wordico.RCL_Function pour y ajouter leur types ?
+// En fait nan, on peut créer un environement de type là où on en a besoin
+
+// Créer une fonction tail et head + first et last pour les vecteurs

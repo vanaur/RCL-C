@@ -89,7 +89,7 @@ static void handle_cmd(const REPL_AST cmd, BResult *bresult_ptr)
         RawCode exp = parse_expr(cmd.u.repl_typeof_.expr);
         cc_fprintf(CC_FG_WHITE, stdout, "%s", show_rcode(exp));
         printf(" : ");
-        cc_fprintf(CC_FG_CYAN, stdout, "%s\n", show_type(infer_type(NULL, &exp, &bresult_ptr->state)));
+        cc_fprintf(CC_FG_CYAN, stdout, "%s\n", show_type(infer_type(NULL, &exp, NULL, &bresult_ptr->state)));
         break;
     }
 

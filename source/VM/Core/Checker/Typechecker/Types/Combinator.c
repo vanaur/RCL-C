@@ -60,7 +60,10 @@ const RCL_Type combinator_types[] =
         T_ARROW(T_STACK(&T_ANY('a'), &T_ANY('b'), &T_ANY('c')), T_STACK(&T_ANY('c'), &T_ANY('b'), &T_ANY('a'))),
         // ID : Δ α -> Δ α
         T_ARROW(T_STACK(&T_ANY('a')), T_STACK(&T_ANY('a'))),
-        // DIP
+        // DIP : Δ α [β] -> Δ β α
+        T_ARROW(T_STACK(&T_ANY('a'), &T_QUOTE(T_ANY('b'))), T_STACK(&T_ANY('b'), &T_ANY('a'))),
+        // GIS : Δ Int Int -> Δ {Int}
+        T_ARROW(T_STACK(&T_LITERAL(RCL_Value_Integer), &T_LITERAL(RCL_Value_Integer)), T_STACK(&T_ARRAY(T_LITERAL(RCL_Value_Integer)))),
         // QUOTE : Δ α -> [α]
         T_ARROW(T_STACK(&T_ANY('a')), T_STACK(&T_QUOTE(T_ANY('a')))),
         // UQUOTE : Δ [α] -> α

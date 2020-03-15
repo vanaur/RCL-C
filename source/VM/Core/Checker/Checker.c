@@ -42,11 +42,14 @@
 
 static Checked_out typecheck(BResult *bresult)
 {
-    Env_map_t env = new_Env_map_t(bresult->psdata.rcode.used);
-    const RCL_Type main_type = infer_type(&env, &bresult->psdata.rcode, &bresult->state);
+    const Env_map_t env = inferall(bresult, &bresult->state);
+    const RCL_Type main_type = infer_type(&env, &bresult->psdata.rcode, NULL, &bresult->state);
 
     // printf("\n\n%s : %s\n", show_rcode(bresult->psdata.rcode), show_type(main_type));
 
+/*     for (Iterator i = 0; i < bresult->wordico.functions.used; i++)
+        printf("%s : %s\n", bresult->wordico.functions.array[i].name, show_type(get_val_Env(&env, bresult->wordico.functions.array[i].hash_code, &cmp_hashs)));
+ */
     if (main_type.u.rcl_type_stack_.nbr > 1)
     {
         state_put_warn_ch("The return of the program is a concatenation (of type `%s`), which is not compilable.", show_type(main_type));

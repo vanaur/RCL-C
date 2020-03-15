@@ -25,7 +25,13 @@
 #pragma once
 #include <VM\Core\Checker\Typechecker\Types\Types.h>
 
+// A table of functions that are non-typed again
+typedef Vector(fununtyped_table_t, hash_t);
+
+bool cmp_hashs(const hash_t, const hash_t);
+
 // Performs a type inference (more precisely, it determines the action on the stack,
 // the scope of the elements and the type of the result) of the expression sent,
 // taking into account an environment of variable types or not already existing.
-RCL_Type infer_type(Env_map_t *, RawCode *, struct State *);
+RCL_Type infer_type(Env_map_t *, RawCode *, fununtyped_table_t *, struct State *);
+Env_map_t inferall(BResult *, struct State *);
