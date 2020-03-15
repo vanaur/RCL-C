@@ -25,6 +25,7 @@
 #pragma once
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <Tools\Internal\Internal.h>
 #include <Tools\console-color\console-color.h>
 
@@ -69,6 +70,44 @@
             exit(0);                                                                                    \
         }                                                                                               \
         PushToVector(vec_ptr, T, item);                                                                 \
+    }                                                                                                   \
+    inline struct name singleton_##name(T item)                                                         \
+    {                                                                                                   \
+        struct name res = new_##name(1);                                                                \
+        push_##name(&res, item);                                                                        \
+        return res;                                                                                     \
+    }                                                                                                   \
+    inline T head_##name(const struct name *vec_ptr)                                                    \
+    {                                                                                                   \
+        return vec_ptr->array[0];                                                                       \
+    }                                                                                                   \
+    inline T last_##name(const struct name *vec_ptr)                                                    \
+    {                                                                                                   \
+        return vec_ptr->array[vec_ptr->used - 1];                                                       \
+    }                                                                                                   \
+    inline struct name tail_##name(const struct name *vec_ptr)                                          \
+    {                                                                                                   \
+        struct name res = new_##name(vec_ptr->used - 1);                                                \
+        res.array = vec_ptr->array - 1;                                                                 \
+        return res;                                                                                     \
+    }                                                                                                   \
+    inline struct name front_##name(const struct name *vec_ptr)                                         \
+    {                                                                                                   \
+        struct name res = new_##name(vec_ptr->used - 1);                                                \
+        for (int i = 0; i < vec_ptr->used - 1; i++)                                                     \
+            push_##name(&res, vec_ptr->array[i]);                                                       \
+        return res;                                                                                     \
+    }                                                                                                   \
+    inline struct name rreverse_##name(const struct name *vec_ptr)                                      \
+    {                                                                                                   \
+        struct name res = *vec_ptr;                                                                     \
+        for (int i = 0; i < res.used / 2; i++)                                                          \
+        {                                                                                               \
+            T t = res.array[i];                                                                         \
+            res.array[i] = res.array[res.used - i - 1];                                                 \
+            res.array[res.used - i - 1] = t;                                                            \
+        }                                                                                               \
+        return res;                                                                                     \
     }                                                                                                   \
     inline void pop_##name(struct name *vec_ptr)                                                        \
     {                                                                                                   \
