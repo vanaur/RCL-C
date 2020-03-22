@@ -54,14 +54,24 @@ csrc_abstract_paths = $(wildcard $(1) $(CSRC_SUBDIR_PATHS))
 VM_CSRC = $(call csrc_abstract_paths, VM\)
 VM_OBJS = $(VM_CSRC:.c=.o)
 
+exe_main = source/VM/RCL.o
+
 LIB_CSRC = $(call csrc_abstract_paths, Library\)
-LIB_OBJS = $(LIB_CSRC:.c=.o)
+LIB_OBJS = $(filter-out $(exe_main), $(LIB_CSRC:.c=.o))
 
 #src/Core/Syntax/Parser.c src/Tools\Syntax\Parser.h:	src/Core/Syntax/RCL.y
 #	${BISON} ${BISON_OPTS} src/Core/Syntax/RCL.y
 
 #src/Core/Syntax/Lexer.c: src/Core/Syntax/RCL.l src/Tools\Syntax\Lexer.h
 #	${FLEX} ${FLEX_OPTS} src/Core/Syntax/RCL.l
+
+ifeq ($(OS), Windows_NT)
+	uname_ext := ${ANAME}.dll
+	clean_cmd = @del /s /q *.o > null
+else
+	uname_ext := ${ANAME}.so
+	clean_cmd = @rm -f *.o
+endif
 
 PHONY: --todo
 
@@ -71,7 +81,7 @@ PHONY: --todo
 	@echo  3) If you want to build the library (as .a) ............................ run `make LIB`
 	@echo  4) If you want to clean directories from object files .................. run `make clean`
 	@echo  5) If you want more options ............................................ run `make help`
-	@echo (The option (2) is probably the one you're interested in)
+	@echo (The option (3) is probably the one you're interested in)
 
 end-msg = @echo Compilation completed
 
@@ -80,40 +90,35 @@ VM: ${VM_OBJS}
 	$(end-msg)
 
 DLL: ${LIB_OBJS}
-	${CC} -shared -o ${ANAME}.dll $^ ${LIBS}
+	${CC} -shared -o $(uname_ext) $^ ${LIBS}
 	$(end-msg)
 
 LIB: ${LIB_OBJS}
 	ar rcs librcl.a $^
 	$(end-msg)
 
-ALL: ${LIB_OBJS}
-	@mkdir All
-	${CC} $^ -o All\${ANAME} ${LIBS}
-	${CC} -shared -o All\${ANAME}.dll $^ ${LIBS}
-	ar rcs All\librcl.a $^
-	CScript Assets\Windows\zip.vbs All "All RCL.zip" > null
-	@rmdir /s /q All
-	$(end-msg)
-
 help:
-	@echo  1) Build VM (as executable) ............. run `make VM`  --------- produce 'RCL.exe'  (as program)
+	@echo  1) Build VM (as executable) ............. run `make VM`  --------- produce 'RCL'      (as program)
 	@echo  2) Build library (as DLL) ............... run `make LIB` --------- produce 'librcl.a' (for static links)
 	@echo  2) Build library (as DLL) ............... run `make DLL` --------- produce 'RCL.dll'  (for dynamic links)
-	@echo  3) Build all (1 and 2) .................. run `make ALL` --------- produce 'RCL.exe', 'librcl.a' and 'RCL.dll' in 'All.zip'
 	@echo  4) Clean directories .................... run `make clean`
 	@echo  5) Display help menu .................... run `make help`
 	@echo  6) Display required tools ............... run `make required`
 
 clean:
-	del /s /q *.o > null
+	$(clean_cmd)
 	@echo Cleaned directories
 
 required:
-	@echo   Required tools:
-	@echo  -  GCC       (version 5.1.0 was used)
-	@echo  -  Makefile  (version 4.2.1 was used)
-	@echo  -  Bison     (version 2.4.1 was used)
-	@echo  -  Flex      (version 2.5.4 was used)
-	@echo  All supposed to be accessible from the shell
+	@echo   Required compilation tools:
+	@echo  -   GCC      (version 5.1.0 was used)
+	@echo  -   Makefile (version 4.2.1 was used)
+	@echo  (-  Bison    (version 2.4.1 was used))  // pre-generated
+	@echo  (-  Flex     (version 2.5.4 was used))  // pre-generated
+	@echo  All supposed to be accessible from the shell.
+	@echo ---------------------------------------------
+	@echo   Required libraries:
+	@echo  - libffi     (https://sourceware.org/libffi/)
+	@echo  - GMP        (https://gmplib.org/)
+	@echo Headers and static libraries simply need to be in the GCC compiler folders.
 	@echo ---------------------------------------------
