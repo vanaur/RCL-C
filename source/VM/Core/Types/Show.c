@@ -140,7 +140,7 @@ String show_type(const RCL_Type type)
         return "#error#";
 
     default:
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unknown type kind: %d.", type.kind);
+        _interr("Unknown type kind: %d.", type.kind);
         return "?";
     }
 }

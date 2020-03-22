@@ -56,7 +56,7 @@ static hash_t hash_asm_reg(const Register reg)
         return (hash_t)SIGMA_GETV_BYVAL(reg, rs_512, r);
 
     default:
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unhashable register (kind = %d).", reg.kind);
+        _interr("Unhashable register (kind = %d).", reg.kind);
     }
 }
 
@@ -89,7 +89,7 @@ hash_t hash_asm_value(const ASM_Value val)
         return hash_asm_value(*SIGMA_GETV_BYVAL(val, asmv_mul, v1)) + hash_asm_value(*SIGMA_GETV_BYVAL(val, asmv_sub, v2));
 
     default:
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unhashable value (kind = %d).", val.kind);
+        _interr("Unhashable value (kind = %d).", val.kind);
     }
 }
 
@@ -232,7 +232,7 @@ static hash_t hash_asm_instr(const ASM_Instr instr)
         return COMMENT_NEUTRAL_HASH;
 
     default:
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unhashable instruction (kind = %d).", instr.kind);
+        _interr("Unhashable instruction (kind = %d).", instr.kind);
     }
 }
 

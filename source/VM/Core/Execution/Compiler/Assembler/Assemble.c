@@ -61,7 +61,7 @@ struct Bunch init_bunch(const BResult *bresult)
     init_HashOpBloLbl_const_map_t(&cst_lbl_map, count_operations_bykind(bresult->psdata.rcode, RCL_Value_Quotation) + bresult->wordico.functions.used + 1);
     init_Lenv_map_t(&lenv, 3);
     init_Labels(&result, 3);
-    return (struct Bunch){result, bresult, lenv, lbl_count, cst_str_map, cst_lbl_map};
+    return (struct Bunch){result, bresult, inferall(bresult, &bresult->state), lenv, lbl_count, cst_str_map, cst_lbl_map};
 }
 
 static void clean_heap(struct Bunch *bunch_ptr)
@@ -91,6 +91,36 @@ typedef const bool Vectorize;
 
 static Opcode_block assemble_block(struct Bunch *, RawCode);
 static Name cst_array_label(struct Bunch *, const Value);
+
+static Regi reg0(const Register reg)
+{
+    return make_regi(reg, 0);
+}
+
+static size_t bsizeof_value(const Value value)
+{
+    switch (value.kind)
+    {
+    case RCL_Value_Integer:
+        return sizeof(int);
+
+    case RCL_Value_Float:
+        return sizeof(double);
+
+    case RCL_Value_Char:
+        return sizeof(char);
+
+    case RCL_Value_String:     // The size of the pointers is constant,
+    case RCL_Value_Array:      // for arrays (like strings) and also for functions
+    case RCL_Value_Quotation:  // (a quote is an anonymous function).
+        return sizeof(void *); // The `void *` has the constant size of 8.
+
+    default:
+        _interr_ext("Unsizeable value: `%s'.", show_value(value));
+        break;
+    }
+    return 0;
+}
 
 static bool is_vzero(const Value value)
 {
@@ -160,12 +190,12 @@ static void cst_array__seval_case(RawCode *result_ptr, const RawCode exp_case, s
 
     if (result_ptr->used > 1)
     {
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Non-constant or evaluable array case result: `%s`.", show_quote(*result_ptr));
+        _interr("Non-constant or evaluable array case result: `%s`.", show_quote(*result_ptr));
         return exit(EXIT_FAILURE);
     }
     if (result_ptr->array[0].kind != expected_kind)
     {
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Non-conform type array of case result: `%s`.", show_quote(*result_ptr));
+        _interr("Non-conform type array of case result: `%s`.", show_quote(*result_ptr));
         return exit(EXIT_FAILURE);
     }
 }
@@ -302,7 +332,7 @@ static Name cst_array_label(struct Bunch *bunch_ptr, const Value value)
         break;
 
     default:
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unarrayable data kind: %s.", show_kind(RCL_ARRAY_CONTENT_CASE(value, 0)->array[0].kind));
+        _interr("Unarrayable data kind: %s.", show_kind(RCL_ARRAY_CONTENT_CASE(value, 0)->array[0].kind));
     }
     return osize_optimization__push_label(bunch_ptr, assembled_array, lbl_name);
 }
@@ -322,7 +352,7 @@ static ASM_Value assemble_structure(struct RCL_Value_DataStruct _struct, RCL_Val
         break;
 
     default:
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Can't handle structure field.", NULL);
+        _interr("Can't handle structure field.", NULL);
     }
 }
 
@@ -395,13 +425,9 @@ static ASM_Value assemble_value(struct Bunch *bunch_ptr, Value *value_ptr)
         //case RCL_Value_Field:
 
     default:
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Not handled value: %s.", show_value(*value_ptr));
+        _interr("Not handled value: %s.", show_value(*value_ptr));
         exit(EXIT_FAILURE);
     }
-}
-
-static Opcode_block assemble_combinator(struct Bunch *bunch_ptr, const Combinator combinator)
-{
 }
 
 static Opcode_block assembly__swap_reg(const Register r1, const Register r2)
@@ -598,26 +624,202 @@ static void assemble_combinator__stack__multi_dup(struct Bunch *bunch_ptr, Opcod
         push_Opcode_block(block_ptr, assembly_push_value(bunch_ptr, value_ptr));
 }
 
-static Opcode_block assemble_block(struct Bunch *bunch_ptr, const RawCode rcode_ptr)
+struct epsi_info_t
 {
-    Opcode_block result;
-    init_Opcode_block(&result, rcode_ptr.used * 2);
+    RCL_Type type;
+    size_t arity_;
+    size_t trace_;
+};
 
-    for (Iterator i = 0; i < rcode_ptr.used; i++)
+struct epsi_info_t new_epsi_info(const RCL_Type type)
+{
+    return (struct epsi_info_t){type, arity(type), trace(type)};
+}
+
+struct epsi_value_info_t
+{
+    Value value;
+    struct epsi_info_t info;
+};
+
+struct epsi_value_info_t new_epsi_value(const struct Bunch *bunch_ptr, const Value value)
+{
+    const RawCode value_as_rcode = singleton_RawCode(value);
+    const RCL_Type type = infer_type(&bunch_ptr->tenv, &value_as_rcode, NULL, &bunch_ptr->bresult->state);
+    if (type.kind == TYPE_ERROR)
+        _interr_ext("Error in type for E-algorithm", NULL);
+    return (struct epsi_value_info_t){value, new_epsi_info(type)};
+}
+
+struct epsi_rcode_info_t
+{
+    const RawCode rcode;
+    const struct epsi_info_t info;
+    const size_t rcode_used;
+    const struct epsi_value_info_t *rcode_values_infos;
+};
+
+struct epsi_rcode_info_t new_epsi_rcode(const struct Bunch *bunch_ptr, const RawCode rcode)
+{
+    const struct epsi_info_t rcode_info = new_epsi_info(infer_type(&bunch_ptr->tenv, &rcode, NULL, &bunch_ptr->bresult->state));
+    struct epsi_value_info_t *rcode_values_infos = malloc(rcode.used * sizeof(struct epsi_value_info_t));
+    for (Iterator i = 0; i < rcode.used; i++)
+        rcode_values_infos[i] = new_epsi_value(bunch_ptr, rcode.array[i]);
+    return (struct epsi_rcode_info_t){rcode, rcode_info, rcode.used, rcode_values_infos};
+}
+
+static void set_new_reg(struct Bunch *bunch_ptr, Register *reg_ptr)
+{
+    for (Iterator i = 0; i < bunch_ptr->lenv.used; i++)
     {
-        const Value *current = &rcode_ptr.array[i];
-        /*         const RCL_Type delt = type_of(current, ENTRY_NAME, bunch_ptr->bresult);
-        const size_t currho = arity(delt); */
+        const Register current = bunch_ptr->lenv.array[i].key.reg;
 
-        const size_t currho = 0;
+        if (current.kind != reg_ptr->kind)
+            continue;
 
-        if (current->kind == RCL_Value_Quotation)
-            inc_lc(&bunch_ptr->lbl_count);
+        else if (cmp_reg(current, *reg_ptr))
+            *reg_ptr = next_reg(*reg_ptr);
 
-        if (currho == 0) // Not a relationship operation
-                         // + Créer un déducteur de complexité (algorithmique) de fonction
-            //concat_Opcode_block(&result, pblock_singleton(assembly_test_value(bunch_ptr, _EAX, current)));
-            concat_Opcode_block(&result, assemble_div_cst(bunch_ptr, _EAX, *current));
+        else
+            break;
+    }
+}
+
+static Register allocate_in_reg(struct Bunch *bunch_ptr, const enum Value_Kind vkind)
+{
+    Register result;
+    switch (vkind)
+    {
+    case RCL_Value_Integer:
+        __fast_assign(result, __EAX);
+        set_new_reg(bunch_ptr, &result);
+        break;
+
+    case RCL_Value_Float:
+        __fast_assign(result, __XMM0);
+        set_new_reg(bunch_ptr, &result);
+        break;
+
+    default:
+        _interr_ext("Non-allocable data.", NULL);
+        break;
+    }
+    add_Lenv(&bunch_ptr->lenv, reg0(result), REG_RESERVED);
+    return result;
+}
+// https://www.cs.virginia.edu/~evans/cs216/guides/x86.html
+static Regi allocate_in_esp(struct Bunch *bunch_ptr, const Value value)
+{
+    Regi result;
+    switch (value.kind)
+    {
+    case RCL_Value_Integer:
+        __fast_assign(result, make_regi(__ESP, bsizeof_value(value) * bunch_ptr->lenv.used)); // todo => 4, 8, 16, ...
+                                                                                              // Créer un gestionnaire d'emplacement finallement
+        break;
+    default:
+        printf("TODO: %d\n", __LINE__);
+    }
+    return result;
+}
+
+static void assemble_return_value(struct Bunch *bunch_ptr, Opcode_block *block_ptr, const Value vtoret)
+{
+    // const struct epsi_value_info_t epsi_value_indo = new_epsi_value(bunch_ptr, vtoret);
+    // assemble_pure_mov(block_ptr, _EAX, assemble_value(bunch_ptr, &vtoret));
+    /*     const Register allocated = allocate_in_reg(bunch_ptr, vtoret.kind);
+    printf("%s is allocated in %s\n", show_value(vtoret), show_register(allocated)); */
+}
+
+static void assemble_operation(struct Bunch *bunch_ptr, Opcode_block *block_ptr, const struct epsi_value_info_t vop)
+{
+}
+
+static void smart_inc(struct Bunch *bunch_ptr, const enum Value_Kind vk)
+{
+    if (vk == RCL_Value_Quotation)
+        inc_lc(&bunch_ptr->lbl_count);
+}
+
+static Opcode_block assemble_concatenation(struct Bunch *bunch_ptr, const RawCode concatenation)
+{
+    // Créer une fonction `bool contains_IO(rcode)` pour vérifier si une séquence contient de l'IO
+    //      --> Comme ça on sait l'évaluer directement pour optimiser
+    // il va falloir utiliser  allocate_in_esp  pour savoir comment se porte la pile
+
+    // Evaluer d'abod la concatenation? Vérifier s'il est constante, donc déjà là; car elle peut être produite après
+    // Le type est parfois trompeur...
+
+    const RawCode seval_conc = seval(concatenation, bunch_ptr->bresult);
+    Opcode_block result = new_Opcode_block(seval_conc.used);
+
+    for (Iterator i = 0; i < seval_conc.used; i++)
+    { // if contains arrow type ... =>  3 2 + *
+        const Value current_value = seval_conc.array[i];
+        const ASM_Value asm_value = assemble_value(bunch_ptr, &current_value);
+        push_Opcode_block(&result, assembly_push_value(bunch_ptr, &current_value));
+    }
+    return result;
+}
+
+static Opcode_block assemble_combinator(struct Bunch *bunch_ptr, const struct epsi_value_info_t vcomb)
+{
+    Opcode_block result = new_Opcode_block(vcomb.info.arity_ + 2);
+
+    // On suppose que tout est sur la pile ?
+
+    if (vcomb.value.u.comb_ == DUP)
+    {
+        const Regi regi = last_Lenv_map_t(&bunch_ptr->lenv).key;
+        const src_t src = opcode_make_asm_value__adress_reg(opcode_make_asm_value__add(opcode_make_asm_value__reg(regi.reg), opcode_make_asm_value__num(regi.location)));
+        // Faire une fonction pour compiler en ASM_VALUE un REGI plus facilement que ...^^^^^^^^^^^^...
+        push_Opcode_block(&result, OPCODE_INSTR_COMMENT("We duplicate:"));
+        push_Opcode_block(&result, opcode_make_opcode__push(src));
+    }
+
+    return result;
+}
+
+static Opcode_block assemble_block(struct Bunch *bunch_ptr, const RawCode rcode)
+{
+    Opcode_block result = new_Opcode_block(rcode.used * 2);
+
+    // Regarder le type:
+    // Si c'est une flèche, réserver des registres pour les arguments
+    //...
+    // Créer une fonction d'assemblage pour renvoyer (dans EAX)
+    // Créer une fonction d'assemblage pour envoyer X éléments à une fonction => argument
+    // Faire une fonction d'allocation de registre ! En fonction de la valeur et en passant LENV (bunch)
+
+    // LENV ne contient pas suffisement d'information, nous ne savons rien de ce qui est alloué
+
+    const struct epsi_rcode_info_t epsi_rcode = new_epsi_rcode(bunch_ptr, rcode);
+
+    inc_lc(&bunch_ptr->lbl_count);
+
+    /*     // If this is a simple concatenation:
+    if (epsi_rcode.info.type.kind == TYPE_STACK)
+        return assemble_concatenation(bunch_ptr, rcode); // And returns it! */
+
+    for (Iterator i = 0; i < rcode.used; i++)
+    {
+        const Value current_value = rcode.array[i];
+        const struct epsi_value_info_t current_epsi_value = new_epsi_value(bunch_ptr, current_value);
+        smart_inc(bunch_ptr, current_value.kind);
+
+        if (current_epsi_value.info.arity_ == 0) // This is then a simple value
+        {
+            const ASM_Value asm_value = assemble_value(bunch_ptr, &current_value);
+            push_Opcode_block(&result, assembly_push_value(bunch_ptr, &current_value));
+            continue;
+        }
+        // Then this is a function or a combinator
+
+        if (current_value.kind == RCL_Value_Combinator)
+        {
+            concat_Opcode_block(&result, assemble_combinator(bunch_ptr, current_epsi_value));
+            continue;
+        }
     }
 
     return result;
@@ -648,11 +850,11 @@ static void cgen(const RawCode rcode, struct Bunch *bunch_ptr)
     assemble_function(bunch_ptr, &bunch_ptr->result, ENTRY_NAME, "This is the entry point", &bunch_ptr->bresult->psdata.rcode);
 }
 
-static void *th_assemble_externs(struct VEC_Externs * externs) {}
-static void *th_assemble_structure(struct VEC_Structures * structures) {}
-static void *th_assemble_functions(struct VEC_Functions * functions) {}
+static void *th_assemble_externs(struct VEC_Externs *externs) {}
+static void *th_assemble_structure(struct VEC_Structures *structures) {}
+static void *th_assemble_functions(struct VEC_Functions *functions) {}
 
-static Labels assemble_main(RawCode * main, struct Wordico *wordico, label_count_t *lbl_count)
+static Labels assemble_main(RawCode *main, struct Wordico *wordico, label_count_t *lbl_count)
 {
     Labels result;
     init_Labels(&result, count_operations_bykind(*main, RCL_Value_Quotation + 1));
@@ -660,7 +862,7 @@ static Labels assemble_main(RawCode * main, struct Wordico *wordico, label_count
     return result;
 }
 
-Assembled_Program assemble(const BResult * bresult)
+Assembled_Program assemble(const BResult *bresult)
 {
     pthread_t
         th_fn, // Assemble functions

@@ -66,7 +66,7 @@
     {                                                                                                   \
         if (!vec_ptr->size)                                                                             \
         {                                                                                               \
-            _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Uninitialized vector `%s`", #name); \
+            _interr("Uninitialized vector `%s`", #name); \
             exit(0);                                                                                    \
         }                                                                                               \
         PushToVector(vec_ptr, T, item);                                                                 \
@@ -117,7 +117,7 @@
     {                                                                                                   \
         if (!vec.size)                                                                                  \
         {                                                                                               \
-            _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Uninitialized vector `%s`", #name); \
+            _interr("Uninitialized vector `%s`", #name); \
             exit(0);                                                                                    \
         }                                                                                               \
         return vec.array[vec.used - 1];                                                                 \
@@ -126,7 +126,7 @@
     {                                                                                                   \
         if (!vec_ptr->size)                                                                             \
         {                                                                                               \
-            _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Uninitialized vector `%s`", #name); \
+            _interr("Uninitialized vector `%s`", #name); \
             exit(0);                                                                                    \
         }                                                                                               \
         return &vec_ptr->array[vec_ptr->used - 1];                                                      \

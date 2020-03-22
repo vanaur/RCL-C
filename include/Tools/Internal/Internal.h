@@ -37,4 +37,12 @@
 #endif
 
 #define _internal_error(file, line, fn, fmt, args...) \
-    cc_fprintf(CC_FG_RED, stdout, "  [Internal: %s, %d in '%s']\n     > " fmt "\n", file, line, fn, args);
+    (void)cc_fprintf(CC_FG_RED, stdout, "  [Internal: %s, %d in '%s']\n     > " fmt "\n", file, line, fn, args);
+
+#define _interr(fmt, args...) _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, fmt, args);
+
+#define _interr_ext(fmt, args...) \
+    {                             \
+        _interr(fmt, args);       \
+        exit(EXIT_FAILURE);       \
+    }

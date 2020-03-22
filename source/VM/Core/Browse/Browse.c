@@ -481,7 +481,7 @@ void case_preprocessor(BResult * bresult, Preprocessor p)
         break;
 
     default:
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unknown preprocessor kind: %d.", p->kind);
+        _interr("Unknown preprocessor kind: %d.", p->kind);
     }
 }
 

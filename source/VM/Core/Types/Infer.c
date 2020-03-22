@@ -122,7 +122,7 @@ TVar_t set_tvar_str(Context_map_t *context_ptr)
 
     if (c > 'z')
     {
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Too large context of variable types.\n", NULL);
+        _interr("Too large context of variable types.\n", NULL);
     }
 
     return c;
@@ -134,7 +134,7 @@ void remove_tvar_str(Context_map_t *context_ptr, TVar_t tvar)
     const int found = key_find_Context(context_ptr, tvar, &cmp_tvars);
 
     if (found == map_unfound)
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unfound key: %c.", tvar);
+        _interr("Unfound key: %c.", tvar);
 
     for (Iterator i = found; i < length_Context(context_ptr) - 1; i++)
         context_ptr->array[i] = context_ptr->array[i + 1];

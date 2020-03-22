@@ -32,7 +32,7 @@
 #include <Tools\Utils\Utils.h>
 #include <VM\Core\Execution\Compiler\Assembler\Opcode.h>
 
-static String show_register(Register reg)
+String show_register(Register reg)
 {
     switch (reg.kind)
     {

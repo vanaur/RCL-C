@@ -25,6 +25,7 @@
 #pragma once
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Execution\Compiler\Assembler\Opcode.h>
+#include <VM\Core\Types\Infer.h>
 
 /*** The literal name given to certain types of labels, in the generated code ***/
 
@@ -41,6 +42,8 @@ struct Bunch
     Labels result;
     // All the informations about the program.
     BResult *bresult;
+    // The environment of functions' type
+    Env_map_t tenv;
     // The existing label environment, which evolves over the course of compilation.
     Lenv_map_t lenv;
     // A label counter.

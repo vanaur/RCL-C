@@ -645,6 +645,6 @@ inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
         break;
 
     default:
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unknown combinator kind: %d.", comb);
+        _interr("Unknown combinator kind: %d.", comb);
     }
 }

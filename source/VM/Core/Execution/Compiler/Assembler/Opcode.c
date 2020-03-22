@@ -97,7 +97,10 @@ Register next_reg(const Register reg)
     case _16:
         return opcode_make_register(_16, reg.u.rs_16_.r + 1);
     case _32:
-        return opcode_make_register(_32, reg.u.rs_32_.r + 1);
+        // These registers (ESP and EBP) are reserved for the stack, and therefore cannot be used as a register.
+        return opcode_make_register(_32, ((reg.u.rs_32_.r + 1) == ESP ?
+            (reg.u.rs_32_.r + 2) : reg.u.rs_32_.r + 1) == EBP ?
+            (reg.u.rs_32_.r + 3) : reg.u.rs_32_.r + 1);
     case _64:
         return opcode_make_register(_64, reg.u.rs_64_.r + 1);
     case _128:

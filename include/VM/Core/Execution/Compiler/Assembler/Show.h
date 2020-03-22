@@ -26,4 +26,5 @@
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Execution\Compiler\Assembler\Opcode.h>
 
+String show_register(Register);
 String show_assembled_program(Assembled_Program, const BResult);

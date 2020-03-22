@@ -335,7 +335,7 @@ Value otov(Operation op)
         return make_RCL_Value_Field(op->u.field_.rcl_structure_field_);
 
     default: // May no reach
-        _internal_error(__FILE__, __LINE__, __FUNCTION_NAME__, "Unknown value kind: %d.", op->kind);
+        _interr("Unknown value kind: %d.", op->kind);
         exit(EXIT_FAILURE);
     }
 }

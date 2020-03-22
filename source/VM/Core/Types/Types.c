@@ -178,7 +178,7 @@ bool cmp_types(const RCL_Type t1, const RCL_Type t2)
 
     case TYPE_VARIABLE: // Replace String by hash
         return (!strcmp(SIGMA_GETV_BYVAL(t1, rcl_type_variable, name), SIGMA_GETV_BYVAL(t2, rcl_type_variable, name)));
-    
+
     case TYPE_ERROR:
         return false;
     }
@@ -189,16 +189,31 @@ bool cmp_types(const RCL_Type t1, const RCL_Type t2)
 
 size_t arity(RCL_Type t)
 {
+    /*     if (t.kind == TYPE_STACK)
+        return SIGMA_GETV_BYVAL(t, rcl_type_stack, nbr); */
+
     if (t.kind == TYPE_STACK)
-        return SIGMA_GETV_BYVAL(t, rcl_type_stack, nbr);
+    {
+        size_t res = 0;
+        for (Iterator i = 0; i < t.u.rcl_type_stack_.nbr; i++)
+            res += arity(*t.u.rcl_type_stack_.tstack[i]);
+        return res;
+    }
 
     if (t.kind == TYPE_ARROW)
+    {
+        if (t.u.rcl_type_arrow_.t1->kind == TYPE_STACK)
+            return t.u.rcl_type_arrow_.t1->u.rcl_type_stack_.nbr;
+        return arity(*t.u.rcl_type_arrow_.t1);
+    }
+
+    /*     if (t.kind == TYPE_ARROW)
     {
         size_t a = arity(*t.u.rcl_type_arrow_.t1);
         if (t.u.rcl_type_arrow_.t2->kind == TYPE_ARROW)
             return a + arity(*t.u.rcl_type_arrow_.t2->u.rcl_type_arrow_.t1);
         return a;
-    }
+    } */
     return 0;
 }
 

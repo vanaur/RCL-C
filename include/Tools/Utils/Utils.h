@@ -34,6 +34,11 @@
 #define _GET_NTH_ARG(_1, _2, _3, _4, _5, N, ...) N
 #define COUNT_VARARGS(...) _GET_NTH_ARG("ignored", ##__VA_ARGS__, 4, 3, 2, 1, 0)
 
+#define __fast_assign(var, val) \
+    {                           \
+        var = val;              \
+    }
+
 typedef char *String;
 typedef void *GenericT;
 typedef long long int Iterator;
