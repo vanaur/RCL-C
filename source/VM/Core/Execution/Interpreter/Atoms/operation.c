@@ -71,7 +71,7 @@ inline void evalop(Stack * stack, Value * op, BResult * bresult)
         return doComb(stack, op->u.comb_, bresult);
 
     case RCL_Value_LiteralOperation:
-        return doArithmetic(stack, op->u.litOperation_, bresult);
+        return do_arithmetic(stack, op->u.litOperation_, bresult);
 
     case RCL_Value_Parallel:
         printf("TODO");

@@ -22,119 +22,192 @@
  * under the License.
  */
 
-#include <math.h>
 #include <gmp.h>
+#include <assert.h>
 
 #include <VM\Core\Execution\Interpreter\Arithmetic.h>
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 #include <VM\Core\Execution\Interpreter\Stack\Combinators\Basics.h>
 #include <VM\Core\Syntax\Absyn.h>
+#include <VM\Core\Show\Show.h>
 
-// To improve: 10 5 / 2 + => 0.5 2 + => 2.5 ==> To reach
-static void integer_arithmetic(Stack * stack, const LiteralOperation lo)
+enum abstract_number_kind
 {
-    mpz_t result;
-    mpz_init(result);
+    _INTEGER,
+    _FLOAT
+};
 
+typedef struct
+{
+    enum abstract_number_kind kind;
+    mpz_t *_integer;
+    mpf_t *_float;
+} abstract_number_t;
+
+static mpf_t *ztof(const mpz_t mpz)
+{
+    mpf_t *res = malloc(sizeof(mpf_t));
+    mpf_init(*res);
+    mpf_set_z(*res, mpz);
+    return res;
+}
+
+abstract_number_t new_abstract_number(const Value value_num)
+{
+    assert(value_num.kind == RCL_Value_Integer || value_num.kind == RCL_Value_Float);
+    if (value_num.kind == RCL_Value_Integer)
+    {
+        mpz_t *res_ptr = malloc(sizeof(mpz_t));
+        mpz_init_set(*res_ptr, value_num.u.int_);
+        return (abstract_number_t){_INTEGER, res_ptr, NULL};
+    }
+    mpf_t *res_ptr = malloc(sizeof(mpf_t));
+    mpf_init_set(*res_ptr, value_num.u.float_);
+    return (abstract_number_t){_FLOAT, NULL, res_ptr};
+}
+
+static void compute_binop(const abstract_number_t n1, const abstract_number_t n2, Stack *stack,
+                          void (*fnz)(mpz_ptr, mpz_srcptr, mpz_srcptr),
+                          void (*fnf)(mpf_ptr, mpf_srcptr, mpf_srcptr))
+{
+    if (n1.kind == _INTEGER && n2.kind == _INTEGER)
+    {
+        if (fnz == NULL)
+            _interr_ext("Unsuccessful attempt to apply a `mpz_` function", NULL);
+        if (fnz == &mpz_div)
+        {
+            mpf_t res;
+            mpf_init(res);
+            mpf_div(res, *ztof(*n1._integer), *ztof(*n2._integer));
+            return push(stack, RCL_Float(res));
+        }
+        mpz_t res;
+        mpz_init(res);
+        fnz(res, *n1._integer, *n2._integer);
+        return push(stack, RCL_Integer(res));
+    }
+    if (fnf == NULL)
+        _interr_ext("Unsuccessful attempt to apply a `mpf_` function", NULL);
+    if (n1.kind == _INTEGER && n2.kind == _FLOAT)
+    {
+        mpf_t res;
+        mpf_init(res);
+        fnf(res, *ztof(*n1._integer), *n2._float);
+        return push(stack, RCL_Float(res));
+    }
+    if (n1.kind == _FLOAT && n2.kind == _INTEGER)
+    {
+        mpf_t res;
+        mpf_init(res);
+        fnf(res, *n1._float, *ztof(*n2._integer));
+        return push(stack, RCL_Float(res));
+    }
+    if (n1.kind == _FLOAT && n2.kind == _FLOAT)
+    {
+        mpf_t res;
+        mpf_init(res);
+        fnf(res, *n1._float, *n2._float);
+        return push(stack, RCL_Float(res));
+    }
+    _interr_ext("Reaching the impossible!", NULL);
+}
+
+//  a b <op>  =>  `b` <op> `a`
+//  6 5 +      => 5 + 6
+//  4 7 -      => 7 - 4
+
+static void compute_arithmetic(Stack *stack, const LiteralOperation lo)
+{
     if (lo->kind != is_Inc && lo->kind != is_Dec)
-        doComb(stack, SWAP, NULL);
+    {
+        assert(stack->used >= 2);
+    }
+    else
+    {
+        assert(stack->used >= 1);
+    }
+
+    if (lo->kind == is_Inc || lo->kind == is_Dec)
+    {
+        const abstract_number_t n1 = new_abstract_number(drop(stack));
+        const abstract_number_t n2 = new_abstract_number(RCL_Integer_I(1));
+        if (lo->kind == is_Inc)
+            return compute_binop(n1, n2, stack, &mpz_add, &mpf_add);
+        return compute_binop(n1, n2, stack, &mpz_sub, &mpf_sub);
+    }
+
+    const abstract_number_t n1 = new_abstract_number(drop(stack));
+    const abstract_number_t n2 = new_abstract_number(drop(stack));
 
     switch (lo->kind)
     {
     case is_Add:
-        mpz_add(result, drop(stack).u.int_, drop(stack).u.int_);
+        compute_binop(n1, n2, stack, &mpz_add, &mpf_add);
         break;
 
     case is_Mul:
-        mpz_mul(result, drop(stack).u.int_, drop(stack).u.int_);
+        compute_binop(n1, n2, stack, &mpz_mul, &mpf_mul);
         break;
 
     case is_Sub:
-        mpz_sub(result, drop(stack).u.int_, drop(stack).u.int_);
+        compute_binop(n1, n2, stack, &mpz_sub, &mpf_sub);
         break;
 
     case is_Div:
-    {
-        mpf_t div_result;
-        mpf_t x1, y1;
-        mpz_t x2, y2;
-        mpz_init_set(x2, drop(stack).u.int_);
-        mpz_init_set(y2, drop(stack).u.int_);
-        mpf_init(x1);
-        mpf_init(y1);
-        mpf_set_z(x1, x2);
-        mpf_set_z(y1, y2);
-        mpf_init(div_result);
-        mpf_div(div_result, x1, y1);
-        push(stack, make_RCL_Value_Float(div_result));
-        return (void)(NULL);
-    }
+        compute_binop(n1, n2, stack, &mpz_div, &mpf_div);
+        break;
 
     case is_Pow:
-        mpz_pow_ui(result, drop(stack).u.int_, mpz_get_ui(drop(stack).u.int_));
-        break;
+        // Only integer exponentiation for now
+        {
+            mpz_t result;
+            mpz_init(result);
+            mpz_pow_ui(result, *n1._integer, mpz_get_d(*n2._integer));
+            push(stack, RCL_Integer(result));
+            break;
+        }
 
     case is_Mod:
-        mpz_mod(result, drop(stack).u.int_, drop(stack).u.int_);
-        break;
-
-    case is_Inc:
-        mpz_add_ui(result, drop(stack).u.int_, 1);
-        break;
-
-    case is_Dec:
-        mpz_sub_ui(result, drop(stack).u.int_, 1);
+        compute_binop(n1, n2, stack, &mpz_mod, NULL);
         break;
 
     case is_BAnd:
-        mpz_and(result, drop(stack).u.int_, drop(stack).u.int_);
+        compute_binop(n1, n2, stack, &mpz_and, NULL);
         break;
 
     case is_BOr:
-        mpz_ior(result, drop(stack).u.int_, drop(stack).u.int_);
+        compute_binop(n1, n2, stack, &mpz_ior, NULL);
         break;
 
     case is_BXor:
-        mpz_xor(result, drop(stack).u.int_, drop(stack).u.int_);
+        compute_binop(n1, n2, stack, &mpz_xor, NULL);
         break;
 
     case is_BLeft:
+    {
+        mpz_t result;
+        mpz_init(result);
         mpz_mul_2exp(result, drop(stack).u.int_, mpz_get_d(drop(stack).u.int_));
+        push(stack, RCL_Integer(result));
         break;
+    }
 
     case is_BRight:
+    {
+        mpz_t result;
+        mpz_init(result);
         mpz_div_2exp(result, drop(stack).u.int_, mpz_get_d(drop(stack).u.int_));
+        push(stack, RCL_Integer(result));
         break;
     }
 
-    push(stack, make_RCL_Value_Integer(result));
+    default:
+        _interr_ext("Reaching the impossible!", NULL);
+        break;
+    }
 }
 
-/* static void integer_arithmetic(Stack * stack, const LiteralOperation lo)
+void do_arithmetic(Stack *stack, const LiteralOperation lo, BResult *bresult)
 {
-    if (lo->kind == lo_inc)
-    {
-        if (top(stack).kind == RCL_Value_Integer)
-            mpz_add_ui(top_ptr(stack)->u.int_, top_ptr(stack)->u.int_, 1);
-
-        if (top(stack).kind == RCL_Value_Float)
-            mpf_add_ui(top_ptr(stack)->u.float_, top_ptr(stack)->u.float_, 1);
-
-        return;
-    }
-
-    const Value a = drop(stack);
-    const Value b = drop(stack);
-
-    if (a.kind == RCL_Value_Integer && b.kind == RCL_Value_Integer);
-    if (a.kind == RCL_Value_Integer && b.kind == RCL_Value_Float);
-    if (a.kind == RCL_Value_Float && b.kind == RCL_Value_Integer);
-    if (a.kind == RCL_Value_Float && b.kind == RCL_Value_Float);
-
-} */
-
-void doArithmetic(Stack * stack, const LiteralOperation lo, BResult * bresult)
-{
-    if (top_ptr(stack)->kind == RCL_Value_Integer)
-        integer_arithmetic(stack, lo);
+    compute_arithmetic(stack, lo);
 }

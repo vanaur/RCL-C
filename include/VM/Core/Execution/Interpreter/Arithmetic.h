@@ -28,4 +28,4 @@
 #include <VM\Core\Syntax\Absyn.h>
 #include <VM\Core\Browse\BResult.h>
 
-void doArithmetic(Stack *, const LiteralOperation, BResult *);
+void do_arithmetic(Stack *, const LiteralOperation, BResult *);
