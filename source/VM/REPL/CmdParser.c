@@ -23,6 +23,7 @@
  */
 
 #include <Tools\Utils\Utils.h>
+#include <Tools\console-color\console-color.h>
 #include <VM\REPL\CmdParser.h>
 #include <string.h>
 
@@ -30,6 +31,28 @@ const String commands[] =
     {"stack", "free", "quit", "help", "typeof",
      "step", "exec", "exect", "show", "oof",
      "opt", "set"};
+
+void help_if_unknown(const String str)
+{
+    int levens[12];
+    for (Iterator i = 0; i < 12; i++)
+        levens[i] = levenshtein(trim(str), strlen(trim(str)), commands[i], strlen(commands[i]));
+
+    for (Iterator i = 0; i < 12; i++)
+    {
+        if (levens[i] == 0)
+        {
+            cc_fprintf(CC_FG_YELLOW, stdout, "Lacking arguments in `%s`.\n", commands[i]);
+            return;
+        }
+    }
+
+    for (Iterator i = 0; i < 12; i++)
+    {
+        if (levens[i] == 1 || levens[i] == 2)
+            cc_fprintf(CC_FG_YELLOW, stdout, "Try `%s`?\n", commands[i]);
+    }
+}
 
 REPL_AST repl_cmd_parse(const String cmd)
 {
@@ -60,7 +83,7 @@ REPL_AST repl_cmd_parse(const String cmd)
     if (startsWith(trimed_cpy, "set "))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_SET, repl_set, trim(trimed_cpy += 4));
 
-    // do levenshtein
+    help_if_unknown(cmd);
 
     return SIGMA_FILL_CTOR(REPL_AST, CMDERR, cmderr, rcl_sprintf_s("Unknown command: `%s'.", trimed_cpy));
 }
