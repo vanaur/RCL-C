@@ -44,7 +44,7 @@
 
 #include <VM\Core\Show\Show.h>
 
-inline void evalop(Stack * stack, Value * op, BResult * bresult)
+inline void evalop(Stack *stack, Value *op, BResult *bresult)
 {
     if (bresult->exec_infos.show_steps)
         printf("step>\t\t%s%s\n", show_stack_nobraces(*stack), show_value(*op));
@@ -52,13 +52,6 @@ inline void evalop(Stack * stack, Value * op, BResult * bresult)
     switch (op->kind)
     {
     case RCL_Value_Word:
-        /*  if (stack->in_rec)
-        {
-            if (!strcmp(stack->fname, op->u.word_))
-                return push(stack, *op);
-        }
-        else
-             */
         return evalword(stack, bresult, &op->u.word_);
 
     case RCL_Value_Array ... RCL_Value_String:

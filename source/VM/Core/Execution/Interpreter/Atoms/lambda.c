@@ -33,7 +33,8 @@
 
 void new_lambda(Stack *stack, BResult * bresult, const Value lamdop)
 {
-    struct RCL_Lambda *lam_yet_exists = getSpecific_lambda(&bresult->wordico, hash_djb2(lamdop.u.lam_));
+    String tmp_name = rcl_sprintf_s("%s.%s", S_CURRENTF, lamdop.u.lam_);
+    struct RCL_Lambda *lam_yet_exists = getSpecific_lambda(&bresult->wordico, hash_djb2(tmp_name));
     if (lam_yet_exists)
     {
         if (bresult->exec_infos.low)
@@ -46,14 +47,15 @@ void new_lambda(Stack *stack, BResult * bresult, const Value lamdop)
             return;
         }
     }
-    vec_add_lambdas(&bresult->wordico.lambdas, make_rcl_Lambda(lamdop.u.lam_, bresult->argvs, drop(stack), *stack));
+    vec_add_lambdas(&bresult->wordico.lambdas, make_rcl_Lambda(tmp_name, bresult->argvs, drop(stack), *stack));
 }
 
 void unscope_lambda(BResult * bresult, const Value lamdop)
 {
-    if (getSpecific_lambda(&bresult->wordico, hash_djb2(lamdop.u.endLamScope_)) == NULL)
+    String tmp_name = rcl_sprintf_s("%s.%s", S_CURRENTF, lamdop.u.endLamScope_);
+    if (getSpecific_lambda(&bresult->wordico, hash_djb2(tmp_name)) == NULL)
     {
-        state_put_warn_it("Trying to unscope an non-existing lambda (`%s').", lamdop.u.endLamScope_);
+        state_put_warn_it("Trying to unscope an non-existing lambda (`%s').", tmp_name);
     }
     else
     {

@@ -39,8 +39,15 @@
 #include <VM\Core\Execution\Interpreter\Atoms\field.h>
 #include <VM\Core\Execution\Interpreter\Atoms\FFI.h>
 
-inline void evalword(Stack * stack, BResult * bresult, RCL_Value_Word_t * word)
+inline void evalword(Stack *stack, BResult *bresult, RCL_Value_Word_t *word)
 {
+    String tmp_str = rcl_sprintf_s("%s.%s", S_CURRENTF, word->word_str);
+    struct RCL_Lambda *cpytmp_lambda = getSpecific_lambda(&bresult->wordico, hash_djb2(tmp_str));
+    if (cpytmp_lambda != NULL)
+    {
+        return eval_lambda_call(stack, cpytmp_lambda, bresult);
+    }
+
     struct RCL_Function *cpytmp_function = getSpecific_function(&bresult->wordico, word->hash_code);
     if (cpytmp_function != NULL)
     {
@@ -51,12 +58,6 @@ inline void evalword(Stack * stack, BResult * bresult, RCL_Value_Word_t * word)
     if (cpytmp_extern != NULL)
     {
         return eval_external_call(stack, bresult, cpytmp_extern);
-    }
-
-    struct RCL_Lambda *cpytmp_lambda = getSpecific_lambda(&bresult->wordico, word->hash_code);
-    if (cpytmp_lambda != NULL)
-    {
-        return eval_lambda_call(stack, cpytmp_lambda, bresult);
     }
 
     if (!strcmp(word->word_str, "new__"))
