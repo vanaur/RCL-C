@@ -36,12 +36,12 @@
 
 // Prints a simple message as `Hello, world!` with the version of the RCL in use.
 // Allows user to checks if the linkage worked properly.
-_export void rcl__hello_world();
+_export void rcl_hello_world();
 // Returns the currently used version of the RCL as a string.
-_export const String rcl__get_current_version_s();
+_export const String rcl_get_current_version_s();
 // Returns the currently used version of the RCL
 // as a structure containing the specific fields of the current version.
-_export const Version rcl__get_current_version_v();
+_export const Version rcl_get_current_version_v();
 
 _export enum IResult_kind { SUCCESS,
                             FAILURE,
@@ -49,7 +49,7 @@ _export enum IResult_kind { SUCCESS,
 _export struct IResult
 {
     enum IResult_kind program_res;
-    int main_returned;
+    double main_returned;
 };
 
 // Takes as argument an RCL IR bytecode program as string, supposedly correct, interprets it
@@ -58,12 +58,12 @@ _export struct IResult
 //   `FAILURE`    (1) if there are one or more errors ;
 //   `INCOMPLETE` (2) if there are still elements on the stack).
 // The boolean argument displays the result at the end of the execution if `true`.
-_export struct IResult rcl__simple_interpret_ir_s(const String, const bool);
+_export struct IResult rcl_simple_interpret_ir_s(const String, const bool);
 
 // Takes as argument a compiled program and evaluate it (interpreter or JIT or compiler)
 // taking into account all informations having being given.
 // The boolean argument displays the result at the end of the execution if `true`.
-_export struct IResult rcl__eval(const rcl__program_t, const bool);
+_export struct IResult rcl_eval(const rcl_program_t, const bool);
 
 // Interpret the given expression and returns the resulting
-_export struct IResult rcl__evali_expr(const rcl__expr_t);
+_export struct IResult rcl_evali_expr(const rcl_expr_t);

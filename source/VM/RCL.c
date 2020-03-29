@@ -49,6 +49,7 @@
 #include <Tools\Time_Measure\Time_Measure.h>
 #include <Library\Primitive\Primitive.h>
 #include <Library\Primitive\Expression.h>
+#include <Library\Primitive\Function.h>
 #include <Library\rclib.h>
 
 void atex()
@@ -165,13 +166,17 @@ int main(int argc, String argv[])
 {
     atexit(atex);
 
-    /*     rcl__expr_t cst_n1 = rcl_expr__cst_int(10);
-    rcl__expr_t cst_n2 = rcl_expr__cst_int(5);
-    rcl__expr_t my_exp = rcl_expr__div(cst_n1, cst_n2);
+/*     const rcl_fun_params_t f1params = rcl_fun_params(2, (const String[]){"x", "y"});
+    const rcl_fun_t fn1 = rcl_fun_define("addition", f1params, rcl_expr__add(rcl_expr__var("x"), rcl_expr__var("y")));
 
-    printf("%s\n", rcl__show_ir_expr(my_exp));
-    struct IResult res = rcl__evali_expr(my_exp);
-    printf("Resulting: %d\n", res.main_returned); */
+    const rcl_fun_args_t f1args = rcl_fun_args(2, (const rcl_expr_t[]){rcl_expr__cst_int(6), rcl_expr__cst_int(21)});
+    const rcl_fun_t fn2 = rcl_fun_define("example", rcl_fun_params_0, rcl_expr__mul(rcl_fun_call("addition", f1args), rcl_expr__cst_int(2)));
+
+    printf("%s\n", rcl_show_ir_fun(fn1));
+    printf("%s\n", rcl_show_ir_fun(fn2));
+
+    return 0; */
+
 
     // If the RCL is launch without argument
     if (argc == 1)
@@ -181,7 +186,12 @@ int main(int argc, String argv[])
     remove_element(argv, argc--, 0);
     Exec exec = get_exec(argv, &argc);
 
-    // if O3 then activate "all" the optimisations
+    if (exec.repl && argc == 0)
+    {
+        BResult tmp = new_bresult();
+        run_repl(&tmp);
+        return 0;
+    }
 
     // Don't display anything if this is the flag 'noise'
     if (exec.noise_level == Noise)

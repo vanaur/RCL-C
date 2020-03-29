@@ -38,7 +38,7 @@ Will build the VM as executable one, the library as dynamic linking one and as s
 
 If you're using the library, don't forget use `include` file in your test, with gcc: `-Iinclude` and of course the library that you can link with `-lrcl`. Make sure these files are accessible from the command prompt you're using to build and testing.
 
-The function `rcl__hello_world()` can be used from `Library\rclib.h`, it will display a `Hello, world!` for the RCL.
+The function `rcl_hello_world()` can be used from `Library\rclib.h`, it will display a `Hello, world!` for the RCL.
 
 For the executable, you can try to launch it with a file containing some IR code, try:
 

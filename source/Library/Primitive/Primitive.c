@@ -35,37 +35,37 @@
 
 #define INIT_DEFAULT_SIZE 12
 
-String rcl__show_ir_expr(const rcl__expr_t e)
+String rcl_show_ir_expr(const rcl_expr_t e)
 {
     return show_rcode(e);
 }
 
-String rcl__show_ir_fun(const rcl__fun_t f)
+String rcl_show_ir_fun(const rcl_fun_t f)
 {
     return rcl_sprintf_s("%s = %s ;", f.name, show_rcode(f.body));
 }
 
-String rcl__show_ir_extern(const rcl__extern_t ef)
+String rcl_show_ir_extern(const rcl_extern_t ef)
 {
     return rcl_sprintf_s("extern %f ;", ef.name);
 }
 
-String rcl__show_ir_struct(const rcl__struct_t s)
+String rcl_show_ir_struct(const rcl_struct_t s)
 {
     return rcl_sprintf_s("structure %s ;", s.name);
 }
 
-rcl__program_t new_rcl_program(const String prog_name, const String src_lang, const rcl__exec_infos_t exec_infos)
+rcl_program_t new_rcl_program(const String prog_name, const String src_lang, const rcl_exec_infos_t exec_infos)
 {
-    rcl__program_t result;
+    rcl_program_t result;
     result.program_name = prog_name;
     result.src_language = src_lang;
     result.pexecinfos = exec_infos;
     init_rcode(&result.pmain, INIT_DEFAULT_SIZE);
-    init_rcl__const_array_vec(&result.pconstarrays, INIT_DEFAULT_SIZE);
-    init_rcl__extern_vec(&result.pexternals, INIT_DEFAULT_SIZE);
-    init_rcl__fun_vec(&result.pfunctions, INIT_DEFAULT_SIZE);
-    init_rcl__struct_vec(&result.pstructures, INIT_DEFAULT_SIZE);
+    init_rcl_const_array_vec(&result.pconstarrays, INIT_DEFAULT_SIZE);
+    init_rcl_extern_vec(&result.pexternals, INIT_DEFAULT_SIZE);
+    init_rcl_fun_vec(&result.pfunctions, INIT_DEFAULT_SIZE);
+    init_rcl_struct_vec(&result.pstructures, INIT_DEFAULT_SIZE);
     return result;
 }
 

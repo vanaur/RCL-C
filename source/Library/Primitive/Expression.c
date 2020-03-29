@@ -38,58 +38,63 @@
 #include <Library\Primitive\Primitive.h>
 #include <Library\Primitive\Expression.h>
 
-inline rcl__expr_t rcl_expr__cst_int(const int n)
+inline rcl_expr_t rcl_expr__var(const String var)
 {
-    rcl__expr_t res = new_RawCode(1);
+    return singleton_RawCode(RCL_Word(var));
+}
+
+inline rcl_expr_t rcl_expr__cst_int(const int n)
+{
+    rcl_expr_t res = new_RawCode(1);
     push_RawCode(&res, RCL_Integer_I(n));
     return res;
 }
 
-inline rcl__expr_t rcl_expr__cst_bigint(const mpz_t n)
+inline rcl_expr_t rcl_expr__cst_bigint(const mpz_t n)
 {
-    rcl__expr_t res = new_RawCode(1);
+    rcl_expr_t res = new_RawCode(1);
     push_rcode(&res, RCL_Integer(n));
     return res;
 }
 
-inline rcl__expr_t rcl_expr__cst_float(const double n)
+inline rcl_expr_t rcl_expr__cst_float(const double n)
 {
-    rcl__expr_t res = new_RawCode(1);
+    rcl_expr_t res = new_RawCode(1);
     push_rcode(&res, RCL_Float_F(n));
     return res;
 }
 
-inline rcl__expr_t rcl_expr__cst_bigfloat(const mpf_t n)
+inline rcl_expr_t rcl_expr__cst_bigfloat(const mpf_t n)
 {
-    rcl__expr_t res = new_RawCode(1);
+    rcl_expr_t res = new_RawCode(1);
     push_rcode(&res, RCL_Float(n));
     return res;
 }
 
-inline rcl__expr_t rcl_expr__cst_char(const char c)
+inline rcl_expr_t rcl_expr__cst_char(const char c)
 {
-    rcl__expr_t res = new_RawCode(1);
+    rcl_expr_t res = new_RawCode(1);
     push_rcode(&res, RCL_Char(c));
     return res;
 }
 
-inline rcl__expr_t rcl_expr__cst_string(const String s)
+inline rcl_expr_t rcl_expr__cst_string(const String s)
 {
-    rcl__expr_t res = new_RawCode(1);
+    rcl_expr_t res = new_RawCode(1);
     push_rcode(&res, RCL_String(s));
     return res;
 }
 
-inline rcl__expr_t rcl_expr__cst_bool(const bool x)
+inline rcl_expr_t rcl_expr__cst_bool(const bool x)
 {
-    rcl__expr_t res = new_RawCode(1);
+    rcl_expr_t res = new_RawCode(1);
     push_rcode(&res, RCL_Integer_I((int)x));
     return res;
 }
 
-static rcl__expr_t rcl_expr__BOP(const rcl__expr_t e1, const rcl__expr_t e2, const size_t opk)
+static rcl_expr_t rcl_expr__BOP(const rcl_expr_t e1, const rcl_expr_t e2, const size_t opk)
 {
-    rcl__expr_t res;
+    rcl_expr_t res;
     init_rcode(&res, e1.used + e2.used + 1);
     concat_rcode(&res, &e2);
     concat_rcode(&res, &e1);
@@ -97,76 +102,76 @@ static rcl__expr_t rcl_expr__BOP(const rcl__expr_t e1, const rcl__expr_t e2, con
     return res;
 }
 
-static rcl__expr_t rcl_expr__UOP(const rcl__expr_t e, const size_t opk)
+static rcl_expr_t rcl_expr__UOP(const rcl_expr_t e, const size_t opk)
 {
-    rcl__expr_t res;
+    rcl_expr_t res;
     init_rcode(&res, e.used + 1);
     concat_rcode(&res, &e);
     push_rcode(&res, RCL_LiteralOperation_kind(opk));
     return res;
 }
 
-inline rcl__expr_t rcl_expr__add(const rcl__expr_t e1, const rcl__expr_t e2)
+inline rcl_expr_t rcl_expr__add(const rcl_expr_t e1, const rcl_expr_t e2)
 {
     return rcl_expr__BOP(e1, e2, lo_add);
 }
 
-inline rcl__expr_t rcl_expr__sub(const rcl__expr_t e1, const rcl__expr_t e2)
+inline rcl_expr_t rcl_expr__sub(const rcl_expr_t e1, const rcl_expr_t e2)
 {
     return rcl_expr__BOP(e1, e2, lo_sub);
 }
 
-inline rcl__expr_t rcl_expr__pow(const rcl__expr_t e1, const rcl__expr_t e2)
+inline rcl_expr_t rcl_expr__pow(const rcl_expr_t e1, const rcl_expr_t e2)
 {
     return rcl_expr__BOP(e1, e2, lo_pow);
 }
 
-inline rcl__expr_t rcl_expr__mul(const rcl__expr_t e1, const rcl__expr_t e2)
+inline rcl_expr_t rcl_expr__mul(const rcl_expr_t e1, const rcl_expr_t e2)
 {
     return rcl_expr__BOP(e1, e2, lo_mul);
 }
 
-inline rcl__expr_t rcl_expr__div(const rcl__expr_t e1, const rcl__expr_t e2)
+inline rcl_expr_t rcl_expr__div(const rcl_expr_t e1, const rcl_expr_t e2)
 {
     return rcl_expr__BOP(e1, e2, lo_div);
 }
 
-inline rcl__expr_t rcl_expr__mod(const rcl__expr_t e1, const rcl__expr_t e2)
+inline rcl_expr_t rcl_expr__mod(const rcl_expr_t e1, const rcl_expr_t e2)
 {
     return rcl_expr__BOP(e1, e2, lo_mod);
 }
 
-inline rcl__expr_t rcl_expr__inc(const rcl__expr_t e)
+inline rcl_expr_t rcl_expr__inc(const rcl_expr_t e)
 {
     return rcl_expr__UOP(e, lo_inc);
 }
 
-inline rcl__expr_t rcl_expr__dec(const rcl__expr_t e)
+inline rcl_expr_t rcl_expr__dec(const rcl_expr_t e)
 {
     return rcl_expr__UOP(e, lo_dec);
 }
 
-inline rcl__expr_t rcl_expr__band(const rcl__expr_t e1, const rcl__expr_t e2)
+inline rcl_expr_t rcl_expr__band(const rcl_expr_t e1, const rcl_expr_t e2)
 {
     return rcl_expr__BOP(e1, e2, lo_band);
 }
 
-inline rcl__expr_t rcl_expr__bor(const rcl__expr_t e1, const rcl__expr_t e2)
+inline rcl_expr_t rcl_expr__bor(const rcl_expr_t e1, const rcl_expr_t e2)
 {
     return rcl_expr__BOP(e1, e2, lo_bor);
 }
 
-inline rcl__expr_t rcl_expr__xor(const rcl__expr_t e1, const rcl__expr_t e2)
+inline rcl_expr_t rcl_expr__xor(const rcl_expr_t e1, const rcl_expr_t e2)
 {
     return rcl_expr__BOP(e1, e2, lo_bxor);
 }
 
-inline rcl__expr_t rcl_expr__shl(const rcl__expr_t e1, const rcl__expr_t e2)
+inline rcl_expr_t rcl_expr__shl(const rcl_expr_t e1, const rcl_expr_t e2)
 {
     return rcl_expr__BOP(e1, e2, lo_bleft);
 }
 
-inline rcl__expr_t rcl_expr__shr(const rcl__expr_t e1, const rcl__expr_t e2)
+inline rcl_expr_t rcl_expr__shr(const rcl_expr_t e1, const rcl_expr_t e2)
 {
     return rcl_expr__BOP(e1, e2, lo_bright);
 }
