@@ -52,29 +52,22 @@ String timWs(String str)
     return str;
 }
 
-size_t levenshtein(const String s, size_t ls, const String t, size_t lt)
+#define MIN3(a, b, c) ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
+
+size_t levenshtein(const String s1, size_t s1len, const String s2, size_t s2len)
 {
-    size_t a, b, c;
+    unsigned int x, y;
+    unsigned int matrix[s2len + 1][s1len + 1];
+    matrix[0][0] = 0;
+    for (x = 1; x <= s2len; x++)
+        matrix[x][0] = matrix[x - 1][0] + 1;
+    for (y = 1; y <= s1len; y++)
+        matrix[0][y] = matrix[0][y - 1] + 1;
+    for (x = 1; x <= s2len; x++)
+        for (y = 1; y <= s1len; y++)
+            matrix[x][y] = MIN3(matrix[x - 1][y] + 1, matrix[x][y - 1] + 1, matrix[x - 1][y - 1] + (s1[y - 1] == s2[x - 1] ? 0 : 1));
 
-    if (!ls)
-        return lt;
-    if (!lt)
-        return ls;
-
-    if (s[ls - 1] == t[lt - 1])
-        return levenshtein(s, ls - 1, t, lt - 1);
-
-    a = levenshtein(s, ls - 1, t, lt - 1);
-    b = levenshtein(s, ls, t, lt - 1);
-    c = levenshtein(s, ls - 1, t, lt);
-
-    if (a > b)
-        a = b;
-
-    if (a > c)
-        a = c;
-
-    return a + 1;
+    return (matrix[s2len][s1len]);
 }
 
 String indexToWord(size_t n)
