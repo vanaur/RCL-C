@@ -33,6 +33,7 @@
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 #include <VM\Core\Execution\Interpreter\Stack\Combinators\Basics.h>
 #include <VM\Core\Show\Show.h>
+#include <VM\Core\RawCode\cmpvalue.h>
 
 static void doDup(Stack *stack)
 {
@@ -58,11 +59,26 @@ static void doGis(Stack *stack)
     const int from = mpz_get_d(drop(stack).u.int_);
     const int until = mpz_get_d(drop(stack).u.int_);
 
+    const int size = until - from;
+
+    if (size <= 0)
+        return push(stack, RCL_Combinator(VQ));
+
     RawCode *quote = (RawCode *)malloc(sizeof(*quote));
     init_rcode(quote, abs(until - from) + 1);
 
-    for (Iterator i = from; i < until; i++)
-        push_rcode(quote, make_RCL_Value_Integer_i(i));
+    /*     for (Iterator i = from; i < until; i++)
+        push_rcode(quote, make_RCL_Value_Integer_i(i)); */
+
+    Value *array = malloc(sizeof(Value) * size);
+
+    int tmp = size;
+
+    while (tmp-- > from)
+        array[tmp] = RCL_Integer_I(tmp);
+
+    quote->array = array;
+    quote->used = size;
 
     push(stack, make_RCL_Value_Quotation(quote));
 }
@@ -425,6 +441,9 @@ static void do_cmp(Stack *stack, const Combinator cmp_kind)
     const Value a = drop(stack);
     const Value b = drop(stack);
 
+    if (cmp_kind == EQ && a.kind != (RCL_Value_Integer || b.kind != RCL_Value_Integer))
+        return push(stack, RCL_Integer_I(cmpvalue(a, b)));
+
     if (a.kind == RCL_Value_Integer && b.kind == RCL_Value_Integer)
         return do_cmp_ii(stack, a, b, cmp_kind);
 
@@ -632,7 +651,7 @@ inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
 
     case STOI:
         return do_stoi(stack);
-    
+
     case ITOS:
         return do_itos(stack);
 

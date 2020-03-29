@@ -342,7 +342,7 @@ Value otov(Operation op)
 
 void init_rcode(RawCode * rcode, size_t initSize)
 {
-    InitVector(rcode, sizeof(Value), Value);
+    InitVector(rcode, initSize, Value);
 }
 
 void push_rcode(RawCode * rcode, Value item)
