@@ -72,8 +72,7 @@ inline void evalword(Stack *stack, BResult *bresult, RCL_Value_Word_t *word)
         return push(stack, RCL_Word(RCL_NIL_WRD));
     }
 
-    String upped;
-    rcl_asprintf(&upped, "%s", word->word_str);
+    String upped = word->word_str;
     upped[0] = toupper(upped[0]);
 
     struct RCL_Structure *cpytmp_structure = getSpecific_structure(&bresult->wordico, hash_djb2(upped));

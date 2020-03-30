@@ -30,6 +30,7 @@
 
 #include <VM\Core\RawCode\RawCode.h>
 #include <VM\Core\RawCode\cmpvalue.h>
+#include <VM\Core\RawCode\rawcodecmp.h>
 
 static inline bool cmpvalue_int(const Value v1, const Value v2)
 {
@@ -64,6 +65,13 @@ static inline bool cmpvalue_comb(const Value v1, const Value v2)
 static inline bool cmpvalue_lo(const Value v1, const Value v2)
 {
     return (bool)(v1.u.litOperation_->kind == v2.u.litOperation_->kind);
+}
+
+static inline bool cmpvalue_quote(const Value v1, const Value v2)
+{
+    if (v1.u.quote_->used != v2.u.quote_->used)
+        return false;
+    return rawcodecmp(v1.u.quote_->array, v2.u.quote_->array, v1.u.quote_->used);
 }
 
 inline bool cmpvalue(const Value v1, const Value v2)
@@ -103,6 +111,9 @@ inline bool cmpvalue(const Value v1, const Value v2)
 
     case RCL_Value_LiteralOperation:
         return cmpvalue_lo(v1, v2);
+
+    case RCL_Value_Quotation:
+        return cmpvalue_quote(v1, v2);
 
     default:
         printf("%d\n", v1.kind);

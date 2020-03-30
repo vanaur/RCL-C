@@ -39,6 +39,17 @@
 #include <VM\Core\Show\Show.h>
 #include <VM\Core\Execution\Interpreter\Atoms\operation.h>
 
+/*
+
+    Recursive function evaluation optimizations are supported when the `--Orec` option is enabled.
+    The recursion optimizations provided focus on recursive tail calls,
+    all recursive tail call cases are supported in principle.
+    The RCL library (RCL::Library) tries to generate recursive tail calls most of the time,
+    so most recursion cases are optimized. Some contrary cases exist, however, and are not all managed (for now),
+    although some non-recursive call recursion schemes are worked on.
+
+*/
+
 #define FOREVER(instr) \
     while (true)       \
     {                  \
@@ -79,6 +90,9 @@ static bool optimized_eval_func__linear_reccall(Stack *stack, struct RCL_Functio
 
     if (value_is_fname(body.array[0], function->hash_code))
         FOREVER(); // When there is no instruction to evaluate
+                   // for example: `undefined = undefiend`
+                   // or again: `foo = foo 3 2 +`
+                   // => When the recursive function is call in first, the rest is dead code
 
     for (i; i > 0; i--)
         if (value_is_fname(body.array[i], function->hash_code))
@@ -192,17 +206,13 @@ static bool optimized_eval_func__combinator_reccall(Stack *stack, struct RCL_Fun
 
 static void optimized_eval_func(Stack *stack, struct RCL_Function *function, BResult *bresult)
 {
-    const RawCode body = function->body;
-    const Value top_body = top_rcode(&body);
-
     if (optimized_eval_func__linear_reccall(stack, function, bresult))
         return;
 
-    else if (optimized_eval_func__combinator_reccall(stack, function, bresult))
+    if (optimized_eval_func__combinator_reccall(stack, function, bresult))
         return;
 
-    else
-        simple_eval_rcode(stack, body, bresult);
+    simple_eval_rcode(stack, function->body, bresult);
 }
 
 void eval_function(Stack *stack, struct RCL_Function *function, BResult *bresult)

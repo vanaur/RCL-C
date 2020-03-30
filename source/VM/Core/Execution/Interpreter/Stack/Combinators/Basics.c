@@ -441,7 +441,7 @@ static void do_cmp(Stack *stack, const Combinator cmp_kind)
     const Value a = drop(stack);
     const Value b = drop(stack);
 
-    if (cmp_kind == EQ && a.kind != (RCL_Value_Integer || b.kind != RCL_Value_Integer))
+    if (cmp_kind == EQ && (a.kind != RCL_Value_Integer || b.kind != RCL_Value_Integer))
         return push(stack, RCL_Integer_I(cmpvalue(a, b)));
 
     if (a.kind == RCL_Value_Integer && b.kind == RCL_Value_Integer)
@@ -658,6 +658,8 @@ inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
     case FTOI:
     case ITOF:
     case ITOC:
+        return push(stack, RCL_Char(mpz_get_d(drop(stack).u.int_)));
+
     case CTOI:
     case ITOB:
         printf("todo");
