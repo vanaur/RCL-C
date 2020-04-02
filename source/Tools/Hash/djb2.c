@@ -31,6 +31,9 @@
 
 hash_t hash_djb2(String str)
 {
+    if (str == NULL)
+        return (hash_t)(0);
+
     hash_t hash = 5381;
     int c = 0;
 
