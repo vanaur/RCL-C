@@ -105,6 +105,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <VM\Core\Syntax\Absyn.h>
+#include <Tools\console-color\console-color.h>
 #define initialize_lexer RCL_initialize_lexer
 extern int yyparse(void);
 extern int yylex(void);
@@ -113,8 +114,12 @@ extern int initialize_lexer(FILE * inp);
 void yyerror(const char *str)
 {
   extern char *RCLtext;
-  fprintf(stderr,"error: line %d: %s at %s\n",
-    yy_mylinenumber + 1, str, RCLtext);
+  if (!strcmp(RCLtext, ""))
+    cc_fprintf(CC_FG_RED, stderr, "\n    > Parsing error: expected code after line %d.\n\n", yy_mylinenumber + 1);
+  else
+    cc_fprintf(CC_FG_RED, stderr, "\n    > Parsing error [%d]: %s at `%s`.\n\n", yy_mylinenumber + 1, str, RCLtext);
+/*   fprintf(stderr,"error: line %d: %s at %s\n",
+    yy_mylinenumber + 1, str, RCLtext); */
 }
 
 Program YY_RESULT_Program_ = 0;
