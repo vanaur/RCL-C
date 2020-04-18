@@ -37,17 +37,17 @@
 
 struct RCL_Structure_field make_enum_field(String name)
 {
-    return (struct RCL_Structure_field){.kind = _is_Enum, .name = name, .u._enum = {}};
+    return (struct RCL_Structure_field){.kind = _is_Enum, .name = name, .hash_code = hash_djb2(name), .u._enum = {}};
 }
 
 struct RCL_Structure_field make_free_field(String name)
 {
-    return (struct RCL_Structure_field){.kind = _is_Field, .name = name, .u._field = {}};
+    return (struct RCL_Structure_field){.kind = _is_Field, .name = name, .hash_code = hash_djb2(name), .u._field = {}};
 }
 
 struct RCL_Structure_field make_spec_field(String name, String typename)
 {
-    return (struct RCL_Structure_field){.kind = _is_Spec, .name = name, .u._typed = typename};
+    return (struct RCL_Structure_field){.kind = _is_Spec, .name = name, .hash_code = hash_djb2(name), .u._typed = typename};
 }
 
 void init_rcl_structure(struct RCL_Structure * rcl_struct, String name, size_t fields_alloc_size)
@@ -67,9 +67,6 @@ void add_field(struct RCL_Structure * rcl_struct, struct RCL_Structure_field rcl
         if (rcl_struct->fields == NULL)
             perror("Out of RCL structure fields memory");
     }
-    String field_hash_src;
-    rcl_asprintf(&field_hash_src, "%s::%s", rcl_struct->name, rcl_field.name);
-    rcl_field.hash_code = hash_djb2(field_hash_src);
     rcl_struct->fields[rcl_struct->field_alloc_used++] = rcl_field;
 }
 
