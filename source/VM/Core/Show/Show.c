@@ -274,37 +274,32 @@ static void indent(String *str, int n)
     rcl_asprintf(str, "%s%s", *str, show_indent(n));
 }
 
-static String show_structure(const struct RCL_Value_DataStruct rcl_struct, const int deepness)
-{
-    String res = rcl_sprintf_s("\n%s'Structure<:%s>", show_indent(deepness / 2), rcl_struct.template->name);
+static String show_structure(const struct RCL_Value_DataStruct, const int);
 
-    for (Iterator i = 0; i < rcl_struct.template->field_alloc_used; i++)
+static void show_field(String *res_ptr, const struct RCL_Value_DataStruct_Field field, const String fs, const bool ln)
+{
+    rcl_asprintf(res_ptr, "%s  .%s:%s%s", *res_ptr, field.field_type_info->name, fs, ln ? "\n" : "");
+}
+
+static void show_fields(String *res_ptr, const struct RCL_Value_DataStruct_Field field, const int depth)
+{
+    if (field.field_value->kind == RCL_Value_DataStruct)
+        return show_field(res_ptr, field, show_structure(field.field_value->u.dataStruct_, depth + 1), false);
+    show_field(res_ptr, field, show_value(*field.field_value), true);
+}
+
+static String show_structure(const struct RCL_Value_DataStruct rcl_struct, const int depth)
+{
+    String res = rcl_sprintf_s("\n%s'Structure<:%s>\n", show_indent(depth), rcl_struct.template->name);
+    const size_t fields_nbr = rcl_struct.template->field_alloc_used;
+
+    for (Iterator i = 0; i < fields_nbr; i++)
     {
         if (rcl_struct.fields[i].field_value == NULL)
             return res;
 
-        if (i + 1 < rcl_struct.template->field_alloc_used)
-            if (rcl_struct.fields[i + 1].field_value->kind != RCL_Value_DataStruct)
-                rcl_asprintf(&res, "%s\n", res);
-
-        indent(&res, deepness);
-        switch (rcl_struct.fields[i].field_type_info->kind)
-        {
-        case _is_Spec:
-        case _is_Field:
-            if (rcl_struct.fields[i].field_value->kind == RCL_Value_DataStruct)
-                rcl_asprintf(&res, "%s%s", res, show_structure(rcl_struct.fields[i].field_value->u.dataStruct_, deepness + 2));
-            else
-                rcl_asprintf(&res, "%s.%s(%s)", res, rcl_struct.fields[i].field_type_info->name, show_value(*rcl_struct.fields[i].field_value));
-            break;
-
-        default:
-            break;
-        }
-
-        if (i + 1 < rcl_struct.template->field_alloc_used)
-            if (rcl_struct.fields[i + 1].field_value->kind != RCL_Value_DataStruct)
-                rcl_asprintf(&res, "%s\n", res);
+        indent(&res, depth);
+        show_fields(&res, rcl_struct.fields[i], depth);
     }
     return res;
 }
