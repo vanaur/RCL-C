@@ -277,8 +277,11 @@ static void indent(String *str, int n)
 static String show_structure(const struct RCL_Value_DataStruct rcl_struct, const int deepness)
 {
     String res = rcl_sprintf_s("\n%s'Structure<:%s>", show_indent(deepness / 2), rcl_struct.template->name);
+
     for (Iterator i = 0; i < rcl_struct.template->field_alloc_used; i++)
     {
+        if (rcl_struct.fields[i].field_value == NULL)
+            return res;
 
         if (i + 1 < rcl_struct.template->field_alloc_used)
             if (rcl_struct.fields[i + 1].field_value->kind != RCL_Value_DataStruct)

@@ -96,7 +96,7 @@ struct RCL_Value_DataStruct
 } __attribute__((packed));
 
 // Return a pointer of the specific element or NULL of it dosen't exist
-struct RCL_Value_DataStruct_Field *getSpecific_DataStruct_field(struct RCL_Value_DataStruct, String);
+struct RCL_Value_DataStruct_Field *getSpecific_DataStruct_field(struct RCL_Value_DataStruct, hash_t);
 
 // Make a data structure value without filled fields => just structure template pointer
 struct RCL_Value_DataStruct make_DataStruct_unfilled(struct RCL_Structure *);
@@ -112,8 +112,8 @@ typedef struct
     String word_str;
     hash_t hash_code;
 } RCL_Value_Word_t;
-typedef String RCL_Value_LamdaDecl_t;
-typedef String RCL_Value_EndLambdaScope_t;
+typedef RCL_Value_Word_t RCL_Value_LamdaDecl_t;
+typedef RCL_Value_Word_t RCL_Value_EndLambdaScope_t;
 typedef LiteralOperation RCL_Value_LiteralOperation_t;
 typedef Combinator RCL_Value_Combinator_t;
 typedef struct
@@ -159,6 +159,7 @@ typedef struct ValueTag
 // This is the content of case `case` of the array `vname`
 // This is a concatenation of terms
 #define RCL_ARRAY_CONTENT_CASE(vname, case) vname.u.array_.array->array[case].u.concatenation_
+#define RCL_ARRAY_CONTENT_CASE_FROM_U(varray, case) varray.array->array[case].u.concatenation_
 
 // Shorter names as macros
 // To build a more visual AST :
@@ -191,8 +192,8 @@ Value make_RCL_Value_Float_f(const double);
 Value make_RCL_Value_Char(const RCL_Value_Char_t);
 Value make_RCL_Value_String(const RCL_Value_String_t);
 Value make_RCL_Value_Word(const String);
-Value make_RCL_Value_EndLamScope(const RCL_Value_EndLambdaScope_t);
-Value make_RCL_Value_Lambda(const RCL_Value_LamdaDecl_t);
+Value make_RCL_Value_EndLamScope(const String);
+Value make_RCL_Value_Lambda(const String);
 Value make_RCL_Value_LiteralOperation(const RCL_Value_LiteralOperation_t);
 Value make_RCL_Value_LiteralOperation_kind(const unsigned short);
 Value make_RCL_Value_Combinator(const RCL_Value_Combinator_t);
@@ -205,13 +206,9 @@ Value make_RCL_Value_Concatenation(RawCode *);
 Value otov(Operation);
 
 #define RCL_NIL_WRD "nil__"
-
-/* struct RawCode
-{
-    Value *array;
-    size_t used;
-    size_t size;
-} __attribute__((packed)); */
+#define RCL_NIL_HSH ((hash_t)268497766)
+#define RCL_NEW_WRD "new__"
+#define RCL_NEW_HSH ((hash_t)268365997)
 
 /*** Values vectorization under concatenation form ***/
 
@@ -249,5 +246,7 @@ Value top_rcode(RawCode *);
 
 size_t count_operations(ListOperation);
 size_t count_operations_bykind(RawCode, enum Value_Kind);
+
+Value quote_of_char_to_string(const RawCode);
 
 static const Value emptyRawCodeValue = {.kind = RCL_Value_Empty};

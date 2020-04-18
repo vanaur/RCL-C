@@ -31,24 +31,26 @@
 #include <VM\Core\State\State.h>
 #include <VM\Core\Execution\Interpreter\Atoms\field.h>
 
-void eval_field(Stack * stack, BResult * bresult, RCL_Structure_Field field)
+void eval_field(Stack *stack, BResult *bresult, RCL_Structure_Field field)
 {
     String field_name;
 
     switch (field->kind)
     {
     case is_FreeField:
-        {field_name = field->u.freefield_.lident_;}
+        __fast_assign(field_name, field->u.freefield_.lident_);
         break;
 
     case is_EnumField:
-        {field_name = field->u.enumfield_.lident_;}
+        __fast_assign(field_name, field->u.enumfield_.lident_);
         break;
 
     case is_SpecField:
-        {field_name = field->u.specfield_.lident_;}
+        __fast_assign(field_name, field->u.specfield_.lident_);
         break;
     }
+
+    const hash_t hash_code = hash_djb2(field_name);
 
     if (top_ptr(stack)->kind != RCL_Value_DataStruct)
     {
@@ -61,7 +63,7 @@ void eval_field(Stack * stack, BResult * bresult, RCL_Structure_Field field)
 
     if (field->kind == is_EnumField)
     {
-        signed int index = field_index(*_struct.template, field_name);
+        signed int index = field_index(*_struct.template, hash_code);
 
         if (index == -1)
             goto unknown_field;
@@ -79,7 +81,7 @@ void eval_field(Stack * stack, BResult * bresult, RCL_Structure_Field field)
         return push(stack, RCL_Integer_I(index));
     }
 
-    struct RCL_Value_DataStruct_Field *field_ptr = getSpecific_DataStruct_field(_struct, field_name);
+    struct RCL_Value_DataStruct_Field *field_ptr = getSpecific_DataStruct_field(_struct, hash_code);
 
     if (field_ptr == NULL)
         goto unknown_field;

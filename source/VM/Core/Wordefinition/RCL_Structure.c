@@ -115,10 +115,10 @@ struct RCL_Structure make_rcl_structure(UIdent name, ListRCL_Structure_Field fie
     return result;
 }
 
-signed int field_index(struct RCL_Structure rcl_structure, String name)
+signed int field_index(struct RCL_Structure rcl_structure, hash_t hash_code)
 {
     for (Iterator i = 0; i < rcl_structure.field_alloc_used; i++)
-        if (!strcmp(rcl_structure.fields[i].name, name))
+        if (rcl_structure.fields[i].hash_code == hash_code)
             return i;
     return -1;
 }

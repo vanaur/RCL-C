@@ -30,7 +30,7 @@
 
 static const Value emptyStackValue = {.kind = RCL_Value_Empty};
 
-inline void init_stack(Stack * stack, const size_t initSize)
+inline void init_stack(Stack *stack, const size_t initSize)
 {
     stack->array = (Value *)malloc(initSize * sizeof(Value));
     stack->used = 0;
@@ -39,13 +39,13 @@ inline void init_stack(Stack * stack, const size_t initSize)
     stack->overflow = false;
 }
 
-inline void multinit_stack(Stack * stacks[], size_t nbr_stck)
+inline void multinit_stack(Stack *stacks[], size_t nbr_stck)
 {
     while (nbr_stck--)
         init_stack(stacks[nbr_stck], 1);
 }
 
-inline void resetStack(Stack * stack)
+inline void resetStack(Stack *stack)
 {
     memset(stack->array, stack->used = 0, stack->size);
     stack->array = (Value *)malloc((stack->size = 1) * sizeof(Value));
@@ -53,7 +53,7 @@ inline void resetStack(Stack * stack)
     //stack->fname = "\0";
 }
 
-inline void totalyFreeStack(Stack * stack)
+inline void totalyFreeStack(Stack *stack)
 {
     free(stack->array);
     stack->array = NULL;
@@ -62,7 +62,7 @@ inline void totalyFreeStack(Stack * stack)
     stack->fname = "\0";
 }
 
-inline void concatStack(Stack * dest_ptr, Stack * src_ptr, size_t from)
+inline void concatStack(Stack *dest_ptr, Stack *src_ptr, size_t from)
 {
     assert(src_ptr->used >= from);
 
@@ -77,7 +77,7 @@ inline void concatStack(Stack * dest_ptr, Stack * src_ptr, size_t from)
         dest_ptr->size = 2 * dest_ptr->used;
 }
 
-inline void concatStackUntil(Stack * dest_ptr, Stack * src_ptr, size_t from, size_t until)
+inline void concatStackUntil(Stack *dest_ptr, Stack *src_ptr, size_t from, size_t until)
 {
     if (from >= until)
         return;
@@ -96,7 +96,7 @@ inline void concatStackUntil(Stack * dest_ptr, Stack * src_ptr, size_t from, siz
         dest_ptr->size = 2 * dest_ptr->used;
 }
 
-inline void push(Stack * stack, const Value item)
+inline void push(Stack *stack, const Value item)
 {
     if (stack->used == stack->size)
     {
@@ -107,12 +107,12 @@ inline void push(Stack * stack, const Value item)
     stack->array[stack->used++] = item;
 }
 
-inline void pop(Stack * stack)
+inline void pop(Stack *stack)
 {
     stack->array[stack->used == 0 ? 0 : stack->used--];
 }
 
-Value drop(Stack * stack)
+Value drop(Stack *stack)
 {
     if (!stack->used)
         return emptyStackValue;
@@ -121,19 +121,19 @@ Value drop(Stack * stack)
     return last;
 }
 
-inline Value top(const Stack * stack)
+inline Value top(const Stack *stack)
 {
     return (
         stack->used == 0 ? emptyStackValue : stack->array[stack->used - 1]);
 }
 
-inline Value *top_ptr(Stack * stack)
+inline Value *top_ptr(Stack *stack)
 {
-    assert(stack->used > 0);
+    rcl_assert(stack->used > 0);
     return &stack->array[stack->used - 1];
 }
 
-inline Value *topx_ptr(Stack * stack, const size_t x)
+inline Value *topx_ptr(Stack *stack, const size_t x)
 {
     assert(stack->used > 0);
     return &stack->array[stack->used - x];

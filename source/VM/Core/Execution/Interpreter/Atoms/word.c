@@ -41,8 +41,8 @@
 
 inline void evalword(Stack *stack, BResult *bresult, RCL_Value_Word_t *word)
 {
-    String tmp_str = rcl_sprintf_s("%s.%s", S_CURRENTF, word->word_str);
-    struct RCL_Lambda *cpytmp_lambda = getSpecific_lambda(&bresult->wordico, hash_djb2(tmp_str));
+
+    struct RCL_Lambda *cpytmp_lambda = getSpecific_lambda(&bresult->wordico, word->hash_code);
     if (cpytmp_lambda != NULL)
     {
         return eval_lambda_call(stack, cpytmp_lambda, bresult);
@@ -54,41 +54,34 @@ inline void evalword(Stack *stack, BResult *bresult, RCL_Value_Word_t *word)
         return eval_function(stack, cpytmp_function, bresult);
     }
 
-    struct RCL_Extern *cpytmp_extern = getSpecific_extern(&bresult->wordico, word->hash_code);
-    if (cpytmp_extern != NULL)
+    word->word_str[0] = toupper(word->word_str[0]);
+    struct RCL_Structure *cpytmp_structure = getSpecific_structure(&bresult->wordico, hash_djb2(word->word_str));
+    if (cpytmp_structure != NULL)
     {
-        return eval_external_call(stack, bresult, cpytmp_extern);
+        return push(stack, make_RCL_Value_DataStruct(make_DataStruct_unfilled(cpytmp_structure)));
     }
+    word->word_str[0] = tolower(word->word_str[0]);
 
-    if (!strcmp(word->word_str, "new__"))
+    if (word->hash_code == RCL_NEW_HSH)
     {
         return eval_new(stack, bresult);
     }
 
-    if (!strcmp(word->word_str, RCL_NIL_WRD))
+    if (word->hash_code == RCL_NIL_HSH)
     {
         // Used by data structures, this word simply means
         // that you do not want to fill in a field immediately
         return push(stack, RCL_Word(RCL_NIL_WRD));
     }
 
-    String upped = word->word_str;
-    upped[0] = toupper(upped[0]);
-
-    struct RCL_Structure *cpytmp_structure = getSpecific_structure(&bresult->wordico, hash_djb2(upped));
-
-    if (cpytmp_structure != NULL)
+    struct RCL_Extern *cpytmp_extern = getSpecific_extern(&bresult->wordico, word->hash_code);
+    if (cpytmp_extern != NULL)
     {
-        return push(stack, make_RCL_Value_DataStruct(make_DataStruct_unfilled(cpytmp_structure)));
+        return eval_external_call(stack, bresult, cpytmp_extern);
     }
 
     // If the word is unrecognized, then put an error to the state
 
-    NewState_continue(
-        make_error,
-        Interpreter,
-        "Unrecognized word: `%s'.",
-        word->word_str);
-
-    state_put(&bresult->state, make_info(Interpreter, "It could have been used as a lambda name that was unscoped."));
+    state_put_err_it("Unrecognized word: `%s', in function `%s'.", word->word_str, S_CURRENTF);
+    state_put_info_it("It could have been used as a lambda name that was unscoped.", NULL);
 }

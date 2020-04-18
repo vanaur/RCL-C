@@ -59,7 +59,7 @@ struct RCL_Structure_field make_spec_field(String, String);
 
 size_t count_fields(ListRCL_Structure_Field);
 
-signed int field_index(struct RCL_Structure, String);
+signed int field_index(struct RCL_Structure, hash_t);
 
 void init_rcl_structure(struct RCL_Structure*, String, size_t);
 void add_field(struct RCL_Structure*, struct RCL_Structure_field);

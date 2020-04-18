@@ -64,7 +64,7 @@ struct RCL_Function *getSpecific_function(struct Wordico *, hash_t);
 struct RCL_Extern *getSpecific_extern(struct Wordico *, hash_t);
 struct RCL_Structure *getSpecific_structure(struct Wordico *, hash_t);
 struct RCL_Lambda *getSpecific_lambda(struct Wordico *, hash_t);
-struct RCL_Structure_field *getSpecific_field(struct Wordico *, String);
+struct RCL_Structure_field *getSpecific_field(struct Wordico *, hash_t);
 
 // Checks if a structure, function or external data definition already exists in the table
 // Take a string pointer to indicate the kind of data if yet defined (for error messages)

@@ -36,10 +36,10 @@
 #include <VM\Core\Wordefinition\RCL_Structure.h>
 #include <VM\Core\Browse\BResult.h>
 
-struct RCL_Value_DataStruct_Field *getSpecific_DataStruct_field(struct RCL_Value_DataStruct data_struct, String name)
+struct RCL_Value_DataStruct_Field *getSpecific_DataStruct_field(struct RCL_Value_DataStruct data_struct, hash_t hash_code)
 {
     for (Iterator i = 0; i < data_struct.template->field_alloc_used; i++)
-        if (!strcmp(data_struct.fields[i].field_type_info->name, name))
+        if (data_struct.fields[i].field_type_info->hash_code == hash_code)
             return &data_struct.fields[i];
     return NULL;
 }
@@ -154,14 +154,14 @@ Value make_RCL_Value_Word(const String word)
     return (Value){.kind = RCL_Value_Word, .u.word_.word_str = word, .u.word_.hash_code = hash_djb2(word)};
 }
 
-Value make_RCL_Value_EndLamScope(const RCL_Value_EndLambdaScope_t name)
+Value make_RCL_Value_EndLamScope(const String name)
 {
-    return (Value){.kind = RCL_Value_EndLamScope, .u.endLamScope_ = name};
+    return (Value){.kind = RCL_Value_EndLamScope, .u.word_.word_str = name, .u.word_.hash_code = hash_djb2(name)};
 }
 
-Value make_RCL_Value_Lambda(const RCL_Value_LamdaDecl_t name)
+Value make_RCL_Value_Lambda(const String name)
 {
-    return (Value){.kind = RCL_Value_Lambda, .u.lam_ = name};
+    return (Value){.kind = RCL_Value_Lambda, .u.word_.word_str = name, .u.word_.hash_code = hash_djb2(name)};
 }
 
 Value make_RCL_Value_LiteralOperation(const RCL_Value_LiteralOperation_t lo)
@@ -340,29 +340,29 @@ Value otov(Operation op)
     }
 }
 
-void init_rcode(RawCode * rcode, size_t initSize)
+void init_rcode(RawCode *rcode, size_t initSize)
 {
     InitVector(rcode, initSize, Value);
 }
 
-void push_rcode(RawCode * rcode, Value item)
+void push_rcode(RawCode *rcode, Value item)
 {
     PushToVector(rcode, Value, item);
 }
 
-void pop_rcode(RawCode * rcode)
+void pop_rcode(RawCode *rcode)
 {
     PopVector(rcode);
 }
 
-Value drop_rcode(RawCode * rcode)
+Value drop_rcode(RawCode *rcode)
 {
     Value last = top_rcode(rcode);
     pop_rcode(rcode);
     return last;
 }
 
-Value top_rcode(RawCode * rcode)
+Value top_rcode(RawCode *rcode)
 {
     if (rcode->size == 0)
         return emptyRawCodeValue;
@@ -383,13 +383,13 @@ size_t count_operations(ListOperation ls)
     return result;
 }
 
-void concat_rcode(RawCode * dest_ptr, RawCode * src_ptr)
+void concat_rcode(RawCode *dest_ptr, RawCode *src_ptr)
 {
     for (Iterator i = 0; i < src_ptr->used; i++)
         push_rcode(dest_ptr, src_ptr->array[i]);
 }
 
-void concat_rcode_from(RawCode * dest_ptr, RawCode * src_ptr, size_t from)
+void concat_rcode_from(RawCode *dest_ptr, RawCode *src_ptr, size_t from)
 {
     assert(src_ptr->used >= from);
 
@@ -404,7 +404,7 @@ void concat_rcode_from(RawCode * dest_ptr, RawCode * src_ptr, size_t from)
         dest_ptr->size = 2 * dest_ptr->used;
 }
 
-void concat_rcode_until(RawCode * dest_ptr, RawCode * src_ptr, size_t from, size_t until)
+void concat_rcode_until(RawCode *dest_ptr, RawCode *src_ptr, size_t from, size_t until)
 {
     if (from >= until)
         return;
@@ -424,7 +424,7 @@ void concat_rcode_until(RawCode * dest_ptr, RawCode * src_ptr, size_t from, size
 }
 
 inline void seq_replace(
-    RawCode * rcode,
+    RawCode *rcode,
     const Value seq1[], size_t size1,
     const Value seq2[], size_t size2)
 {
@@ -463,4 +463,13 @@ RawCode fast_rcode_subv(const RawCode src, const size_t from, const size_t until
     for (Iterator i = from; i < until; i++)
         result.array[result.used++] = src.array[i];
     return result;
+}
+
+Value quote_of_char_to_string(const RawCode rcode)
+{
+    RCL_Value_String_t result = malloc(rcode.used + 1);
+    for (Iterator i = 0; i < rcode.used; i++)
+        result[i] = rcode.array[i].u.char_;
+    result[rcode.used + 1] = '\0';
+    return RCL_String(result);
 }

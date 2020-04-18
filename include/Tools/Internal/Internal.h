@@ -46,3 +46,9 @@
         _interr(fmt, args);       \
         exit(EXIT_FAILURE);       \
     }
+
+#define rcl_assert(_exp)                                              \
+    {                                                                 \
+        if (!(_exp))                                                  \
+            _interr_ext("Assertion of ` " #_exp " ` is false.", NULL) \
+    }

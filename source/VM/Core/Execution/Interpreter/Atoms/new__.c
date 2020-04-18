@@ -30,7 +30,7 @@
 #include <VM\Core\Wordefinition\RCL_Structure.h>
 #include <VM\Core\Execution\Interpreter\Atoms\new__.h>
 
-void eval_new(Stack * stack, BResult * bresult)
+void eval_new(Stack *stack, BResult *bresult)
 {
     if (top_ptr(stack)->kind != RCL_Value_DataStruct)
     {
@@ -77,6 +77,8 @@ void eval_new(Stack * stack, BResult * bresult)
         case _is_Spec:
         {
             // TODO
+            // rcl_assert( ... )
+            _struct.fields[i].field_value = dropped;
         }
         case _is_Field:
         {

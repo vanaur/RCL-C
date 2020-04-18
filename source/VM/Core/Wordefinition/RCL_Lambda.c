@@ -45,15 +45,13 @@ struct RCL_Lambda make_rcl_Lambda(String name, struct RCL_Argv rcl_argv, Value v
         switch (rcl_argv.ioc)
         {
         case Interpreted:
-        {
-            result.u.On_Interpreted.i_lam.value = value;
+            __fast_assign(result.u.On_Interpreted.i_lam.value, value);
             break;
-        }
+
         case Compiled:
-        {
-            result.u.On_Compiled.c_lam.value = value;
+            __fast_assign(result.u.On_Compiled.c_lam.value, value);
             break;
-        }
+
         case Jited:
             break;
         }
@@ -61,29 +59,23 @@ struct RCL_Lambda make_rcl_Lambda(String name, struct RCL_Argv rcl_argv, Value v
     return result;
 }
 
-void vec_init_lambdas(struct VEC_Lambdas * rcl_lam, size_t size)
+void vec_init_lambdas(struct VEC_Lambdas *rcl_lam, size_t size)
 {
     InitVector(rcl_lam, size, struct RCL_Lambda);
 }
 
-void vec_add_lambdas(struct VEC_Lambdas * rcl_lam, struct RCL_Lambda lam)
+void vec_add_lambdas(struct VEC_Lambdas *rcl_lam, struct RCL_Lambda lam)
 {
     PushToVector(rcl_lam, struct RCL_Lambda, lam);
 }
 
-void vec_remove_lambda(struct VEC_Lambdas * rcl_lam, String name)
+void vec_remove_lambda(struct VEC_Lambdas *rcl_lam, hash_t hash_code)
 {
-    int i = 0;
-    for (i = 0; i < rcl_lam->used; i++)
-        if (rcl_lam->array[i].hash_code == hash_djb2(name))
+    int index = 0;
+    for (index = 0; index < rcl_lam->used; index++)
+        if (rcl_lam->array[index].hash_code == hash_code)
             break;
 
-    if (i < rcl_lam->used)
-    {
-        rcl_lam->used -= 1;
-        for (Iterator j = i; j < rcl_lam->used; j++)
-            rcl_lam->array[j] = rcl_lam->array[j + 1];
-    }
-/*     rcl_lam->size = --rcl_lam->used == 0 ? 1 : rcl_lam->used;
-    rcl_lam->array = (struct RCL_Lambda *)realloc(rcl_lam->array, rcl_lam->size * sizeof(struct RCL_Lambda)); */
+    rcl_lam->array[index] = rcl_lam->array[rcl_lam->used - 1];
+    rcl_lam->array[rcl_lam->used == 0 ? 0 : rcl_lam->used--];
 }

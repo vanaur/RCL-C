@@ -64,4 +64,4 @@ struct RCL_Lambda make_rcl_Lambda(String, struct RCL_Argv, Value, Stack);
 
 void vec_init_lambdas(struct VEC_Lambdas*, size_t);
 void vec_add_lambdas(struct VEC_Lambdas*, struct RCL_Lambda);
-void vec_remove_lambda(struct VEC_Lambdas*, String);
+void vec_remove_lambda(struct VEC_Lambdas*, hash_t);

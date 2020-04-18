@@ -310,6 +310,8 @@ static void doSteq(Stack *stack, BResult *bresult)
     Value program = drop(stack);
     const Value seq = drop(stack);
 
+    extend_size_RawCode((RawCode *)stack, seq.u.quote_->used);
+
     extend_size_RawCode(program.u.quote_, 2);
     push_rcode(program.u.quote_, make_RCL_Value_Combinator(QUOTE));
     push_rcode(program.u.quote_, make_RCL_Value_Combinator(CAT));
