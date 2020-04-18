@@ -30,6 +30,7 @@
 #include <VM\Core\RawCode\Combinator\Combinators.h>
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Execution\Interpreter\Atoms\operation.h>
+#include <VM\Core\Execution\Interpreter\Arithmetic.h>
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 #include <VM\Core\Execution\Interpreter\Stack\Combinators\Basics.h>
 #include <VM\Core\Show\Show.h>
@@ -37,11 +38,13 @@
 
 static void doDup(Stack *stack)
 {
+    rcl_assert(stack->used >= 1);
     push(stack, *top_ptr(stack));
 }
 
 static void doSwap(Stack *stack)
 {
+    rcl_assert(stack->used >= 2);
     Value tmp = *topx_ptr(stack, 1);
     *topx_ptr(stack, 1) = *topx_ptr(stack, 2);
     *topx_ptr(stack, 2) = tmp;
@@ -49,6 +52,7 @@ static void doSwap(Stack *stack)
 
 static void doFlip(Stack *stack)
 {
+    rcl_assert(stack->used >= 3);
     Value tmp = *topx_ptr(stack, 1);
     *topx_ptr(stack, 1) = *topx_ptr(stack, 3);
     *topx_ptr(stack, 3) = tmp;
@@ -56,8 +60,16 @@ static void doFlip(Stack *stack)
 
 static void doGis(Stack *stack)
 {
-    const int from = mpz_get_d(drop(stack).u.int_);
-    const int until = mpz_get_d(drop(stack).u.int_);
+    rcl_assert(stack->used >= 2);
+
+    const Value from_val = drop(stack);
+    const Value until_val = drop(stack);
+
+    rcl_assert(from_val.kind == RCL_Value_Integer);
+    rcl_assert(until_val.kind == RCL_Value_Integer);
+
+    const int from = mpz_get_d(from_val.u.int_);
+    const int until = mpz_get_d(until_val.u.int_);
 
     const int size = until - from;
 
@@ -90,6 +102,7 @@ static void doPop(Stack *stack)
 
 static void doQuote(Stack *stack)
 {
+    rcl_assert(stack->used >= 1);
     RawCode *quote = (RawCode *)malloc(sizeof(*quote));
     init_rcode(quote, 1);
     push_rcode(quote, *top_ptr(stack));
@@ -114,19 +127,35 @@ inline void doUnquote(Stack *stack, const Value *quote, BResult *bresult)
 
 static void doId(Stack *stack)
 {
-    // No implementation needed such it returns the same argument
+    rcl_assert(stack->used >= 1);
     return;
 }
 
 static void doCat(Stack *stack)
 {
-    concat_rcode(topx_ptr(stack, 2)->u.quote_, top_ptr(stack)->u.quote_);
-    pop(stack);
+    rcl_assert(stack->used >= 2);
+
+    Value *s1 = topx_ptr(stack, 2);
+    Value *s2 = top_ptr(stack);
+
+    rcl_assert(s1->kind == RCL_Value_Quotation || s1->kind == RCL_Value_String);
+    rcl_assert(s2->kind == RCL_Value_Quotation || s2->kind == RCL_Value_String);
+
+    if (s1->kind == RCL_Value_Quotation && s2->kind == RCL_Value_Quotation)
+        return concat_rcode(s1->u.quote_, drop(stack).u.quote_);
+    if (s1->kind == RCL_Value_String && s2->kind == RCL_Value_String)
+        return (void)strcat(s1->u.string_, drop(stack).u.string_); // TODO: Use 'open_memstream' (...) instead of strcat
+    if (s1->kind == RCL_Value_String && s2->kind == RCL_Value_Quotation)
+        return (void)strcat(s1->u.string_, quote_of_char_to_string(*drop(stack).u.quote_).u.string_);
+    *s1 = quote_of_char_to_string(*s1->u.quote_);
+    strcat(s1->u.string_, drop(stack).u.string_);
 }
 
 static void doCons(Stack *stack)
 {
     // [A] [B] cons => [[A] B]
+
+    rcl_assert(stack->used >= 2);
 
     doSwap(stack);
     doQuote(stack);
@@ -134,19 +163,44 @@ static void doCons(Stack *stack)
     doCat(stack);
 }
 
+static void doUncons_string(Stack *stack)
+{
+    RCL_Value_String_t tmp = top_ptr(stack)->u.string_;
+    const size_t len = strlen(tmp);
+    if (len == 0) // ? Good iead? Or assert?
+        return push(stack, RCL_Word(RCL_NIL_WRD));
+    push(stack, RCL_Char(tmp[len - 1]));
+    tmp[len - 1] = 0;
+}
+
+static void doUncons_quote(Stack *stack)
+{
+    RCL_Value_Quote_t tmp = top_ptr(stack)->u.quote_;
+    if (tmp->used == 0) // ? Good iead? Or assert?
+        return push(stack, RCL_Word(RCL_NIL_WRD));
+    push(stack, tmp->array[tmp->used - 1]);
+    pop_rcode(topx_ptr(stack, 2)->u.quote_);
+}
+
 static void doUncons(Stack *stack)
 {
-    push(stack, top_ptr(stack)->u.quote_->array[top_ptr(stack)->u.quote_->used - 1]);
-    pop_rcode(topx_ptr(stack, 2)->u.quote_);
-    //push(stack, drop_rcode(top_ptr(stack)->u.quote_));
+    rcl_assert(stack->used >= 1);
+    rcl_assert(top_ptr(stack)->kind == RCL_Value_String || top_ptr(stack)->kind == RCL_Value_Quotation);
+    if (top_ptr(stack)->kind == RCL_Value_String)
+        return doUncons_string(stack);
+    return doUncons_quote(stack);
 }
 
 static void doDip(Stack *stack, BResult *bresult)
 {
     // a [B] dip => B a
 
+    rcl_assert(stack->used >= 2);
+
     const Value b_quote = drop(stack);
     const Value a_value = drop(stack);
+
+    rcl_assert(b_quote.kind == RCL_Value_Quotation);
 
     doUnquote(stack, &b_quote, bresult);
     push(stack, a_value);
@@ -156,8 +210,13 @@ static void doSap(Stack *stack, BResult *bresult)
 {
     // [A] [B] sap => B A
 
+    rcl_assert(stack->used >= 2);
+
     Value b = drop(stack);
     Value a = drop(stack);
+
+    rcl_assert(a.kind == RCL_Value_Quotation);
+    rcl_assert(b.kind == RCL_Value_Quotation);
 
     doUnquote(stack, &b, bresult);
     doUnquote(stack, &a, bresult);
@@ -168,7 +227,13 @@ static void doTake(Stack *stack, BResult *bresult)
 {
     // A [B] take => [B A]
 
-    push_rcode(top_ptr(stack)->u.quote_, *topx_ptr(stack, 2));
+    rcl_assert(stack->used >= 2);
+
+    Value *q_val = top_ptr(stack);
+
+    rcl_assert(q_val->kind == RCL_Value_Quotation);
+
+    push_rcode(q_val->u.quote_, *topx_ptr(stack, 2));
     doSwap(stack);
     pop(stack);
 }
@@ -200,7 +265,12 @@ static void doRep(Stack *stack, BResult *bresult)
 {
     // [A] rep => A A
 
+    rcl_assert(stack->used >= 1);
+
     Value to_apply = drop(stack);
+
+    rcl_assert(to_apply.kind == RCL_Value_Quotation);
+
     doUnquote(stack, &to_apply, bresult);
     doUnquote(stack, &to_apply, bresult);
 }
@@ -209,7 +279,12 @@ static void doKap(Stack *stack, BResult *bresult)
 {
     // [A] kap => [A] A
 
+    rcl_assert(stack->used >= 1);
+
     Value to_apply = drop(stack);
+
+    rcl_assert(to_apply.kind == RCL_Value_Quotation);
+
     push(stack, to_apply);
     doUnquote(stack, &to_apply, bresult);
 }
@@ -218,7 +293,12 @@ static void doPak(Stack *stack, BResult *bresult)
 {
     // [A] pak => A [A]
 
+    rcl_assert(stack->used >= 1);
+
     Value to_apply = drop(stack);
+
+    rcl_assert(to_apply.kind == RCL_Value_Quotation);
+
     doUnquote(stack, &to_apply, bresult);
     push(stack, to_apply);
 }
@@ -226,6 +306,8 @@ static void doPak(Stack *stack, BResult *bresult)
 static void doQap(Stack *stack)
 {
     // A [B] qap => [A B]
+
+    rcl_assert(stack->used >= 2);
 
     RawCode *result = (RawCode *)malloc(sizeof(*result));
     init_rcode(result, top_ptr(stack)->u.quote_->used + 1);
@@ -273,6 +355,8 @@ static void doRec(Stack *stack, BResult *bresult)
 {
     // [P] rec => [[P] rec] P
 
+    rcl_assert(stack->used >= 1);
+
     RawCode *result = (RawCode *)malloc(sizeof(*result));
     init_rcode(result, 2);
 
@@ -286,45 +370,93 @@ static void doRec(Stack *stack, BResult *bresult)
     free(result);
 }
 
-static void doStep(Stack *stack, BResult *bresult)
+static void doStep_string(Stack *stack, const Value program, const RCL_Value_String_t seq_s, BResult *bresult)
 {
-    const Value program = drop(stack);
-    const Value seq = drop(stack);
+    const size_t len = strlen(seq_s);
 
-    for (Iterator i = 0; i < seq.u.quote_->used; i++)
+    for (Iterator i = 0; i < len; i++)
     {
-        push(stack, seq.u.quote_->array[i]);
+        push(stack, RCL_Char(seq_s[i]));
         doUnquote(stack, &program, bresult);
     }
 }
 
-/*
-    vq
-    [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20]
-    [~10 cube square quote cat]
-    step
-*/
+static void doStep_quote(Stack *stack, const Value program, const RCL_Value_Quote_t seq, BResult *bresult)
+{
+    for (Iterator i = 0; i < seq->used; i++)
+    {
+        push(stack, seq->array[i]);
+        doUnquote(stack, &program, bresult);
+    }
+}
+
+static void doStep(Stack *stack, BResult *bresult)
+{
+    rcl_assert(stack->used >= 2);
+
+    const Value program = drop(stack);
+    const Value seq = drop(stack);
+
+    rcl_assert(program.kind == RCL_Value_Quotation);
+    rcl_assert(seq.kind == RCL_Value_Quotation || seq.kind == RCL_Value_String);
+
+    if (seq.kind == RCL_Value_String)
+        return doStep_string(stack, program, seq.u.string_, bresult);
+    return doStep_quote(stack, program, seq.u.quote_, bresult);
+}
+
+static void doSteq_quote(Stack *stack, BResult *bresult, const Value program, const RCL_Value_Quote_t seq)
+{
+    const size_t len = seq->used;
+
+    Stack tmp;
+    init_stack(&tmp, len);
+
+    for (Iterator i = 0; i < len; i++)
+    {
+        push(&tmp, seq->array[i]);
+        doUnquote(&tmp, &program, bresult);
+    }
+
+    RawCode *content = malloc(sizeof *content);
+    *content = stack_to_rcode(tmp);
+    free(tmp.array);
+    push(stack, RCL_Quotation(content));
+}
+
+static void doSteq_string(Stack *stack, BResult *bresult, const Value program, const RCL_Value_String_t str)
+{
+    const size_t len = strlen(str);
+
+    Stack tmp;
+    init_stack(&tmp, len);
+
+    for (Iterator i = 0; i < len; i++)
+    {
+        push(&tmp, RCL_Char(str[i]));
+        doUnquote(&tmp, &program, bresult);
+    }
+
+    RawCode *content = malloc(sizeof *content);
+    *content = stack_to_rcode(tmp);
+    free(tmp.array);
+    const Value sv = quote_of_char_to_string(*content);
+    push(stack, sv);
+}
 
 static void doSteq(Stack *stack, BResult *bresult)
 {
+    rcl_assert(stack->used >= 2);
+
     Value program = drop(stack);
-    const Value seq = drop(stack);
+    Value seq = drop(stack);
 
-    extend_size_RawCode((RawCode *)stack, seq.u.quote_->used);
+    rcl_assert(program.kind == RCL_Value_Quotation);
+    rcl_assert(seq.kind == RCL_Value_String || seq.kind == RCL_Value_Quotation);
 
-    extend_size_RawCode(program.u.quote_, 2);
-    push_rcode(program.u.quote_, make_RCL_Value_Combinator(QUOTE));
-    push_rcode(program.u.quote_, make_RCL_Value_Combinator(CAT));
-
-    RawCode *quote = malloc(sizeof *quote);
-    init_rcode(quote, 1);
-    push(stack, make_RCL_Value_Quotation(quote));
-
-    for (Iterator i = 0; i < seq.u.quote_->used; i++)
-    {
-        push(stack, seq.u.quote_->array[i]);
-        doUnquote(stack, &program, bresult);
-    }
+    if (seq.kind == RCL_Value_String)
+        return doSteq_string(stack, bresult, program, seq.u.string_);
+    doSteq_quote(stack, bresult, program, seq.u.quote_);
 }
 
 static void doVq(Stack *stack)
@@ -346,10 +478,16 @@ static void do_nprec(Stack *stack)
 
 static void do_ifte(Stack *stack, BResult *bresult)
 {
+    rcl_assert(stack->used >= 3);
+
     // [condition] [then] [else] ifte
     const Value _else = drop(stack);
     const Value _then = drop(stack);
     const Value _cond = drop(stack);
+
+    rcl_assert(_else.kind == RCL_Value_Quotation);
+    rcl_assert(_then.kind == RCL_Value_Quotation);
+    rcl_assert(_cond.kind == RCL_Value_Quotation);
 
     Stack stk_cond;
     init_stack(&stk_cond, _cond.u.quote_->used);
@@ -366,7 +504,10 @@ static void do_ifte(Stack *stack, BResult *bresult)
 
 static void do_puts(Stack *stack)
 {
-    const String str = drop(stack).u.string_;
+    rcl_assert(stack->used >= 1);
+    const Value val = drop(stack);
+    rcl_assert(val.kind == RCL_Value_String);
+    const String str = val.u.string_;
     fwrite(str, sizeof(char), strlen(str), stdout);
 }
 
@@ -440,6 +581,8 @@ static void do_cmp_fi(Stack *stack, const Value a, const Value b, const Combinat
 
 static void do_cmp(Stack *stack, const Combinator cmp_kind)
 {
+    rcl_assert(stack->used >= 2);
+
     const Value a = drop(stack);
     const Value b = drop(stack);
 
@@ -463,7 +606,11 @@ static void do_cmp(Stack *stack, const Combinator cmp_kind)
 
 static void do_not(Stack *stack)
 {
+    rcl_assert(stack->used >= 1);
+
     const Value a = drop(stack);
+
+    rcl_assert(a.kind == RCL_Value_Integer || a.kind == RCL_Value_Float);
 
     if (a.kind == RCL_Value_Integer)
         return push(stack, RCL_Integer_I(!mpz_get_d(a.u.int_)));
@@ -484,6 +631,8 @@ static void do_wtdo(Stack *stack, BResult *bresult)
     // [condition] [body] wtdo
     // While condition is true => execute body.
 
+    rcl_assert(stack->used >= 2);
+
     const RawCode body = *drop(stack).u.quote_;
     const RawCode cond = *drop(stack).u.quote_;
 
@@ -496,18 +645,6 @@ eval_cond:
         simple_eval_rcode(stack, body, bresult);
         goto eval_cond;
     }
-}
-
-struct th_simple_eval_rcode_args_t
-{
-    Stack *stack;
-    const RawCode rcode;
-    BResult *bresult;
-};
-
-static void th_simple_eval_rcode(struct th_simple_eval_rcode_args_t args)
-{
-    simple_eval_rcode(args.stack, args.rcode, args.bresult);
 }
 
 static void do_stoi(Stack *stack)
@@ -558,7 +695,7 @@ inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
 
     case UNQUOTE:
     {
-        Value quote = drop(stack);
+        const Value quote = drop(stack);
         doUnquote(stack, &quote, bresult);
     }
     break;
@@ -632,7 +769,7 @@ inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
         return do_not(stack);
 
     case QLEN:
-        return push(stack, RCL_Integer_I(drop(stack).u.quote_->used));
+        return push(stack, RCL_Integer_I(top_ptr(stack)->kind == RCL_Value_String ? strlen(drop(stack).u.string_) : drop(stack).u.quote_->used));
 
     case ALEN:
         return push(stack, RCL_Integer_I(drop(stack).u.array_.length));
@@ -643,6 +780,7 @@ inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
     case WTDO:
         return do_wtdo(stack, bresult);
 
+        // TODO:
     case SELECT:
     case CASE:
     case GENREC:
@@ -651,6 +789,8 @@ inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
     case TAILREC:
     case PRIMREC:
 
+        /* conversion combinators */
+
     case STOI:
         return do_stoi(stack);
 
@@ -658,13 +798,23 @@ inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
         return do_itos(stack);
 
     case FTOI:
+        __fast_assign(*top_ptr(stack), RCL_Integer(*ftoz(top_ptr(stack)->u.float_)));
+        break;
+
     case ITOF:
+        __fast_assign(*top_ptr(stack), RCL_Float(*ztof(top_ptr(stack)->u.int_)));
+        break;
+
     case ITOC:
-        return push(stack, RCL_Char(mpz_get_d(drop(stack).u.int_)));
+        __fast_assign(*top_ptr(stack), RCL_Char((char)(mpz_get_d(top_ptr(stack)->u.int_))));
+        break;
 
     case CTOI:
+        __fast_assign(*top_ptr(stack), RCL_Integer_I((int)(top_ptr(stack)->u.char_)));
+        break;
+
     case ITOB:
-        printf("todo");
+        __fast_assign(*top_ptr(stack), RCL_Integer_I((bool)(mpz_get_d(top_ptr(stack)->u.int_))));
         break;
 
     default:

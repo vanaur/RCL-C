@@ -59,3 +59,6 @@ Value top(const Stack *);
 
 Value *top_ptr(Stack *);
 Value *topx_ptr(Stack *, const size_t);
+
+Stack rcode_to_stack(const RawCode, const String fname);
+RawCode stack_to_rcode(const Stack);

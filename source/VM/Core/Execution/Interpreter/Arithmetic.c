@@ -44,7 +44,7 @@ typedef struct
     mpf_t *_float;
 } abstract_number_t;
 
-static mpf_t *ztof(const mpz_t mpz)
+mpf_t *ztof(const mpz_t mpz)
 {
     mpf_t *res = malloc(sizeof(mpf_t));
     mpf_init(*res);
@@ -52,9 +52,17 @@ static mpf_t *ztof(const mpz_t mpz)
     return res;
 }
 
+mpz_t *ftoz(const mpf_t mpf)
+{
+    mpz_t *res = malloc(sizeof(mpz_t));
+    mpz_init(*res);
+    mpz_set_f(*res, mpf);
+    return res;
+}
+
 abstract_number_t new_abstract_number(const Value value_num)
 {
-    assert(value_num.kind == RCL_Value_Integer || value_num.kind == RCL_Value_Float);
+    rcl_assert(value_num.kind == RCL_Value_Integer || value_num.kind == RCL_Value_Float);
     if (value_num.kind == RCL_Value_Integer)
     {
         mpz_t *res_ptr = malloc(sizeof(mpz_t));
@@ -120,11 +128,11 @@ static void compute_arithmetic(Stack *stack, const LiteralOperation lo)
 {
     if (lo->kind != is_Inc && lo->kind != is_Dec)
     {
-        assert(stack->used >= 2);
+        rcl_assert(stack->used >= 2);
     }
     else
     {
-        assert(stack->used >= 1);
+        rcl_assert(stack->used >= 1);
     }
 
     if (lo->kind == is_Inc || lo->kind == is_Dec)

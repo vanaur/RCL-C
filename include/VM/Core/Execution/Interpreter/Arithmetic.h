@@ -28,4 +28,7 @@
 #include <VM\Core\Syntax\Absyn.h>
 #include <VM\Core\Browse\BResult.h>
 
+mpf_t *ztof(const mpz_t);
+mpz_t *ftoz(const mpf_t );
+
 void do_arithmetic(Stack *, const LiteralOperation, BResult *);

@@ -138,3 +138,22 @@ inline Value *topx_ptr(Stack *stack, const size_t x)
     assert(stack->used > 0);
     return &stack->array[stack->used - x];
 }
+
+Stack rcode_to_stack(const RawCode rcode, const String fname)
+{
+    Stack result;
+    result.fname = fname;
+    init_stack(&result, rcode.used);
+    memcpy(result.array, rcode.array, rcode.used * sizeof(Value));
+    result.used = rcode.used;
+    return result;
+}
+
+RawCode stack_to_rcode(const Stack stack)
+{
+    RawCode result = new_RawCode(stack.used);
+    memcpy(result.array, stack.array, stack.used * sizeof(Value));
+    result.used = stack.used;
+    return result;
+}
+

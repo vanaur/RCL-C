@@ -467,6 +467,8 @@ RawCode fast_rcode_subv(const RawCode src, const size_t from, const size_t until
 
 Value quote_of_char_to_string(const RawCode rcode)
 {
+    if (rcode.used == 0)
+        return RCL_String("");
     RCL_Value_String_t result = malloc(rcode.used + 1);
     for (Iterator i = 0; i < rcode.used; i++)
         result[i] = rcode.array[i].u.char_;
