@@ -104,7 +104,7 @@ String show_value(Value value)
     }
     case RCL_Value_Lambda:
     {
-        rcl_asprintf(&result, "%s\\", value.u.lam_);
+        rcl_asprintf(&result, "%s\\", value.u.lam_.word_str);
         break;
     }
     case RCL_Value_Combinator:

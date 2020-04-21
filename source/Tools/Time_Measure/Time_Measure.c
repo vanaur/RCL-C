@@ -39,5 +39,5 @@ double timesdiff(const struct timespec t1, const struct timespec t2)
 
 String show_time(const double t)
 {
-    return rcl_sprintf_s("%.3lf seconds", t);
+    return rcl_sprintf_s("%.5lf seconds", t);
 }

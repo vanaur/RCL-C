@@ -30,23 +30,25 @@
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Execution\Interpreter\Atoms\lambda.h>
 #include <VM\Core\Execution\Interpreter\Atoms\operation.h>
+#include <VM\Core\Show\Show.h>
 
 void new_lambda(Stack *stack, BResult * bresult, const Value lamdop)
 {
-    struct RCL_Lambda *lam_yet_exists = getSpecific_lambda(&bresult->wordico, lamdop.u.lam_.hash_code);
-    if (lam_yet_exists)
+    struct RCL_Lambda *found_ptr = getSpecific_lambda(&bresult->wordico, lamdop.u.lam_.hash_code);
+    if (found_ptr != NULL)
     {
         if (bresult->exec_infos.low)
-            lam_yet_exists->u.On_Interpreted.i_lam.value = drop(stack);
+            found_ptr->u.On_Interpreted.i_lam.value = drop(stack);
         else
         {
-            state_put_warn_it("The lambda `%s` is overwrote in function `%s`.", lam_yet_exists->name, S_CURRENTF);
+            state_put_warn_it("The lambda `%s` is overwrote in function `%s`.", found_ptr->name, S_CURRENTF);
             state_put_info_it("If you need lambda overwriting, use option `--low`.", NULL);
-            state_put_info_it("Else, maybe you want unscope the lambda: `%s$`.", lam_yet_exists->name);
+            state_put_info_it("Else, maybe you want unscope the lambda: `%s$`.", found_ptr->name);
             return;
         }
     }
-    vec_add_lambdas(&bresult->wordico.lambdas, make_rcl_Lambda(lamdop.u.lam_.word_str, bresult->argvs, drop(stack), *stack));
+    else
+        vec_add_lambdas(&bresult->wordico.lambdas, make_rcl_Lambda(lamdop.u.lam_.word_str, bresult->argvs, drop(stack), *stack));
 }
 
 void unscope_lambda(BResult * bresult, const Value lamdop)
