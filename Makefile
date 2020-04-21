@@ -7,39 +7,39 @@ FLEX_OPTS = -pRCL
 BISON = bison
 BISON_OPTS = -t -pRCL -v
 
-CCFLAGS =	-g \
-			-O1 \
-			-s \
-			-Wall \
-			-Wno-unused-label \
-			-Wno-missing-braces \
-			-Wno-uninitialized \
-			-Wno-maybe-uninitialized \
-			-Wno-sign-compare \
-			-Wno-unused-parameter \
-			-Wno-unused-variable \
-			-Wno-cast-function-type \
-			-Wno-unused-value \
-			-Wno-return-type \
-			-Wno-format-extra-args \
-			-Wno-format-zero-length \
-			-Wno-unused-but-set-variable \
-			-Wno-parentheses \
-			-Wno-unused-function \
-			-Wno-discarded-qualifiers \
-			-ftree-loop-distribution \
-			-faggressive-loop-optimizations \
-			-fno-leading-underscore \
-			-floop-parallelize-all \
-			-enable-thread-safe \
-			-ftree-vectorize \
-			-funroll-loops \
-			-fstdarg-opt \
-			-fcombine-stack-adjustments \
-			-fsplit-loops \
-			-ftree-loop-if-convert \
-			-static \
-			-Iinclude
+CCFLAGS_WARNS = 	-Wno-unused-label \
+					-Wno-missing-braces \
+					-Wno-uninitialized \
+					-Wno-maybe-uninitialized \
+					-Wno-sign-compare \
+					-Wno-unused-parameter \
+					-Wno-unused-variable \
+					-Wno-cast-function-type \
+					-Wno-unused-value \
+					-Wno-return-type \
+					-Wno-format-extra-args \
+					-Wno-format-zero-length \
+					-Wno-unused-but-set-variable \
+					-Wno-parentheses \
+					-Wno-unused-function \
+					-Wno-discarded-qualifiers \
+					-Wno-strict-aliasing
+CCFLAGS_OPTIMIZE = 	-ftree-loop-distribution \
+					-faggressive-loop-optimizations \
+					-fno-leading-underscore \
+					-floop-parallelize-all \
+					-enable-thread-safe \
+					-ftree-vectorize \
+					-funroll-loops \
+					-fstdarg-opt \
+					-fcombine-stack-adjustments \
+					-fsplit-loops \
+					-ftree-loop-if-convert \
+					-O2
+CCFLAGS_SIMD =		-mavx2
+CCFLAGS_MISC =		-g -Wall -static -Iinclude
+
+CCFLAGS = ${CCFLAGS_MISC} ${CCFLAGS_WARNS} ${CCFLAGS_OPTIMIZE} ${CCFLAGS_SIMD}
 
 export CFLAGS = ${CCFLAGS}
 
