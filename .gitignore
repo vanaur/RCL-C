@@ -1,3 +1,4 @@
+*.o
 test.clir
 null
 RCL.exe

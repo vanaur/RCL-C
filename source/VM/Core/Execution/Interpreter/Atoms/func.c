@@ -116,9 +116,9 @@ static bool optimized_eval_func__combinator_reccal_ifte(Stack *stack, struct RCL
 {
     const RawCode body = function->body;
 
-    RawCode q_else = *(topx_ptr(RCODE_TO_STACK_PTR(&body), 2)->u.quote_);
-    RawCode q_then = *topx_ptr(RCODE_TO_STACK_PTR(&body), 3)->u.quote_;
-    RawCode q_cond = fast_rcode_subv(body, 0, body.used - 3);
+    const RawCode q_else = *(topx_ptr(RCODE_TO_STACK_PTR(&body), 2)->u.quote_);
+    const RawCode q_then = *topx_ptr(RCODE_TO_STACK_PTR(&body), 3)->u.quote_;
+    const RawCode q_cond = fast_rcode_subv(body, 0, body.used - 3);
 
     bool rec_in_else = false,
          rec_in_then = false;
@@ -218,6 +218,7 @@ static void optimized_eval_func(Stack *stack, struct RCL_Function *function, BRe
 void eval_function(Stack *stack, struct RCL_Function *function, BResult *bresult)
 {
     bresult->current_name = function->name;
+
     if (bresult->exec_infos.optimize_rec)
         optimized_eval_func(stack, function, bresult);
     else

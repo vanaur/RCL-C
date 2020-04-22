@@ -35,11 +35,15 @@
 #include <VM\Core\Execution\Interpreter\Stack\Combinators\Basics.h>
 #include <VM\Core\Show\Show.h>
 #include <VM\Core\RawCode\cmpvalue.h>
+#include <VM\Core\RawCode\cpyvalue.h>
 
 static void doDup(Stack *stack)
 {
     rcl_assert(stack->used >= 1);
-    push(stack, *top_ptr(stack));
+    Value *value = malloc(sizeof *value);
+    valcpy(value, top_ptr(stack));
+    push(stack, *value);
+    //! `push(stack, *top_ptr(stack))`: cannot be done because some operations change the pointers for optimizations.
 }
 
 static void doSwap(Stack *stack)
