@@ -36,7 +36,7 @@
 #include <VM\Core\Execution\Interpreter\Arithmetic.h>
 #include <VM\Core\Execution\Interpreter\Atoms\operation.h>
 #include <VM\Core\Execution\Interpreter\Atoms\word.h>
-#include <VM\Core\Execution\Interpreter\Atoms\new__.h>
+#include <VM\Core\Execution\Interpreter\Atoms\struct_builder.h>
 #include <VM\Core\Execution\Interpreter\Atoms\lambda.h>
 #include <VM\Core\Execution\Interpreter\Atoms\func.h>
 #include <VM\Core\Execution\Interpreter\Atoms\field.h>

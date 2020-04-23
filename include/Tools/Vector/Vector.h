@@ -47,103 +47,103 @@
 #define PopVector(name) \
     name->array[name->used--];
 
-#define Vector(name, T)                                                                                 \
-    struct name                                                                                         \
-    {                                                                                                   \
-        T *array;                                                                                       \
-        size_t used;                                                                                    \
-        size_t size;                                                                                    \
-    } __attribute__((packed)) name;                                                                     \
-    inline void init_##name(struct name *vec_ptr, size_t size)                                          \
-    {                                                                                                   \
-        InitVector(vec_ptr, size, T);                                                                   \
-    }                                                                                                   \
-    inline struct name new_##name(const size_t nbr_items)                                               \
-    {                                                                                                   \
-        return (struct name){(T *)malloc(nbr_items * sizeof(T)), 0, nbr_items};                         \
-    }                                                                                                   \
-    inline void push_##name(struct name *vec_ptr, T item)                                               \
-    {                                                                                                   \
-        if (!vec_ptr->size)                                                                             \
-        {                                                                                               \
-            _interr("Uninitialized vector `%s`", #name); \
-            exit(0);                                                                                    \
-        }                                                                                               \
-        PushToVector(vec_ptr, T, item);                                                                 \
-    }                                                                                                   \
-    inline struct name singleton_##name(T item)                                                         \
-    {                                                                                                   \
-        struct name res = new_##name(1);                                                                \
-        push_##name(&res, item);                                                                        \
-        return res;                                                                                     \
-    }                                                                                                   \
-    inline T head_##name(const struct name *vec_ptr)                                                    \
-    {                                                                                                   \
-        return vec_ptr->array[0];                                                                       \
-    }                                                                                                   \
-    inline T last_##name(const struct name *vec_ptr)                                                    \
-    {                                                                                                   \
-        return vec_ptr->array[vec_ptr->used - 1];                                                       \
-    }                                                                                                   \
-    inline struct name tail_##name(const struct name *vec_ptr)                                          \
-    {                                                                                                   \
-        struct name res = new_##name(vec_ptr->used - 1);                                                \
-        res.array = vec_ptr->array - 1;                                                                 \
-        return res;                                                                                     \
-    }                                                                                                   \
-    inline struct name front_##name(const struct name *vec_ptr)                                         \
-    {                                                                                                   \
-        struct name res = new_##name(vec_ptr->used - 1);                                                \
-        for (int i = 0; i < vec_ptr->used - 1; i++)                                                     \
-            push_##name(&res, vec_ptr->array[i]);                                                       \
-        return res;                                                                                     \
-    }                                                                                                   \
-    inline struct name rreverse_##name(const struct name *vec_ptr)                                      \
-    {                                                                                                   \
-        struct name res = *vec_ptr;                                                                     \
-        for (int i = 0; i < res.used / 2; i++)                                                          \
-        {                                                                                               \
-            T t = res.array[i];                                                                         \
-            res.array[i] = res.array[res.used - i - 1];                                                 \
-            res.array[res.used - i - 1] = t;                                                            \
-        }                                                                                               \
-        return res;                                                                                     \
-    }                                                                                                   \
-    inline void pop_##name(struct name *vec_ptr)                                                        \
-    {                                                                                                   \
-        PopVector(vec_ptr);                                                                             \
-    }                                                                                                   \
-    inline T ctop_##name(struct name vec)                                                               \
-    {                                                                                                   \
-        if (!vec.size)                                                                                  \
-        {                                                                                               \
-            _interr("Uninitialized vector `%s`", #name); \
-            exit(0);                                                                                    \
-        }                                                                                               \
-        return vec.array[vec.used - 1];                                                                 \
-    }                                                                                                   \
-    inline T *top_ptr_##name(struct name *vec_ptr)                                                      \
-    {                                                                                                   \
-        if (!vec_ptr->size)                                                                             \
-        {                                                                                               \
-            _interr("Uninitialized vector `%s`", #name); \
-            exit(0);                                                                                    \
-        }                                                                                               \
-        return &vec_ptr->array[vec_ptr->used - 1];                                                      \
-    }                                                                                                   \
-    inline void extend_size_##name(struct name *vec_ptr, const size_t add_size)                         \
-    {                                                                                                   \
-        vec_ptr->size += add_size;                                                                      \
-        vec_ptr->array = (T *)realloc(vec_ptr->array, vec_ptr->size * sizeof(T));                       \
-        if (vec_ptr->array == NULL)                                                                     \
-            perror("Out of vector memory");                                                             \
-    }                                                                                                   \
-    inline void concat_##name(struct name *vec_ptr, const struct name to_copy)                          \
-    {                                                                                                   \
-        if (to_copy.used == 0)                                                                          \
-            return;                                                                                     \
-        if ((vec_ptr->used - vec_ptr->size) < to_copy.used)                                             \
-            extend_size_##name(vec_ptr, to_copy.used);                                                  \
-        memcpy(&vec_ptr->array[vec_ptr->used], to_copy.array, to_copy.used * sizeof(T));                \
-        vec_ptr->used += to_copy.used;                                                                  \
+#define Vector(name, T)                                                                  \
+    struct name                                                                          \
+    {                                                                                    \
+        T *array;                                                                        \
+        size_t used;                                                                     \
+        size_t size;                                                                     \
+    } __attribute__((packed)) name;                                                      \
+    inline void init_##name(struct name *vec_ptr, size_t size)                           \
+    {                                                                                    \
+        InitVector(vec_ptr, size, T);                                                    \
+    }                                                                                    \
+    inline struct name new_##name(const size_t nbr_items)                                \
+    {                                                                                    \
+        return (struct name){(T *)malloc(nbr_items * sizeof(T)), 0, nbr_items};          \
+    }                                                                                    \
+    inline void push_##name(struct name *vec_ptr, T item)                                \
+    {                                                                                    \
+        if (!vec_ptr->size)                                                              \
+        {                                                                                \
+            _interr("Uninitialized vector `%s`", #name);                                 \
+            exit(0);                                                                     \
+        }                                                                                \
+        PushToVector(vec_ptr, T, item);                                                  \
+    }                                                                                    \
+    inline struct name singleton_##name(T item)                                          \
+    {                                                                                    \
+        struct name res = new_##name(1);                                                 \
+        push_##name(&res, item);                                                         \
+        return res;                                                                      \
+    }                                                                                    \
+    inline T head_##name(const struct name *vec_ptr)                                     \
+    {                                                                                    \
+        return vec_ptr->array[0];                                                        \
+    }                                                                                    \
+    inline T last_##name(const struct name *vec_ptr)                                     \
+    {                                                                                    \
+        return vec_ptr->array[vec_ptr->used - 1];                                        \
+    }                                                                                    \
+    inline struct name tail_##name(const struct name *vec_ptr)                           \
+    {                                                                                    \
+        struct name res = new_##name(vec_ptr->used - 1);                                 \
+        res.array = vec_ptr->array - 1;                                                  \
+        return res;                                                                      \
+    }                                                                                    \
+    inline struct name front_##name(const struct name *vec_ptr)                          \
+    {                                                                                    \
+        struct name res = new_##name(vec_ptr->used - 1);                                 \
+        for (int i = 0; i < vec_ptr->used - 1; i++)                                      \
+            push_##name(&res, vec_ptr->array[i]);                                        \
+        return res;                                                                      \
+    }                                                                                    \
+    inline struct name rreverse_##name(const struct name *vec_ptr)                       \
+    {                                                                                    \
+        struct name res = *vec_ptr;                                                      \
+        for (int i = 0; i < res.used / 2; i++)                                           \
+        {                                                                                \
+            T t = res.array[i];                                                          \
+            res.array[i] = res.array[res.used - i - 1];                                  \
+            res.array[res.used - i - 1] = t;                                             \
+        }                                                                                \
+        return res;                                                                      \
+    }                                                                                    \
+    inline void pop_##name(struct name *vec_ptr)                                         \
+    {                                                                                    \
+        PopVector(vec_ptr);                                                              \
+    }                                                                                    \
+    inline T ctop_##name(struct name vec)                                                \
+    {                                                                                    \
+        if (!vec.size)                                                                   \
+        {                                                                                \
+            _interr("Uninitialized vector `%s`", #name);                                 \
+            exit(0);                                                                     \
+        }                                                                                \
+        return vec.array[vec.used - 1];                                                  \
+    }                                                                                    \
+    inline T *top_ptr_##name(struct name *vec_ptr)                                       \
+    {                                                                                    \
+        if (!vec_ptr->size)                                                              \
+        {                                                                                \
+            _interr("Uninitialized vector `%s`", #name);                                 \
+            exit(0);                                                                     \
+        }                                                                                \
+        return &vec_ptr->array[vec_ptr->used - 1];                                       \
+    }                                                                                    \
+    inline void extend_size_##name(struct name *vec_ptr, const size_t add_size)          \
+    {                                                                                    \
+        vec_ptr->size += add_size;                                                       \
+        vec_ptr->array = (T *)realloc(vec_ptr->array, vec_ptr->size * sizeof(T));        \
+        if (vec_ptr->array == NULL)                                                      \
+            perror("Out of vector memory");                                              \
+    }                                                                                    \
+    inline void concat_##name(struct name *vec_ptr, const struct name to_copy)           \
+    {                                                                                    \
+        if (to_copy.used == 0)                                                           \
+            return;                                                                      \
+        if ((vec_ptr->used - vec_ptr->size) < to_copy.used)                              \
+            extend_size_##name(vec_ptr, to_copy.used);                                   \
+        memcpy(&vec_ptr->array[vec_ptr->used], to_copy.array, to_copy.used * sizeof(T)); \
+        vec_ptr->used += to_copy.used;                                                   \
     }

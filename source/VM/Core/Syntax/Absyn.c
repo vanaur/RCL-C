@@ -374,6 +374,7 @@ RCL_Structure_Field make_FreeField(LIdent p1)
     }
     tmp->kind = is_FreeField;
     tmp->u.freefield_.lident_ = p1;
+    tmp->u.freefield_.hash_code = hash_djb2(p1);
     return tmp;
 }
 /********************   EnumField    ********************/
@@ -387,6 +388,7 @@ RCL_Structure_Field make_EnumField(LIdent p1)
     }
     tmp->kind = is_EnumField;
     tmp->u.enumfield_.lident_ = p1;
+    tmp->u.enumfield_.hash_code = hash_djb2(p1);
     return tmp;
 }
 /********************   SpecField    ********************/
@@ -400,6 +402,7 @@ RCL_Structure_Field make_SpecField(LIdent p1, Identifier p2)
     }
     tmp->kind = is_SpecField;
     tmp->u.specfield_.lident_ = p1;
+    tmp->u.specfield_.hash_code = hash_djb2(p1);
     tmp->u.specfield_.identifier_ = p2;
     return tmp;
 }/********************   TPrimitive    ********************/

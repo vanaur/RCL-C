@@ -205,10 +205,16 @@ Value make_RCL_Value_Array(RawCode *, const size_t);
 Value make_RCL_Value_Concatenation(RawCode *);
 Value otov(Operation);
 
-#define RCL_NIL_WRD "nil__"
-#define RCL_NIL_HSH ((hash_t)268497766)
-#define RCL_NEW_WRD "new__"
-#define RCL_NEW_HSH ((hash_t)268365997)
+/*** Some words to work with structures ***/
+
+#define RCL_NIL_WRD  "nil"  // It allows you to fill a field with "empty" data.
+#define RCL_NIL_HSH  ((hash_t)193500360)
+#define RCL_NEW_WRD  "new"  // It fills the fields of structure S in order with what is in the stack.
+#define RCL_NEW_HSH  ((hash_t)193500239)
+#define RCL_NEWF_WRD "newf" // It fills the fields {C} of structure S with what is on the stack and fills the other fields with A.
+#define RCL_NEWF_HSH ((hash_t)2090540693)
+#define RCL_NEWA_WRD "newa" // It initializes all fields of structure S with data A.
+#define RCL_NEWA_HSH ((hash_t)2090540688)
 
 /*** Values vectorization under concatenation form ***/
 

@@ -28,3 +28,5 @@
 #include <VM\Core\Browse\BResult.h>
 
 void eval_new(Stack *, BResult *);
+void eval_newf(Stack *, BResult *);
+void eval_newa(Stack *, BResult *);

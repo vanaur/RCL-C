@@ -123,14 +123,26 @@ String show_value(Value value)
         return show_array(value.u.array_);
 
     case RCL_Value_DataStruct:
-    {
-        //rcl_asprintf(&result, "'Structure<:%s>", value.u.dataStruct_.template->name);
         return show_structure_whole(value.u.dataStruct_);
-        break;
-    }
+
     case RCL_Value_Field:
     {
-        rcl_asprintf(&result, ".<>");
+        switch (value.u.field_->kind)
+        {
+        case _is_Enum:
+            rcl_asprintf(&result, ".%s", value.u.field_->u.enumfield_.lident_);
+            break;
+        case _is_Field:
+            rcl_asprintf(&result, ".%s", value.u.field_->u.freefield_.lident_);
+            break;
+        case _is_Spec:
+            rcl_asprintf(&result, ".%s", value.u.field_->u.specfield_.lident_);
+            break;
+
+        default:
+            rcl_asprintf(&result, ".<>");
+            break;
+        }
         break;
     }
     case RCL_Value_Parallel:

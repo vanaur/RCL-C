@@ -33,7 +33,7 @@
 #include <VM\Core\Execution\Interpreter\Stack\Combinators\Basics.h>
 #include <VM\Core\Execution\Interpreter\Atoms\operation.h>
 #include <VM\Core\Execution\Interpreter\Atoms\word.h>
-#include <VM\Core\Execution\Interpreter\Atoms\new__.h>
+#include <VM\Core\Execution\Interpreter\Atoms\struct_builder.h>
 #include <VM\Core\Execution\Interpreter\Atoms\lambda.h>
 #include <VM\Core\Execution\Interpreter\Atoms\func.h>
 #include <VM\Core\Execution\Interpreter\Atoms\field.h>
@@ -62,6 +62,18 @@ inline void evalword(Stack *stack, BResult *bresult, RCL_Value_Word_t *word)
     }
     word->word_str[0] = tolower(word->word_str[0]);
 
+    /** "Words" that are not combinators, but constructors or initializers... **/
+
+    if (word->hash_code == RCL_NEWF_HSH)
+    {
+        return eval_newf(stack, bresult);
+    }
+
+    if (word->hash_code == RCL_NEWA_HSH)
+    {
+        return eval_newa(stack, bresult);
+    }
+
     if (word->hash_code == RCL_NEW_HSH)
     {
         return eval_new(stack, bresult);
@@ -73,6 +85,8 @@ inline void evalword(Stack *stack, BResult *bresult, RCL_Value_Word_t *word)
         // that you do not want to fill in a field immediately
         return push(stack, RCL_Word(RCL_NIL_WRD));
     }
+
+    /** Forgein functions (external, FFI) **/
 
     struct RCL_Extern *cpytmp_extern = getSpecific_extern(&bresult->wordico, word->hash_code);
     if (cpytmp_extern != NULL)
