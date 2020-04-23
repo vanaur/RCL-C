@@ -669,6 +669,31 @@ static void do_itos(Stack *stack)
     push(stack, RCL_String(res));
 }
 
+/*
+    4
+    [7 5 9]
+    [["This is 7"] ["This is 5"] ["This is 9"]]
+    ["Unknown pattern!"]
+    select
+*/
+
+static void do_select(Stack *stack, BResult *bresult)
+{
+    rcl_assert(stack->used >= 4);
+    const Value otherwise = drop(stack);
+    const RawCode results = *drop(stack).u.quote_;
+    const RawCode cases = *drop(stack).u.quote_;
+    const Value value = drop(stack);
+    rcl_assert(results.used == cases.used);
+    Iterator i = 0;
+    for (i; i < cases.used; i++)
+        if (cmpvalue(cases.array[i], value))
+            break;
+    if (i == cases.used)
+        return doUnquote(stack, &otherwise, bresult);
+    doUnquote(stack, &results.array[i], bresult);
+}
+
 inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
 {
     switch (comb)
@@ -784,8 +809,11 @@ inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
     case WTDO:
         return do_wtdo(stack, bresult);
 
-        // TODO:
     case SELECT:
+        return do_select(stack, bresult);
+
+        // TODO:
+
     case CASE:
     case GENREC:
     case LINREC: // https://hypercubed.github.io/joy/html/j05cmp.html
