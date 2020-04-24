@@ -29,9 +29,9 @@
 #include <Tools\Internal\Internal.h>
 #include <Tools\console-color\console-color.h>
 
-#define InitVector(name, Size, T)                \
-    name->array = (T *)malloc(Size * sizeof(T)); \
-    name->used = 0;                              \
+#define InitVector(name, Size, T)           \
+    name->array = malloc(Size * sizeof(T)); \
+    name->used = 0;                         \
     name->size = Size;
 
 #define PushToVector(name, T, Item)                                      \
@@ -60,7 +60,7 @@
     }                                                                                    \
     inline struct name new_##name(const size_t nbr_items)                                \
     {                                                                                    \
-        return (struct name){(T *)malloc(nbr_items * sizeof(T)), 0, nbr_items};          \
+        return (struct name){malloc(nbr_items * sizeof(T)), 0, nbr_items};               \
     }                                                                                    \
     inline void push_##name(struct name *vec_ptr, T item)                                \
     {                                                                                    \

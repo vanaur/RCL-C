@@ -85,7 +85,7 @@ struct RCL_Structure make_rcl_structure(UIdent name, ListRCL_Structure_Field fie
 
     const size_t fields_size = count_fields(fields);
 
-    result.fields = (struct RCL_Structure_field *)malloc(fields_size * sizeof(struct RCL_Structure_field));
+    result.fields = malloc(fields_size * sizeof(struct RCL_Structure_field));
     result.field_alloc_used = 0;
     result.field_alloc_size = fields_size;
 

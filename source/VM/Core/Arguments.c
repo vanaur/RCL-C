@@ -102,7 +102,7 @@ void remove_element(String *argv, int total, int at)
 struct RCL_Argv get_lamargs(String *argv, int *argc)
 {
     const int total = *argc;
-    struct RCL_Argv *result = (struct RCL_Argv *)malloc(sizeof(*result));
+    struct RCL_Argv *result = malloc(sizeof(*result));
     FILE *tmp;
 
     for (int i = 0; i < total; i++)

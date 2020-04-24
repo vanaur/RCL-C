@@ -86,8 +86,8 @@ ffi_type *convertRCLT_FFIT(FFI_Type_Signature rawty)
         return &ffi_type_pointer;
     case is_TStruct:
     {
-        ffi_type *result;
-        ffi_type *fields = malloc(1 * sizeof(ffi_type));
+        ffi_type *result = malloc(sizeof *result);
+        ffi_type *fields = malloc(sizeof *fields);
         result->size = result->alignment = 0;
         result->type = FFI_TYPE_STRUCT;
         result->elements = &fields;

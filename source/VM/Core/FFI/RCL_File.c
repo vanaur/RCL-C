@@ -28,7 +28,7 @@
 
 void init_RCL_File(RCL_Files *files, size_t initSize)
 {
-    files->array = (RCL_File *)malloc(initSize * sizeof(RCL_File));
+    files->array = malloc(initSize * sizeof(RCL_File));
     files->used = 0;
     files->size = initSize;
 }

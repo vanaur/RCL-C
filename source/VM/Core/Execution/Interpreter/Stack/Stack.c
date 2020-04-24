@@ -32,7 +32,7 @@ static const Value emptyStackValue = {.kind = RCL_Value_Empty};
 
 inline void init_stack(Stack *stack, const size_t initSize)
 {
-    stack->array = (Value *)malloc(initSize * sizeof(Value));
+    stack->array = malloc(initSize * sizeof(Value));
     stack->used = 0;
     stack->size = initSize;
     stack->in_rec = false;
@@ -48,7 +48,7 @@ inline void multinit_stack(Stack *stacks[], size_t nbr_stck)
 inline void resetStack(Stack *stack)
 {
     memset(stack->array, stack->used = 0, stack->size);
-    stack->array = (Value *)malloc((stack->size = 1) * sizeof(Value));
+    stack->array = malloc((stack->size = 1) * sizeof(Value));
     stack->in_rec = false;
     //stack->fname = "\0";
 }

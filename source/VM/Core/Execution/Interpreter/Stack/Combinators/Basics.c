@@ -80,7 +80,7 @@ static void doGis(Stack *stack)
     if (size <= 0)
         return push(stack, RCL_Combinator(VQ));
 
-    RawCode *quote = (RawCode *)malloc(sizeof(*quote));
+    RawCode *quote = malloc(sizeof(*quote));
     init_rcode(quote, abs(until - from) + 1);
 
     /*     for (Iterator i = from; i < until; i++)
@@ -107,7 +107,7 @@ static void doPop(Stack *stack)
 static void doQuote(Stack *stack)
 {
     rcl_assert(stack->used >= 1);
-    RawCode *quote = (RawCode *)malloc(sizeof(*quote));
+    RawCode *quote = malloc(sizeof(*quote));
     init_rcode(quote, 1);
     push_rcode(quote, *top_ptr(stack));
     *top_ptr(stack) = make_RCL_Value_Quotation(quote);
@@ -247,7 +247,7 @@ static void doTakex(Stack *stack, BResult *bresult)
 {
     // [A] [B] take => [B [A]]
 
-    RawCode *result = (RawCode *)malloc(sizeof(*result));
+    RawCode *result = malloc(sizeof(*result));
     init_rcode(result, top_ptr(stack)->u.quote_->used + 1);
 
     Value b_quote = drop(stack);
@@ -313,7 +313,7 @@ static void doQap(Stack *stack)
 
     rcl_assert(stack->used >= 2);
 
-    RawCode *result = (RawCode *)malloc(sizeof(*result));
+    RawCode *result = malloc(sizeof(*result));
     init_rcode(result, top_ptr(stack)->u.quote_->used + 1);
 
     RawCode quote = *drop(stack).u.quote_;
@@ -332,7 +332,7 @@ static void doComb_map(Stack *stack, BResult *bresult)
 {
     // [a, b, c] [f] comb_map => [a f b f c f]
 
-    RawCode *result = (RawCode *)malloc(sizeof(*result));
+    RawCode *result = malloc(sizeof(*result));
     init_rcode(result, topx_ptr(stack, 2)->u.quote_->used);
 
     const Value fn = drop(stack);
@@ -361,7 +361,7 @@ static void doRec(Stack *stack, BResult *bresult)
 
     rcl_assert(stack->used >= 1);
 
-    RawCode *result = (RawCode *)malloc(sizeof(*result));
+    RawCode *result = malloc(sizeof(*result));
     init_rcode(result, 2);
 
     Value quote = drop(stack);

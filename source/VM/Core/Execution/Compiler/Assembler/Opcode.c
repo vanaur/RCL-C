@@ -142,8 +142,8 @@ inline ASM_Value opcode_make_asm_value__num(double num)
 /*
 Value make_RCL_Value_Parallel(Value f1, Value f2)
 {
-    Value *tmp1 = (Value *)malloc(sizeof(*tmp1));
-    Value *tmp2 = (Value *)malloc(sizeof(*tmp2));
+    Value *tmp1 = malloc(sizeof(*tmp1));
+    Value *tmp2 = malloc(sizeof(*tmp2));
     tmp1->kind = f1.kind;
     tmp2->kind = f2.kind;
     tmp1->u = f1.u;
@@ -154,7 +154,7 @@ Value make_RCL_Value_Parallel(Value f1, Value f2)
 
 inline ASM_Value opcode_make_asm_value__adress_reg(ASM_Value v)
 {
-    ASM_Value *v_ptr = (ASM_Value *)malloc(sizeof *v_ptr);
+    ASM_Value *v_ptr = malloc(sizeof *v_ptr);
     *v_ptr = v;
     return SIGMA_FILL_CTOR(ASM_Value, ADRESS_REG, adress_reg, v_ptr);
 }
@@ -171,8 +171,8 @@ inline ASM_Value opcode_make_asm_value__label(String identifier)
 
 inline ASM_Value opcode_make_asm_value__add(ASM_Value v1, ASM_Value v2)
 {
-    ASM_Value *v1_ptr = (ASM_Value *)malloc(sizeof *v1_ptr);
-    ASM_Value *v2_ptr = (ASM_Value *)malloc(sizeof *v2_ptr);
+    ASM_Value *v1_ptr = malloc(sizeof *v1_ptr);
+    ASM_Value *v2_ptr = malloc(sizeof *v2_ptr);
     *v1_ptr = v1;
     *v2_ptr = v2;
     return SIGMA_FILL_CTOR(ASM_Value, ADD, asmv_add, v1_ptr, v2_ptr);
@@ -180,8 +180,8 @@ inline ASM_Value opcode_make_asm_value__add(ASM_Value v1, ASM_Value v2)
 
 inline ASM_Value opcode_make_asm_value__sub(ASM_Value v1, ASM_Value v2)
 {
-    ASM_Value *v1_ptr = (ASM_Value *)malloc(sizeof *v1_ptr);
-    ASM_Value *v2_ptr = (ASM_Value *)malloc(sizeof *v2_ptr);
+    ASM_Value *v1_ptr = malloc(sizeof *v1_ptr);
+    ASM_Value *v2_ptr = malloc(sizeof *v2_ptr);
     *v1_ptr = v1;
     *v2_ptr = v2;
     return SIGMA_FILL_CTOR(ASM_Value, SUB, asmv_sub, v1_ptr, v2_ptr);
@@ -189,8 +189,8 @@ inline ASM_Value opcode_make_asm_value__sub(ASM_Value v1, ASM_Value v2)
 
 inline ASM_Value opcode_make_asm_value__mul(ASM_Value v1, ASM_Value v2)
 {
-    ASM_Value *v1_ptr = (ASM_Value *)malloc(sizeof *v1_ptr);
-    ASM_Value *v2_ptr = (ASM_Value *)malloc(sizeof *v2_ptr);
+    ASM_Value *v1_ptr = malloc(sizeof *v1_ptr);
+    ASM_Value *v2_ptr = malloc(sizeof *v2_ptr);
     *v1_ptr = v1;
     *v2_ptr = v2;
     return SIGMA_FILL_CTOR(ASM_Value, MUL, asmv_mul, v1_ptr, v2_ptr);

@@ -56,7 +56,7 @@ size_t count_quals(Identifier id)
 
 String show_ast_identifier(Identifier id)
 {
-    String result = (String)malloc(identifier_length(id));
+    String result = malloc(identifier_length(id));
     String tmp1, tmp2;
     size_t pos = 0;
     switch (id->kind)

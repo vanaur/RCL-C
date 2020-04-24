@@ -7,23 +7,16 @@ FLEX_OPTS = -pRCL
 BISON = bison
 BISON_OPTS = -t -pRCL -v
 
-CCFLAGS_WARNS = 	-Wno-unused-label \
-					-Wno-missing-braces \
-					-Wno-uninitialized \
-					-Wno-maybe-uninitialized \
-					-Wno-sign-compare \
+CCFLAGS_WARNS =		-Wno-discarded-qualifiers \
 					-Wno-unused-parameter \
-					-Wno-unused-variable \
-					-Wno-cast-function-type \
 					-Wno-unused-value \
 					-Wno-return-type \
-					-Wno-format-extra-args \
-					-Wno-format-zero-length \
-					-Wno-unused-but-set-variable \
-					-Wno-parentheses \
 					-Wno-unused-function \
-					-Wno-discarded-qualifiers \
-					-Wno-strict-aliasing
+					-Wno-unused-label \
+					-Wno-missing-braces \
+					-Wno-strict-aliasing \
+					-Wno-parentheses \
+					-Wno-unused-variable
 CCFLAGS_OPTIMIZE = 	-ftree-loop-distribution \
 					-faggressive-loop-optimizations \
 					-fno-leading-underscore \

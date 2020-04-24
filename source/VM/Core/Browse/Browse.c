@@ -571,7 +571,7 @@ void handle_parallelConcat(RawCode * rcode, Operation fx, Operation gx)
 size_t count_includes(ListPreprocessor lp)
 {
     ListPreprocessor tmp = lp;
-    size_t result;
+    size_t result = 0;
     while (tmp != NULL)
     {
         if (tmp->preprocessor_->kind == is_Include)
@@ -584,7 +584,7 @@ size_t count_includes(ListPreprocessor lp)
 size_t count_imports(ListPreprocessor lp)
 {
     ListPreprocessor tmp = lp;
-    size_t result;
+    size_t result = 0;
     while (tmp != NULL)
     {
         if (tmp->preprocessor_->kind == is_Import)

@@ -171,7 +171,7 @@ Value make_RCL_Value_LiteralOperation(const RCL_Value_LiteralOperation_t lo)
 
 Value make_RCL_Value_LiteralOperation_kind(const unsigned short lo)
 {
-    LiteralOperation tmp = (LiteralOperation)malloc(sizeof(*tmp));
+    LiteralOperation tmp = malloc(sizeof(*tmp));
     tmp->kind = lo;
     return (Value){.kind = RCL_Value_LiteralOperation, .u.litOperation_ = tmp};
 }
@@ -183,8 +183,8 @@ Value make_RCL_Value_Combinator(const RCL_Value_Combinator_t comb)
 
 Value make_RCL_Value_Parallel(Value f1, Value f2)
 {
-    Value *tmp1 = (Value *)malloc(sizeof(*tmp1));
-    Value *tmp2 = (Value *)malloc(sizeof(*tmp2));
+    Value *tmp1 = malloc(sizeof(*tmp1));
+    Value *tmp2 = malloc(sizeof(*tmp2));
     tmp1->kind = f1.kind;
     tmp2->kind = f2.kind;
     tmp1->u = f1.u;
@@ -204,7 +204,7 @@ Value make_RCL_Value_DataStruct(const RCL_Value_DataStruct_t _struct)
 
 Value make_RCL_Value_Replicate(size_t n, Value op)
 {
-    Value *tmp = (Value *)malloc(sizeof(*tmp));
+    Value *tmp = malloc(sizeof(*tmp));
     tmp->kind = op.kind;
     tmp->u = op.u;
     return (Value){.kind = RCL_Value_Replicated, .u = {.repeat_ = {.times = n, .op = tmp}}};
@@ -246,7 +246,7 @@ static Value otov_lit(Operation op)
 
 static Value otov_quote(Operation op)
 {
-    RawCode *quote = (RawCode *)malloc(sizeof(*quote));
+    RawCode *quote = malloc(sizeof(*quote));
     ListOperation lo = op->u.quote_.operation_->u.concatenation_.listoperation_;
     init_rcode(quote, count_operations(lo));
     while (lo != NULL)
@@ -269,7 +269,7 @@ static Value otov_concatenation(Operation op)
 {
     ListOperation lo = op->u.concatenation_.listoperation_;
     size_t len = count_operations(lo);
-    RawCode *concatenation = (RawCode *)malloc(sizeof(*concatenation));
+    RawCode *concatenation = malloc(sizeof(*concatenation));
     init_rcode(concatenation, len);
     size_t i = 0;
     while (lo != NULL)
@@ -285,7 +285,7 @@ static Value otov_list(Operation op)
 {
     ListOperation lo = op->u.list_.listoperation_;
     size_t len = count_operations(lo);
-    RawCode *array = (RawCode *)malloc(sizeof(*array));
+    RawCode *array = malloc(sizeof(*array));
     init_rcode(array, len);
     size_t i = 0;
     while (lo != NULL)

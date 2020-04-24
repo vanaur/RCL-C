@@ -68,13 +68,13 @@ void eval_newf(Stack *stack, BResult *bresult)
     const RCL_Value_Array_t array_fields = drop(stack).u.array_;
 
     const size_t len = array_fields.length;
-    RCL_Value_Field_t *fields = malloc(len * sizeof *fields);
+    RCL_Value_Field_t fields[len * sizeof(RCL_Value_Field_t)];
     for (Iterator i = 0; i < len; i++)
         fields[i] = RCL_ARRAY_CONTENT_CASE_FROM_U(array_fields, i)->array[0].u.field_;
 
     rcl_assert(stack->used >= len);
 
-    Value *values = malloc(len * sizeof *values);
+    Value values[len * sizeof(Value)];
     for (Iterator i = 0; i < len; i++)
         values[i] = drop(stack);
 
