@@ -33,51 +33,38 @@
 
 void eval_field(Stack *stack, BResult *bresult, RCL_Structure_Field field)
 {
-    String field_name;
+    rcl_assert(top_ptr(stack)->kind == RCL_Value_DataStruct);
+
+    String field_name = NULL;
+    hash_t hash_code = (hash_t)0;
 
     switch (field->kind)
     {
     case is_FreeField:
+        __fast_assign(hash_code, field->u.freefield_.hash_code);
         __fast_assign(field_name, field->u.freefield_.lident_);
         break;
 
     case is_EnumField:
+        __fast_assign(hash_code, field->u.enumfield_.hash_code);
         __fast_assign(field_name, field->u.enumfield_.lident_);
         break;
 
     case is_SpecField:
+        __fast_assign(hash_code, field->u.specfield_.hash_code);
         __fast_assign(field_name, field->u.specfield_.lident_);
         break;
-    }
-
-    const hash_t hash_code = hash_djb2(field_name);
-
-    if (top_ptr(stack)->kind != RCL_Value_DataStruct)
-    {
-        state_put_info_it("In function `%s':", S_CURRENTF);
-        state_put_err_it("A field operator (`.%s' here) needs a structure, but the top of the stack is a %s.", field_name, show_kind(top_ptr(stack)->kind));
-        return;
     }
 
     struct RCL_Value_DataStruct _struct = drop(stack).u.dataStruct_;
 
     if (field->kind == is_EnumField)
     {
-        signed int index = field_index(*_struct.template, hash_code);
+        int index = field_index(*_struct.template, hash_code);
 
         if (index == -1)
             goto unknown_field;
-
-        if (_struct.template->fields[index].kind != _is_Enum)
-        {
-            NewState_return(
-                make_error,
-                Interpreter,
-                "The field `%s' of the given structure `%s' was supposed to be an enumeration field, but isn't.",
-                field_name,
-                _struct.template->name);
-        }
-
+        rcl_assert(_struct.template->fields[index].kind == _is_Enum);
         return push(stack, RCL_Integer_I(index));
     }
 
