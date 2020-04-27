@@ -1,0 +1,43 @@
+/*
+    The management of memory and value accesses by pointers does not exist natively in IR,
+    we could use an extension to use it, but we can also simulate them rather naively with simple combinators.
+    
+    The idea is very simple:
+    let's consider a pointer as a quotation, and the value contained in the quotation would correspond to the data being pointed to.
+
+    For example, in C:
+
+        int a = 74;         -- Value on the stack
+        int *a_ptr = &a;    -- Pointer to `a`.
+
+        int a = 8;
+        int *a_ptr = &a;
+        *a_ptr += 2;
+        int b = *a_ptr;
+    
+    With what has been described above, one could imagine the representation of this situation by this RCL IR program:
+
+        74      -- Value on the stack
+        quote   -- We quote the top stack value
+
+        => 74 quote == [74]
+
+    With a few functions that act as an abstraction of the mechanism, we would arrive at the following simple and trivial set:
+*/
+
+make_ptr = quote ;                      //-- We're quoting from the top of the stack.
+get_val_ptr = unquote ;                 //-- We're unquoting the top of the stack.
+cpy_ptr = dup ;                         //-- We just duplicate the top of the stack.
+modify_ptr_val = steq ;                 //-- We go through the quotation and apply to each data contained the given function.
+replace_ptr_val = [pop] swap cat steq ; //-- We simply create a new quotation.
+null = vq ;                             //-- A NULL pointer don't point to any value.
+
+example1 = 74 make_ptr ;
+example2 = 8 make_ptr [2 +] modify_ptr_val get_val_ptr ;    // => [8] [2 +] modify_ptr_val get_val_ptr
+                                                            // => [8 2 +] get_val_ptr
+                                                            // => [10] get_val_ptr
+                                                            // => 10
+
+//-- Although being only a trivial abstraction of simple and native combiners,
+//-- we can imagine an optimization of real and simple pointers via a simple compositional reduction.
+//-- In practice, however, an extension is used.

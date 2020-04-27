@@ -1,0 +1,13 @@
+//-- Here is the non-optimized and optimized fibonacci function (`fibo` / `fibi`).
+
+fibo = dup 1 swap leq quote vq [dup 1 swap - fib swap 2 swap - fib +] ifte ;
+
+fib_acc = b\ a\ n\
+    n 0 eq quote
+        [a]
+        [n 1 eq quote
+            [b]
+            [n -- b a b + fib_acc] ifte
+        ] ifte ;
+fibi = 0 1 fib_acc b$ a$ n$ ;
+

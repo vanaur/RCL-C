@@ -1,0 +1,9 @@
+//-- Some basics functions
+
+cube = dup dup * *;
+square = dup * ;
+
+fold = [swap] dip step ;
+sum = 0 [+] fold ;
+prod = 1 [*] fold ;
+

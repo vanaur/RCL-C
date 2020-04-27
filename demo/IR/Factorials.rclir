@@ -1,0 +1,30 @@
+// Some factorial functions //
+
+
+//-- Factorial with "pattern matching"
+fac__pattern_match =
+    dup
+        [0 1]
+        [[pop 1] [pop 1]]
+        [dup -- fac__pattern_match *]
+    select ;
+
+
+//-- Factorial with product from 1 to n
+fac__product = 1 swap ++ 0 gis [dup 0 eq quote [pop 1] [id] ifte *] step ;
+
+
+//-- Factorial with accumulator
+fac__acc =
+    dup 1 swap lw quote
+        [pop]
+        [dup flip * swap -- fac__acc]
+    ifte ;
+fac = 1 swap fac__acc ;
+
+
+
+//-- The fastest is the `fac__product` but is more expensive in memory.
+//-- `fac__acc` is the second fastest, it is almost comparable to `fac__product` with recursion optimization enabled (--OREC),
+//    but is less memory intensive.
+//-- `fac__pattern_match` is slower and has no tail recursion, but is more expressive (visually).

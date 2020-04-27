@@ -1,0 +1,67 @@
+/*
+    The structures of the RCL are presented here.
+
+    In the majority of programs, the structures will be used. They are used to structure and represent data.
+    They play the role of both enumerations and "abstract" structures, with no type constraint.
+    The case of algebraic data types, for usefull and good example, can be entirely transcribed into structures
+    (and construction functions, acting as type constructors).
+    For instance, we will switch from the Haskell representation to the C-like representation
+    and finally then to the IR representation of the RCL :
+
+        'Haskell:
+
+            data AB a b     -- The sigma type `AB' taking 2 variable types: 'a' and 'b'
+                = A a       -- The type constructor A, taking type of 'a'
+                | B b       -- The type constructor B, taking type of 'b'
+            
+            example_a = A ("I am in A!")
+            example_b = B ("I am in B!")
+        
+        'C-like
+
+            enum AB_CtorKind = { IS_A, IS_B };  -- We define the constructors' kind
+            struct AB
+            {
+                AB_CtorKind kind;               -- In a C struct, we define a union between the constructor kind
+                union                           -- and the constructor arguments
+                {
+                    T1 value_a;
+                    T2 value_b;
+                } u;
+            };
+        
+            struct AB example_a = (struct AB){.kind = IS_A, .u.value_a = "I am in A!"};
+            struct AB example_b = (struct AB){.kind = IS_B, .u.value_b = "I am in B!"};
+        
+        The RCL does not have unions, but we can consider replacing it with a structure, and it works very well!
+*/
+
+structure AB_CtorKind      //-- Enumeration of constructors' kind
+    = .IS_A!
+    , .IS_B! ;
+
+structure AB_Union         //-- Definition of the union contents
+    = .value_a
+    , .value_b ;
+
+structure AB               //-- Definition of the main structure type
+    = .kind
+    , .u ;
+
+//-- However, we now need to construct a datum of the type of this structure, we will focus
+//-- on the construction of each structure individually (except for the enumeration, which is only an ordinal set):
+
+build_union_a = {.value_a} nil AB_Union newf ;
+build_union_b = {.value_b} nil AB_Union newf ;
+
+build_a = build_union_a AB_CtorKind.IS_A! AB new ;
+build_b = build_union_b AB_CtorKind.IS_B! AB new ;
+
+example_a = "I am in A!" build_a
+example_b = "I am in B!" build_b
+
+//-- This rather "free" and "simple" way of doing things leaves us a lot of construction possibilities,
+//-- literally we will only compose "blocks", as you can see in these last two functions (`example_a` and `example_b`).
+
+
+//-- Many other demonstration examples in this folder use structures, go to `Natural.rclir` if you want a more concrete example.

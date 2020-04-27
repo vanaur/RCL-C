@@ -1,0 +1,90 @@
+structure Tuple
+    = .snd
+    , .fst ;
+    
+new_tuple = tuple new ;
+
+structure ExprKind
+    = .add!
+    , .mul!
+    , .num! ;
+    
+structure ExprU
+    = .add
+    , .mul
+    , .num ;
+    
+make_expru_num = {.num} nil exprU newf ;
+make_expru_add = new_tuple {.add} nil exprU newf ;
+make_expru_mul = new_tuple {.mul} nil exprU newf ;
+    
+structure Expr
+    = .kind
+    , .expr ;
+
+make_expr_num = make_expru_num exprKind.num! expr new ;
+make_expr_add = make_expru_add exprKind.add! expr new ;
+make_expr_mul = make_expru_mul exprKind.mul! expr new ;
+
+compute = expr\
+    expr.kind
+        [2 1 0]
+        [
+            [expr.expr.num]
+            [expr.expr.mul.fst compute expr.expr.mul.snd compute *]
+            [expr.expr.add.fst compute expr.expr.add.snd compute +]
+        ]
+        ["Unknown value to compute: " puts nvshow puts]
+    select expr$ ;
+
+example =
+    7 make_expr_num //-- 7
+    5 make_expr_num //-- 5
+    make_expr_add   //-- 5 + 7
+    3 make_expr_num //-- 3
+    make_expr_mul   //-- 3 * (5 + 7)
+
+/* RCL pretty prints `example` as following:
+
+      'Structure<:Expr>
+        .kind:1
+        .expr:
+         'Structure<:ExprU>
+           .add:<nil>
+           .mul:
+            'Structure<:Tuple>
+              .snd:
+               'Structure<:Expr>
+                 .kind:2
+                 .expr:
+                  'Structure<:ExprU>
+                    .add:<nil>
+                    .mul:<nil>
+                    .num:3
+              .fst:
+               'Structure<:Expr>
+                 .kind:0
+                 .expr:
+                  'Structure<:ExprU>
+                    .add:
+                     'Structure<:Tuple>
+                       .snd:
+                        'Structure<:Expr>
+                          .kind:2
+                          .expr:
+                           'Structure<:ExprU>
+                             .add:<nil>
+                             .mul:<nil>
+                             .num:5
+                       .fst:
+                        'Structure<:Expr>
+                          .kind:2
+                          .expr:
+                           'Structure<:ExprU>
+                             .add:<nil>
+                             .mul:<nil>
+                             .num:7
+                    .mul:<nil>
+                    .num:<nil>
+           .num:<nil>
+*/

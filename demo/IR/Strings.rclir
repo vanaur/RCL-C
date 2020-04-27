@@ -1,0 +1,13 @@
+//-- A bit of play with strings
+//-- (but it also works with quotes, because a string is considered as a character quote: "hey" == ['h' 'e' 'y'])
+
+replace_char = r\ to_rep\ [dup to_rep eq quote [pop r] vq ifte] steq r$ to_rep$ ;
+remove_last_s = uncons pop ;
+inserts = quote steq remove_last_s ;
+
+strlen_ = uncons nil eq quote [pop] [swap 1 + swap strlen_] ifte ;
+strlen = 0 swap strlen_ ;
+
+//-- Needs to work with `--LOW` option:
+fast_find_ = uncons c eq quote [pop acc] [acc ++ acc\ fast_find_] ifte ;
+fast_find = c\ 0 acc\ fast_find_ c$ acc$ ;

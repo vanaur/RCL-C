@@ -1,0 +1,78 @@
+structure List
+    = .data
+    , .next ;
+
+//-- Build the linked list
+
+new_list = list new ;
+init_list = nil swap new_list ;
+
+head = init_list ;
+next = new_list ;
+
+//-- Get the size of the list
+
+len_ = swap dup .next nil eq quote [pop ++] [.next swap ++ len_] ifte ;
+length = 0 len_ ;
+
+//-- Get the nth item of the list
+
+getnth_ = swap dup 0 eq quote [pop .data] [-- swap .next getnth_] ifte ;
+getnth = swap getnth_ ;
+
+// Get front and tail of the list
+
+front = dup length -- getnth ;
+tail = .data ;
+
+//-- Custom pretty print output
+
+print_list_data = .data nvshow puts ;
+print_list_ = dup .next nil eq quote [print_list_data] [dup print_list_data ", " puts .next print_list_] ifte ;
+print_list  = "[" puts print_list_ "]" puts ;
+
+
+example1 = 0 head 1 next 2 next 3 next 4 next 5 next 6 next 7 next 8 next 9 next 10 next ;
+
+
+/* The RCL pretty printed output of `example1` looks like this:
+
+      'Structure<:List>
+        .data:10
+        .next:
+         'Structure<:List>
+           .data:9
+           .next:
+            'Structure<:List>
+              .data:8
+              .next:
+               'Structure<:List>
+                 .data:7
+                 .next:
+                  'Structure<:List>
+                    .data:6
+                    .next:
+                     'Structure<:List>
+                       .data:5
+                       .next:
+                        'Structure<:List>
+                          .data:4
+                          .next:
+                           'Structure<:List>
+                             .data:3
+                             .next:
+                              'Structure<:List>
+                                .data:2
+                                .next:
+                                 'Structure<:List>
+                                   .data:1
+                                   .next:
+                                    'Structure<:List>
+                                      .data:0
+                                      .next:<nil>
+
+    And the custom ones like:
+
+        [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+
+*/

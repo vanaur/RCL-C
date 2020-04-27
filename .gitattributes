@@ -1,1 +1,2 @@
 *.h linguist-language=C
+*.rclir linguist-language=Rust  # It is not Rust code, but the syntax matches well some keywords and comments.

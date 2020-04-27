@@ -1,0 +1,61 @@
+/*
+    It's an adaptation of natural numbers as found in Haskell:
+
+        data Nat = Zero | Succ Nat
+        
+        nat_to_int :: Nat -> Int
+        nat_to_int Zero = 0
+        nat_to_int (Succ n) = (nat_to_int n) + 1
+
+        int_to_nat :: Int -> Nat
+        int_to_nat 0 = Zero
+        int_to_nat n = Succ (int_to_nat (n - 1))
+
+        nadd :: Nat -> Nat -> Nat
+        nadd Zero x = x
+        nadd (Succ n) y = nadd n (Succ y)
+        nadd x Zero = x
+        nadd y (Succ n) = nadd (Succ y) n
+*/
+
+.define
+
+structure NatKind
+    = .succ!
+    , .zero! ;
+    
+structure NatUnion
+    = .succ ;
+    
+make_natu_succ = natUnion new ;
+
+structure Nat
+    = .kind
+    , .nat ;
+
+make_nat_zero = nil natKind.zero! nat new ;
+make_nat_succ = make_natu_succ natKind.succ! nat new ;
+
+zero = make_nat_zero ;
+succ = make_nat_succ ;
+
+nat_to_int_ = dup .kind natKind.zero! eq quote [pop] [swap ++ swap .nat.succ nat_to_int_] ifte ;
+nat_to_int = 0 swap nat_to_int_ ;
+
+int_to_nat_ = dup 0 eq quote [pop] [-- swap succ swap int_to_nat_] ifte ;
+int_to_nat = zero swap int_to_nat_ ;
+
+nadd = dup .kind natKind.zero! eq quote [pop] [swap succ swap .nat.succ nadd] ifte ;
+
+// Some numbers:
+
+nzero = zero ;
+none = nzero succ ;
+ntwo = none succ ;
+nthree = ntwo succ ;
+nfour = nthree succ ;
+
+// Mixing functions:
+
+// (16 + 4) + 2
+test = 16 int_to_nat nfour nadd ntwo nadd 

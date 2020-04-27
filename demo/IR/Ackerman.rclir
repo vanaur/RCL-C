@@ -1,0 +1,6 @@
+//-- This is Ackerman's function written in an optimized and easy-to-read manner
+ack = n\ m\
+    m 0 eq quote
+        [n ++]
+        [n 0 eq quote [m -- 1 ack] [m -- m n -- ack ack] ifte]
+    ifte ;
