@@ -1,4 +1,6 @@
 *.o
+*.a
+*.dll
 test.clir
 null
 RCL.exe
@@ -7,5 +9,4 @@ RCL.exe
 .VSCodeCounter/results.csv
 .VSCodeCounter/results.md
 .VSCodeCounter/results.txt
-RCL.dll
 libtodo.txt

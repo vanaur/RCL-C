@@ -34,29 +34,55 @@
 #include <VM\Core\RawCode\RawCode.h>
 #include <VM\Core\Browse\BrowsedAbsyn.h>
 #include <VM\Core\Wordefinition\RCL_Extern.h>
-#include <VM\Core\FFI\Types.h>
+#include <VM\Core\FFI\C\ctypes.h>
 #include <VM\Core\FFI\RCL_File.h>
 
 size_t count_args(Definition define)
 {
-    Definition tmp = define;
+    ListFFI_Type_Signature cpy = define->u.extern_.listffi_type_signature_;
     size_t result = 0;
-    while (tmp->u.extern_.listffi_type_signature_ != NULL)
+    while (cpy != NULL)
     {
-        result++;
-        tmp->u.extern_.listffi_type_signature_ = tmp->u.extern_.listffi_type_signature_->listffi_type_signature_;
+        result += 1;
+        cpy = cpy->listffi_type_signature_;
     }
     return result;
 }
 
+#include <VM\Core\State\State.h>
+
 struct RCL_Extern make_RCL_extern(String name, String dll, Definition define)
 {
-    struct RCL_Extern result = {.name = name, .dll = dll, .hash_code = hash_djb2(name)};
-    size_t nargs = count_args(define);
+    struct State state; //! State!
+    state_init(&state);
+    size_t nargs = count_ffi_types(define->u.extern_.listffi_type_signature_);
+    ffi_type *tret = ffi_ctype_to_real_ctype(define->u.extern_.ffi_type_signature_);
+    ffi_type **targs = malloc(nargs * sizeof *targs);
+    ffi_ctype_to_real_ctypes(targs, define->u.extern_.listffi_type_signature_);
+    struct RCL_Extern result;
+    result.dll = dll;
+    result.hash_code = hash_djb2(rcl_sprintf_s("%s.%s", dll, name));
+    struct rcl_ffi_C_function_t fn = make_rcl_ffi_C_function(name, new_rcl_ffi_C_attributes(name, dll, nargs, tret, targs, &state));
+    result.fun = fn;
+    return result;
+
+    /*     const String hsh_str_code = rcl_sprintf_s("%s.%s", dll, name);
+    struct RCL_Extern result = {.name = name, .dll = dll, .hash_code = hash_djb2(hsh_str_code)};
+    size_t nargs = count_ffi_types(define->u.extern_.listffi_type_signature_);
     result.nargs = nargs;
     result.targs = malloc(nargs * sizeof(ffi_type *));
-    convertRCLT_FFITS(result.targs, define->u.extern_.listffi_type_signature_);
-    return result;
+    ffi_ctype_to_real_ctypes(result.targs, define->u.extern_.listffi_type_signature_);
+    result.tret = ffi_ctype_to_real_ctype(define->u.extern_.ffi_type_signature_);
+
+struct State my_state;
+state_init(&my_state);
+
+    struct rcl_ffi_C_function_t fn = make_rcl_ffi_C_function(name, new_rcl_ffi_C_attributes(name, dll, nargs, result.tret, result.targs, &my_state));
+    result.fun = fn;
+
+prettyPrint_state(my_state);
+
+    return result; */
 }
 
 void vec_init_externs(struct VEC_Externs *vec, size_t i)
@@ -64,9 +90,31 @@ void vec_init_externs(struct VEC_Externs *vec, size_t i)
     InitVector(vec, i, struct RCL_Extern);
 }
 
-void vec_add_externs(struct VEC_Externs *vec, Definition define)
+void vec_add_externs(struct VEC_Externs *vec, Definition define, rcl_ffi_C_lib_map_t *cffilibmap, struct State *state)
 {
-    PushToVector(vec, struct RCL_Extern, make_RCL_extern(get_last_qual(define->u.extern_.identifier_), get_ast_DLL_extern(define), define));
+    const String fname = get_last_qual(define->u.extern_.identifier_);
+    const String lname = define->u.extern_.identifier_->u.qualname_.uident_;
+
+    const hash_t extern_from_lib_hash_code = hash_djb2(lname);
+    const int found = key_find_rcl_ffi_C_lib(cffilibmap, extern_from_lib_hash_code, &cmp_f_hash);
+    if (found == map_unfound)
+    {
+        state_put_err_br_cst(state, "Attempt to define the external function `%s' from an undefined library identifier: `%s'.", fname, lname);
+        return;
+    }
+
+    size_t nargs = count_ffi_types(define->u.extern_.listffi_type_signature_);
+    ffi_type *tret = ffi_ctype_to_real_ctype(define->u.extern_.ffi_type_signature_);
+    ffi_type **targs = malloc(nargs * sizeof *targs);
+    ffi_ctype_to_real_ctypes(targs, define->u.extern_.listffi_type_signature_);
+    struct rcl_ffi_C_function_t fn = make_rcl_ffi_C_function(fname, new_rcl_ffi_C_attributes(fname, lname, nargs, tret, targs, state));
+
+    if (cffilibmap->array[found].val.functions.size == 0)
+        cffilibmap->array[found].val.functions = new_rcl_ffi_C_function_map_t(1);
+
+    add_rcl_ffi_C_function(&cffilibmap->array[found].val.functions, hash_djb2(fname), fn);
+
+    PushToVector(vec, struct RCL_Extern, make_RCL_extern(fname, get_ast_DLL_extern(define), define));
 }
 
 void vec_add_externs_data(struct VEC_Externs *vec, struct RCL_Extern rcl_extern)

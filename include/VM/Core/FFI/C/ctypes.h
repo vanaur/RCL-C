@@ -22,10 +22,13 @@
  * under the License.
  */
 
-#pragma once
+#include <ffi.h>
+#include <VM\Core\Syntax\Absyn.h>
 
-#include <VM\Core\Execution\Interpreter\Stack\Stack.h>
-#include <VM\Core\Browse\BResult.h>
-#include <VM\Core\Wordefinition\RCL_Extern.h>
-
-void eval_external_call(Stack *, BResult *, struct RCL_Extern *);
+// Converts RCL C FFI types to real C FFI type
+ffi_type *ffi_ctype_to_real_ctype(const FFI_Type_Signature);
+// Converts RCL C list FFI types to real FFI types
+void ffi_ctype_to_real_ctypes(ffi_type **, const ListFFI_Type_Signature);
+// Counts the number of types in the given parameters of a function.
+// The `void` types are ignored.
+size_t count_ffi_types(const ListFFI_Type_Signature);

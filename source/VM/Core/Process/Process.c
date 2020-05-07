@@ -58,7 +58,7 @@ inline size_t refsize(char *s[], size_t nbr)
     return result;
 }
 
-inline void concatWordico(BResult * dest, const BResult source)
+inline void concatWordico(BResult *dest, const BResult source)
 {
     for (Iterator i = 0; i < source.wordico.externs.used; i++)
         vec_add_externs_data(&dest->wordico.externs, source.wordico.externs.array[i]);
@@ -70,7 +70,7 @@ inline void concatWordico(BResult * dest, const BResult source)
         vec_add_structure_data(&dest->wordico.structures, source.wordico.structures.array[i]);
 }
 
-inline void concatBResult(BResult * dest, const BResult source)
+inline void concatBResult(BResult *dest, const BResult source)
 {
     concatWordico(dest, source);
 
@@ -82,6 +82,11 @@ inline void concatBResult(BResult * dest, const BResult source)
 
     for (Iterator i = 0; i < source.psdata.rcode.used; i++)
         push_rcode(&dest->psdata.rcode, source.psdata.rcode.array[i]);
+
+    for (Iterator i = 0; i < source.psdata.cffi_map.used; i++)
+    {
+        add_rcl_ffi_C_lib(&dest->psdata.cffi_map, source.psdata.cffi_map.array[i].key, source.psdata.cffi_map.array[i].val);
+    }
 }
 
 inline BResult processFile(String filename)
@@ -120,6 +125,7 @@ BResult processFiles(String filenames[], size_t nbr, Exec exec)
     init_rcode(&result.psdata.rcode, 1);
     init_imports__(&result.psdata.imports, 1);
     init_imports__(&result.psdata.includes, 1);
+    init_rcl_ffi_C_lib_map_t(&result.psdata.cffi_map, 1);
 
     // Avant, c'était   while(nbr--) ... Avec nbr comme indexe
     for (int i = 0; i < nbr; i++)

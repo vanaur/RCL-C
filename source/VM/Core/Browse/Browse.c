@@ -35,8 +35,7 @@
 #include <VM\Core\RawCode\RawCode.h>
 #include <VM\Core\Syntax\Absyn.h>
 #include <VM\Core\RawCode\Combinator\Combinators.h>
-#include <VM\Core\FFI\Types.h>
-#include <VM\Core\FFI\Types.h>
+#include <VM\Core\FFI\C\ctypes.h>
 #include <VM\Core\FFI\RCL_File.h>
 #include <VM\Core\Syntax\Identifier\Functions.h>
 #include <VM\Core\Wordefinition\Wordico.h>
@@ -78,6 +77,7 @@ struct Definition_handler
 {
     struct Wordico *wordico;
     BrowsedAbsyn *absyn;
+    struct State *state;
     ListDefinition ld;
 } __attribute__((packed));
 
@@ -165,7 +165,7 @@ BResult browseAbsyn(Program prog, String filename)
     return bresult;
 }
 
-void browsePVoid(BResult * bresult)
+void browsePVoid(BResult *bresult)
 {
     state_init(&bresult->state);
     init_wordico_nbr(&bresult->wordico, 1);
@@ -175,7 +175,7 @@ void browsePVoid(BResult * bresult)
     state_put_warn_br("`%s' is an empty program (the file actually no contains any code).", bresult->current_filename);
 }
 
-void browseProg1(const Program prog, BResult * bresult)
+void browseProg1(const Program prog, BResult *bresult)
 {
     ListPreprocessor lp = prog->u.prog1_.listpreprocessor_;
     ListDefinition ld = prog->u.prog1_.listdefinition_;
@@ -191,10 +191,9 @@ void browseProg1(const Program prog, BResult * bresult)
     idata_h.bresult = bresult;
     idata_h.lp = lp;
 
-    handle_preprocessor(&idata_h);
-
     def_h.wordico = &bresult->wordico;
     def_h.absyn = &bresult->psdata;
+    def_h.state = &bresult->state;
     def_h.ld = ld;
 
     pthread_t idata_th;
@@ -212,7 +211,7 @@ void browseProg1(const Program prog, BResult * bresult)
     pthread_join(def_th, NULL);
 }
 
-void browseProg2(Program prog, BResult * bresult)
+void browseProg2(Program prog, BResult *bresult)
 {
     ListPreprocessor lp = prog->u.prog2_.listpreprocessor_;
     ListDefinition ld = prog->u.prog2_.listdefinition_;
@@ -232,6 +231,7 @@ void browseProg2(Program prog, BResult * bresult)
 
     def_h.wordico = &bresult->wordico;
     def_h.absyn = &bresult->psdata;
+    def_h.state = &bresult->state;
     def_h.ld = ld;
 
     handle_definitions(&def_h);
@@ -239,7 +239,7 @@ void browseProg2(Program prog, BResult * bresult)
     pthread_join(idata_th, NULL);
 }
 
-void browseProg3(Program prog, BResult * bresult)
+void browseProg3(Program prog, BResult *bresult)
 {
     ListPreprocessor lp = prog->u.prog3_.listpreprocessor_;
     ListOperation lo = prog->u.prog3_.operation_->u.concatenation_.listoperation_;
@@ -265,7 +265,7 @@ void browseProg3(Program prog, BResult * bresult)
     pthread_join(idata_th, NULL);
 }
 
-void browseProg4(Program prog, BResult * bresult)
+void browseProg4(Program prog, BResult *bresult)
 {
     ListDefinition ld = prog->u.prog4_.listdefinition_;
     ListOperation lo = prog->u.prog4_.operation_->u.concatenation_.listoperation_;
@@ -279,6 +279,7 @@ void browseProg4(Program prog, BResult * bresult)
 
     def_h.wordico = &bresult->wordico;
     def_h.absyn = &bresult->psdata;
+    def_h.state = &bresult->state;
     def_h.ld = ld;
 
     pthread_t def_th;
@@ -292,7 +293,7 @@ void browseProg4(Program prog, BResult * bresult)
     pthread_join(def_th, NULL);
 }
 
-void browseProg5(Program prog, BResult * bresult)
+void browseProg5(Program prog, BResult *bresult)
 {
     ListDefinition ld = prog->u.prog5_.listdefinition_;
 
@@ -304,12 +305,13 @@ void browseProg5(Program prog, BResult * bresult)
 
     def_h.wordico = &bresult->wordico;
     def_h.absyn = &bresult->psdata;
+    def_h.state = &bresult->state;
     def_h.ld = ld;
 
     handle_definitions(&def_h);
 }
 
-void browseProg6(Program prog, BResult * bresult)
+void browseProg6(Program prog, BResult *bresult)
 {
     ListOperation lo = prog->u.prog6_.operation_->u.concatenation_.listoperation_;
 
@@ -324,7 +326,7 @@ void browseProg6(Program prog, BResult * bresult)
     handle_code(&code_h);
 }
 
-void browseProg7(Program prog, BResult * bresult)
+void browseProg7(Program prog, BResult *bresult)
 {
     ListOperation lo = prog->u.prog7_.operation_->u.concatenation_.listoperation_;
 
@@ -339,7 +341,7 @@ void browseProg7(Program prog, BResult * bresult)
     handle_code(&code_h);
 }
 
-void browseProg8(Program prog, BResult * bresult)
+void browseProg8(Program prog, BResult *bresult)
 {
     ListPreprocessor lp = prog->u.prog8_.listpreprocessor_;
 
@@ -365,14 +367,14 @@ void handle_code(struct Code_handler *code_h)
     }
 }
 
-void _handle_word(BResult * bresult, String word)
+void _handle_word(BResult *bresult, String word)
 {
     if (is_combinator(word))
         return push_rcode(&bresult->psdata.rcode, make_RCL_Value_Combinator(str_to_comb(word)));
     push_rcode(&bresult->psdata.rcode, make_RCL_Value_Word(word));
 }
 
-void _handle_lambda(BResult * bresult, String name)
+void _handle_lambda(BResult *bresult, String name)
 {
     if (is_combinator(name))
     {
@@ -384,7 +386,7 @@ void _handle_lambda(BResult * bresult, String name)
     push_rcode(&bresult->psdata.rcode, make_RCL_Value_Lambda(name));
 }
 
-void _handle_endlambda(BResult * bresult, String name)
+void _handle_endlambda(BResult *bresult, String name)
 {
     if (is_combinator(name))
     {
@@ -396,7 +398,7 @@ void _handle_endlambda(BResult * bresult, String name)
     push_rcode(&bresult->psdata.rcode, make_RCL_Value_EndLamScope(name));
 }
 
-void case_operation(BResult * bresult, const Operation op)
+void case_operation(BResult *bresult, const Operation op)
 {
     switch (op->kind)
     {
@@ -420,7 +422,7 @@ void case_operation(BResult * bresult, const Operation op)
 
 void handle_definitions(struct Definition_handler *def_h)
 {
-    set_wordico(def_h->wordico, def_h->absyn, def_h->ld);
+    set_wordico(def_h->wordico, def_h->absyn, def_h->ld, def_h->state);
 }
 
 void handle_preprocessor(struct Preprocessor_handler *idata_h)
@@ -437,6 +439,8 @@ void handle_preprocessor(struct Preprocessor_handler *idata_h)
         init_includes__(&idata_h->bresult->psdata.includes, nbr_includes);
     }
 
+    idata_h->bresult->psdata.cffi_map = new_rcl_ffi_C_lib_map_t(nbr_includes);
+
     while (idata_h->lp != NULL)
     {
         case_preprocessor(idata_h->bresult, idata_h->lp->preprocessor_);
@@ -444,7 +448,7 @@ void handle_preprocessor(struct Preprocessor_handler *idata_h)
     }
 }
 
-void case_preprocessor(BResult * bresult, Preprocessor p)
+void case_preprocessor(BResult *bresult, Preprocessor p)
 {
     switch (p->kind)
     {
@@ -485,31 +489,35 @@ void case_preprocessor(BResult * bresult, Preprocessor p)
     }
 }
 
-void handle_absynImport(BResult * bresult, Preprocessor p)
+void handle_absynImport(BResult *bresult, Preprocessor p)
 {
     imports(bresult, p);
 }
 
-void handle_absynImportAs(BResult * bresult, Preprocessor p)
+void handle_absynImportAs(BResult *bresult, Preprocessor p)
 {
     perror("TO4DO!");
     exit(1);
 }
 
-#define EXEC bresult->exec_infos
-#define IFDEF(val, then) if (def_hash == hash_djb2(OPT val)) { then; }
-
-void handle_absynDefine(BResult * bresult, Preprocessor p)
+void handle_absynDefine(BResult *bresult, Preprocessor p)
 {
     const String def_name = to_lower_s(p->u.define_.uident_);
     const hash_t def_hash = hash_djb2(def_name);
 
-         IFDEF("strict", EXEC.sool = Strict)
+#define EXEC bresult->exec_infos
+#define IFDEF(val, then)                \
+    if (def_hash == hash_djb2(OPT val)) \
+    {                                   \
+        then;                           \
+    }
+
+    IFDEF("strict", EXEC.sool = Strict)
     else IFDEF("optimistic", EXEC.sool = Optimistic)
     else IFDEF("lazy", EXEC.sool = Lazy)
     else IFDEF("interp", EXEC.ioc = Interpreted)
     else IFDEF("jit", EXEC.ioc = Jited)
-    else IFDEF("compile", EXEC.ioc = Compiled)
+    else IFDEF("compile", EXEC.ioc = Compiled) 
     else IFDEF("noise", EXEC.noise_level = Noise)
     else IFDEF("silent", EXEC.noise_level = Silent)
     else IFDEF("oz0", EXEC.optimize_level = O0)
@@ -531,39 +539,22 @@ void handle_absynDefine(BResult * bresult, Preprocessor p)
     else state_put_warn_br("`%s' is a unknown preprocessor definition, at now RCL don't handle them.", p->u.define_.uident_);
 }
 
-void handle_absynInclude(BResult * bresult, Preprocessor p)
+void handle_absynInclude(BResult *bresult, Preprocessor p)
 {
-    if (fopen(p->u.include_.string_, "r"))
+    RCL_File *tmp_file_already_exists = getSpecificRCL_File(&bresult->psdata.includes, p->u.include_.uident_);
+    if (tmp_file_already_exists == NULL)
     {
-        RCL_File *tmp_file_already_exists = getSpecificRCL_File(&bresult->psdata.includes, p->u.include_.uident_);
-        if (tmp_file_already_exists != NULL)
-        {
-            state_put_info_br("In file `%s': ", bresult->current_filename);
-            state_put_warn_br("An included external dynamic library called `%s' already exists in the table of external ressources", p->u.include_.uident_);
-            state_put_info_br("--- The current handled library path is from `%s' ;", p->u.include_.string_);
-            state_put_info_br("--- The already existing library path is from `%s'.", tmp_file_already_exists->path);
-            if (!strcmp(p->u.include_.string_, tmp_file_already_exists->path))
-            {
-                state_put_info_br("------ Since they redirect to the same location, nothing's changed.", NULL);
-            }
-            else
-            {
-                state_put_info_br("------ Please change the name of the included library.", NULL);
-                state_put_info_br("       The current one has no been added.", NULL);
-            }
-        }
-        else
-        {
-            add_RCL_File(&bresult->psdata.includes, new_RCL_File(p->u.include_.string_, p->u.include_.uident_));
-        }
-    }
-    else
-    {
-        state_put_err_br("The included dynamic library called `%s' wasn't found in the given path: \"%s\".", p->u.include_.uident_, p->u.include_.string_);
+        add_RCL_File(&bresult->psdata.includes, new_RCL_File(p->u.include_.string_, p->u.include_.uident_));
+
+        add_rcl_ffi_C_lib(&bresult->psdata.cffi_map,
+                          hash_djb2(p->u.include_.uident_),
+                          make_uninitializedf_rcl_ffi_C_lib(
+                              p->u.include_.string_,
+                              p->u.include_.uident_));
     }
 }
 
-void handle_parallelConcat(RawCode * rcode, Operation fx, Operation gx)
+void handle_parallelConcat(RawCode *rcode, Operation fx, Operation gx)
 {
     push_rcode(rcode, make_RCL_Value_Parallel(otov(fx), otov(gx)));
 }

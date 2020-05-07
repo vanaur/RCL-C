@@ -53,7 +53,7 @@ void init_wordico_nbr(struct Wordico *wordico, size_t nbr)
     vec_init_lambdas(&wordico->lambdas, 1);
 }
 
-void set_wordico(struct Wordico *wordico, BrowsedAbsyn *psdata, ListDefinition ld)
+void set_wordico(struct Wordico *wordico, BrowsedAbsyn *psdata, ListDefinition ld, struct State *state)
 {
     while (ld != NULL)
     {
@@ -64,7 +64,7 @@ void set_wordico(struct Wordico *wordico, BrowsedAbsyn *psdata, ListDefinition l
             break;
 
         case is_Extern:
-            vec_add_externs(&wordico->externs, ld->definition_);
+            vec_add_externs(&wordico->externs, ld->definition_, &psdata->cffi_map, state);
             break;
 
         case is_Structure:

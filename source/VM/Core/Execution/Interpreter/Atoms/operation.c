@@ -40,7 +40,7 @@
 #include <VM\Core\Execution\Interpreter\Atoms\lambda.h>
 #include <VM\Core\Execution\Interpreter\Atoms\func.h>
 #include <VM\Core\Execution\Interpreter\Atoms\field.h>
-#include <VM\Core\Execution\Interpreter\Atoms\FFI.h>
+#include <VM\Core\Execution\Interpreter\Atoms\FFI\C\ffi.h>
 
 #include <VM\Core\Show\Show.h>
 

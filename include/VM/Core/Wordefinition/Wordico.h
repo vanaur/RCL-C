@@ -52,7 +52,7 @@ struct Wordico
     Additions and revisions are therefore made to the runtime for interpretation, and adapted for compilation.
 */
 
-void set_wordico(struct Wordico *, BrowsedAbsyn *, ListDefinition);
+void set_wordico(struct Wordico *, BrowsedAbsyn *, ListDefinition, struct State *);
 void init_wordico(struct Wordico *, ListDefinition);
 void init_wordico_nbr(struct Wordico *, size_t);
 

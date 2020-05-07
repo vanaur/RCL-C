@@ -37,7 +37,8 @@
 #include <VM\Core\Execution\Interpreter\Atoms\lambda.h>
 #include <VM\Core\Execution\Interpreter\Atoms\func.h>
 #include <VM\Core\Execution\Interpreter\Atoms\field.h>
-#include <VM\Core\Execution\Interpreter\Atoms\FFI.h>
+#include <VM\Core\Execution\Interpreter\Atoms\FFI\C\ffi.h>
+#include <VM\Core\FFI\C\cffi.h>
 
 inline void evalword(Stack *stack, BResult *bresult, RCL_Value_Word_t *word)
 {
@@ -54,13 +55,14 @@ inline void evalword(Stack *stack, BResult *bresult, RCL_Value_Word_t *word)
         return eval_function(stack, cpytmp_function, bresult);
     }
 
+    const char c = word->word_str[0];
     word->word_str[0] = toupper(word->word_str[0]);
     struct RCL_Structure *cpytmp_structure = getSpecific_structure(&bresult->wordico, hash_djb2(word->word_str));
     if (cpytmp_structure != NULL)
     {
         return push(stack, make_RCL_Value_DataStruct(make_DataStruct_unfilled(cpytmp_structure)));
     }
-    word->word_str[0] = tolower(word->word_str[0]);
+    word->word_str[0] = c;
 
     /** "Words" that are not combinators, but constructors or initializers... **/
 
@@ -99,3 +101,4 @@ inline void evalword(Stack *stack, BResult *bresult, RCL_Value_Word_t *word)
     state_put_err_it("Unrecognized word: `%s', in function `%s'.", word->word_str, S_CURRENTF);
     state_put_info_it("It could have been used as a lambda name that was unscoped.", NULL);
 }
+//TODO! Il faut revoir la manière de gérer les Words, pour accepter les quals !

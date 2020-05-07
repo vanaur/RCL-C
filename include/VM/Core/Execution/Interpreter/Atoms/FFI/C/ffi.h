@@ -21,21 +21,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
- * File to facilitate the interfacing of external functions as to their type and those of the RCL,
- * also provides components to work on the stack at the level of pointers and
- * structures including specialized stack operators.
- */
 
-#include <ffi.h>
+#pragma once
 
-#include <VM\Core\Syntax\Absyn.h>
+#include <VM\Core\Execution\Interpreter\Stack\Stack.h>
+#include <VM\Core\Browse\BResult.h>
+#include <VM\Core\Wordefinition\RCL_Extern.h>
 
+void eval_external_call(Stack *, BResult *, struct RCL_Extern *);
 
-// Converts RCL C FFI types to real FFI type
-ffi_type* convertRCLT_FFIT(FFI_Type_Signature);
-
-// Converts RCL C list FFI types to real FFI types
-void convertRCLT_FFITS(ffi_type**, ListFFI_Type_Signature);
-
-size_t count_ffi_types(ListFFI_Type_Signature);
+void eval_C_call(Stack *stack, BResult *bresult, const struct rcl_ffi_C_dynflib_t);
