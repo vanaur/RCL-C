@@ -42,6 +42,7 @@ enum Type_kind
     TYPE_QUOTE,     // [x y z]
     TYPE_ARROW,     // a -> b
     TYPE_ANY,       // a, b, c, ... => Variable type / undefined
+    TYPE_SVTA,      // for type inference
     TYPE_EMPTY,     // Empty stack (ex: [])
     TYPE_STACK,     // Type of a stack
     TYPE_VARIABLE,  // Type of a variable (function, structure, lambda, ...)
@@ -53,12 +54,37 @@ typedef enum Type_kind Type_kind;
 
 // + Creatre a type for pointers
 
+
+
+// --- Type variable --- //
+
+typedef unsigned short sva_t;
+typedef char tvar_t;
+typedef struct RCL_Type* RCL_Type_ptr;
+
+// Single Variable Type Assignment
+typedef struct
+{
+    // To view the SVTA variable type
+    String visualize;
+    // The tvar name (as char at the moment for debug)
+    tvar_t tvar;
+    // single tvar assignment
+    sva_t sva;
+    // The concrete corresponding type
+    // The pointer just means that this field is optional (because not all variable types have a real match)
+    RCL_Type_ptr concrete_type;
+} __attribute__((packed)) svta_t;
+
+typedef svta_t* svta_ptr_t;
+
 typedef char TVar_t;
 
 typedef SIGMA_TYPE(
     RCL_Type, Type_kind,
     SIGMA_CTOR(rcl_type_literal,  Value_type tlit);
     SIGMA_CTOR(rcl_type_any,      TVar_t tany);
+    SIGMA_CTOR(rcl_type_svta,     svta_t svta);
     SIGMA_CTOR(rcl_type_array,    struct RCL_Type *tarray);
     SIGMA_CTOR(rcl_type_quote,    struct RCL_Type *tquote);
     SIGMA_CTOR(rcl_type_arrow,    struct RCL_Type *t1; struct RCL_Type *t2);
@@ -72,6 +98,7 @@ RCL_Type make_RCL_Type_stack(size_t n, RCL_Type[n]);
 #define T_ERR                 (RCL_Type){.kind = TYPE_ERROR}
 #define T_EMPTY               (RCL_Type){.kind = TYPE_EMPTY}
 #define T_ANY(vt)             (SIGMA_FILL_CTOR(RCL_Type, TYPE_ANY, rcl_type_any, vt))
+#define T_SVTA(vt)            (SIGMA_FILL_CTOR(RCL_Type, TYPE_SVTA, rcl_type_svta, vt))
 #define T_LITERAL(tk)         (SIGMA_FILL_CTOR(RCL_Type, TYPE_LITERAL, rcl_type_literal, tk))
 #define T_ARRAY(tk)           (SIGMA_FILL_CTOR(RCL_Type, TYPE_ARRAY, rcl_type_array, &tk))
 #define T_ARRAY_PTR(tk)       (SIGMA_FILL_CTOR(RCL_Type, TYPE_ARRAY, rcl_type_array, tk))
@@ -83,7 +110,7 @@ RCL_Type make_RCL_Type_stack(size_t n, RCL_Type[n]);
 #define T_VARIABLE(name)      (SIGMA_FILL_CTOR(RCL_Type, TYPE_VARIABLE, rcl_type_variable, name))
 
 RCL_Type type_of(const Value *, const String, const BResult *);
-bool cmp_types(RCL_Type, RCL_Type);
+bool cmp_types(RCL_Type, RCL_Type, bool strict_lit);
 size_t arity(RCL_Type);
 size_t trace(RCL_Type);
 

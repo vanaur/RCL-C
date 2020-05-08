@@ -185,7 +185,7 @@ static RCL_Type unify_tlit(const RCL_Type t1, const RCL_Type t2, struct State *s
 
 static RCL_Type unify_cmp_types(const RCL_Type t1, const RCL_Type t2)
 {
-    if (cmp_types(t1, t2))
+    if (cmp_types(t1, t2, false))
     {
         if (t1.kind == TYPE_LITERAL)
             if (t1.u.rcl_type_literal_.tlit == RCL_Value_Number)
@@ -288,8 +288,8 @@ static void update_type_stack__partial(args_t *args, const type_stack_t *src, co
         push_type_stack_t(&tmp_t2, src->array[i]);
     }
 
-    RCL_Type *t1 = (RCL_Type *)malloc(sizeof *t1);
-    RCL_Type *t2 = (RCL_Type *)malloc(sizeof *t2);
+    RCL_Type *t1 = malloc(sizeof *t1);
+    RCL_Type *t2 = malloc(sizeof *t2);
     *t1 = make_RCL_Type_stack(tmp_t1.used, tmp_t1.array);
     *t2 = make_RCL_Type_stack(tmp_t2.used, tmp_t2.array);
     RCL_Type final_type = T_ARROW_PTR(t1, t2);
@@ -318,7 +318,7 @@ static void subststack(Context_map_t *context_ptr, const type_stack_t *stackt_pt
 
 static RCL_Type type_of_quote(Env_map_t *env, fununtyped_table_t *fununtyped_table_ptr, RawCode *rcode, struct State *state)
 {
-    RCL_Type *quote_type = (RCL_Type *)malloc(sizeof(*quote_type));
+    RCL_Type *quote_type = malloc(sizeof(*quote_type));
     *quote_type = infer_type(env, rcode, fununtyped_table_ptr, state);
     return T_QUOTE(*quote_type);
 }
@@ -380,8 +380,8 @@ static void compose_arrow(RCL_Type *dest, const RCL_Type *t1_ptr, const RCL_Type
 
     concat_type_stack_t(&tmp_ts_t1, individualize(*t1_ptr));
 
-    RCL_Type *tt1 = (RCL_Type *)malloc(sizeof *tt1);
-    RCL_Type *tt2 = (RCL_Type *)malloc(sizeof *tt2);
+    RCL_Type *tt1 = malloc(sizeof *tt1);
+    RCL_Type *tt2 = malloc(sizeof *tt2);
 
     *tt1 = make_RCL_Type_stack(tmp_ts_t1.used, tmp_ts_t1.array);
     *tt2 = make_RCL_Type_stack(tmp_ts_t2.used, tmp_ts_t2.array);
@@ -395,7 +395,7 @@ static void compose_arrow(RCL_Type *dest, const RCL_Type *t1_ptr, const RCL_Type
 static void infer_type__arrow_on_tstack(args_t *args)
 {
     const RCL_Type ts_top = *top_ptr_type_stack_t(args->ts_ptr);
-    RCL_Type *t1 = (RCL_Type *)malloc(sizeof *t1);
+    RCL_Type *t1 = malloc(sizeof *t1);
     *t1 = *ts_top.u.rcl_type_arrow_.t1;
     type_stack_t t2_indvs = individualize(*ts_top.u.rcl_type_arrow_.t2);
 
@@ -404,7 +404,7 @@ static void infer_type__arrow_on_tstack(args_t *args)
 
     inferiT(&tmp_args);
 
-    RCL_Type *t2 = (RCL_Type *)malloc(sizeof *t2);
+    RCL_Type *t2 = malloc(sizeof *t2);
     *t2 = make_RCL_Type_stack(t2_indvs.used, t2_indvs.array);
 
     RCL_Type final_type;

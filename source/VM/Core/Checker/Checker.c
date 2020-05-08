@@ -71,7 +71,7 @@ static Checked_out typecheck(BResult *bresult)
         const RCL_Type mainT = *main_type.u.rcl_type_stack_.tstack[0];
         const RCL_Type expectedT = T_LITERAL(RCL_Value_Integer);
 
-        if (!cmp_types(mainT, expectedT))
+        if (!cmp_types(mainT, expectedT, false))
             state_put_warn_ch("The return type of the program is '%s`. Was expected an integer or nothing at all.", show_type(mainT));
     }
 

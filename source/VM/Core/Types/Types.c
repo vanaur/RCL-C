@@ -46,7 +46,7 @@ RCL_Type make_RCL_Type_stack(size_t n, RCL_Type types[n])
 {
     if (n == 0)
         return T_STACK(&T_EMPTY);
-    RCL_Type **result = (RCL_Type **)malloc(n * sizeof(RCL_Type *));
+    RCL_Type **result = malloc(n * sizeof(RCL_Type *));
     for (Iterator i = 0; i < n; i++)
         result[i] = &types[i];
     return SIGMA_FILL_CTOR(RCL_Type, TYPE_STACK, rcl_type_stack, result, n);
@@ -126,7 +126,15 @@ RCL_Type type_of(const Value *value, const String function_name, const BResult *
         return T_ANY('a');
 
     case RCL_Value_Quotation:
-        break;
+    {
+        RCL_Type *types = malloc(value->u.quote_->used * sizeof *types);
+        for (Iterator i = 0; i < value->u.quote_->used; i++)
+            types[i] = type_of(&value->u.quote_->array[i], function_name, bresult);
+        RCL_Type_ptr ts = malloc(sizeof *ts);
+        *ts = make_RCL_Type_stack(value->u.quote_->used, types);
+        return T_QUOTE_PTR(ts);
+    }
+    break;
 
     default:
         printf("%d\n", value->kind);
@@ -134,7 +142,7 @@ RCL_Type type_of(const Value *value, const String function_name, const BResult *
     }
 }
 
-bool cmp_types(const RCL_Type t1, const RCL_Type t2)
+bool cmp_types(const RCL_Type t1, const RCL_Type t2, bool strict_lit)
 {
     if (t1.kind != t2.kind)
         return false;
@@ -144,7 +152,13 @@ bool cmp_types(const RCL_Type t1, const RCL_Type t2)
     case TYPE_ANY:
         return (SIGMA_GETV_BYVAL(t1, rcl_type_any, tany) == SIGMA_GETV_BYVAL(t2, rcl_type_any, tany));
 
+    case TYPE_SVTA:
+        return (t1.u.rcl_type_svta_.svta.sva == t2.u.rcl_type_svta_.svta.sva && t1.u.rcl_type_svta_.svta.tvar == t2.u.rcl_type_svta_.svta.tvar);
+
     case TYPE_LITERAL:
+        if (strict_lit)
+            return t1.u.rcl_type_literal_.tlit == t2.u.rcl_type_literal_.tlit;
+
         return (SIGMA_GETV_BYVAL(t1, rcl_type_literal, tlit) == SIGMA_GETV_BYVAL(t2, rcl_type_literal, tlit)) // t1 == t2
                || (SIGMA_GETV_BYVAL(t1, rcl_type_literal, tlit) == RCL_Value_Number                           // t1 == Num
                        && SIGMA_GETV_BYVAL(t2, rcl_type_literal, tlit) == RCL_Value_Integer                   // t2 == Int
@@ -159,20 +173,24 @@ bool cmp_types(const RCL_Type t1, const RCL_Type t2)
     case TYPE_ARRAY:
         return cmp_types(
             *SIGMA_GETV_BYVAL(t1, rcl_type_array, tarray),
-            *SIGMA_GETV_BYVAL(t2, rcl_type_array, tarray));
+            *SIGMA_GETV_BYVAL(t2, rcl_type_array, tarray),
+            strict_lit);
 
     case TYPE_QUOTE:
         return cmp_types(
             *SIGMA_GETV_BYVAL(t1, rcl_type_quote, tquote),
-            *SIGMA_GETV_BYVAL(t2, rcl_type_quote, tquote));
+            *SIGMA_GETV_BYVAL(t2, rcl_type_quote, tquote),
+            strict_lit);
 
     case TYPE_ARROW:
-        return cmp_types(*SIGMA_GETV_BYVAL(t1, rcl_type_arrow, t1), *SIGMA_GETV_BYVAL(t2, rcl_type_arrow, t1)) //
-               && cmp_types(*SIGMA_GETV_BYVAL(t1, rcl_type_arrow, t2), *SIGMA_GETV_BYVAL(t2, rcl_type_arrow, t2));
+        return cmp_types(*SIGMA_GETV_BYVAL(t1, rcl_type_arrow, t1), *SIGMA_GETV_BYVAL(t2, rcl_type_arrow, t1), strict_lit) && cmp_types(*SIGMA_GETV_BYVAL(t1, rcl_type_arrow, t2), *SIGMA_GETV_BYVAL(t2, rcl_type_arrow, t2), strict_lit);
 
     case TYPE_STACK:
+        if (t1.u.rcl_type_stack_.nbr != t2.u.rcl_type_stack_.nbr)
+            return false;
+
         for (Iterator i = 0; i < t1.u.rcl_type_stack_.nbr; i++)
-            if (!cmp_types(*t1.u.rcl_type_stack_.tstack[i], *t1.u.rcl_type_stack_.tstack[i]))
+            if (!cmp_types(*t1.u.rcl_type_stack_.tstack[i], *t2.u.rcl_type_stack_.tstack[i], strict_lit))
                 return false;
         return true;
 

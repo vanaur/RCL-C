@@ -84,10 +84,7 @@ static String show_type_stack(RCL_Type type)
     for (Iterator i = 1; i < type.u.rcl_type_stack_.nbr; i++)
     {
         const RCL_Type current = *SIGMA_GETV_BYVAL(type, rcl_type_stack, tstack)[i];
-        if (current.kind == TYPE_ARROW)
-            rcl_asprintf(&result, "%s . (%s)", result, show_type(current));
-        else
-            rcl_asprintf(&result, "%s . %s", result, show_type(current));
+        rcl_asprintf(&result, "%s . %s", result, show_type(current));
     }
     return result;
 }
@@ -128,7 +125,13 @@ String show_type(const RCL_Type type)
         return show_arrow_type(type);
 
     case TYPE_ANY:
-        return rcl_sprintf_s("%c", SIGMA_GETV_BYVAL(type, rcl_type_any, tany));
+        //return (char[2]){type.u.rcl_type_any_.tany, '\0'};
+        {
+            return rcl_sprintf_s("%c", type.u.rcl_type_any_.tany);
+        }
+
+    case TYPE_SVTA:
+        return type.u.rcl_type_svta_.svta.visualize;
 
     case TYPE_VARIABLE:
         return SIGMA_GETV_BYVAL(type, rcl_type_variable, name);
