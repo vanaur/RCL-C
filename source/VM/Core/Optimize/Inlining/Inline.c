@@ -32,7 +32,7 @@
 
 void inline_optimization_function(BResult * bresult)
 {
-    size_t n = bresult->wordico.functions.used;
+/*     size_t n = bresult->wordico.functions.used;
     // The current function in process
     struct RCL_Function *current = NULL;
     // The found function to be inlined
@@ -57,13 +57,13 @@ void inline_optimization_function(BResult * bresult)
                 (const Value *)fcpy->body.array, fcpy->body.used);
             fcpy = NULL;
         }
-    }
+    } */
 }
 
 // To improve
 void inline_optimization_code(BResult * bresult)
 {
-    struct RCL_Function *fcpy = NULL;
+/*     struct RCL_Function *fcpy = NULL;
 
     RawCode *rcode = &bresult->psdata.rcode;
     size_t itrmx = rcode->used;
@@ -83,5 +83,5 @@ void inline_optimization_code(BResult * bresult)
             (const Value[]){make_RCL_Value_Word(rcode->array[i].u.word_.word_str)}, 1,
             (const Value *)fcpy->body.array, fcpy->body.used);
         fcpy = NULL;
-    }
+    } */
 }
