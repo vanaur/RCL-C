@@ -167,32 +167,53 @@ static void doCons(Stack *stack)
     doCat(stack);
 }
 
-static void doUncons_string(Stack *stack)
+static void doPick_string(Stack *stack)
 {
     RCL_Value_String_t tmp = top_ptr(stack)->u.string_;
     const size_t len = strlen(tmp);
     if (len == 0) // ? Good iead? Or assert?
-        return push(stack, RCL_Word(RCL_NIL_WRD));
+        return push(stack, UNIQUE_QUAL_FROM_STR(RCL_NIL_WRD));
     push(stack, RCL_Char(tmp[len - 1]));
     tmp[len - 1] = 0;
 }
 
-static void doUncons_quote(Stack *stack)
+static void doPick_quote(Stack *stack)
 {
     RCL_Value_Quote_t tmp = top_ptr(stack)->u.quote_;
     if (tmp->used == 0) // ? Good iead? Or assert?
-        return push(stack, RCL_Word(RCL_NIL_WRD));
+        return push(stack, UNIQUE_QUAL_FROM_STR(RCL_NIL_WRD));
     push(stack, tmp->array[tmp->used - 1]);
     pop_rcode(topx_ptr(stack, 2)->u.quote_);
 }
 
-static void doUncons(Stack *stack)
+static void doPick(Stack *stack)
 {
     rcl_assert(stack->used >= 1);
     rcl_assert(top_ptr(stack)->kind == RCL_Value_String || top_ptr(stack)->kind == RCL_Value_Quotation);
     if (top_ptr(stack)->kind == RCL_Value_String)
-        return doUncons_string(stack);
-    return doUncons_quote(stack);
+        return doPick_string(stack);
+    return doPick_quote(stack);
+}
+
+static void doReverse(Stack *stack)
+{
+    rcl_assert(stack->used >= 1);
+    rcl_assert(top_ptr(stack)->kind == RCL_Value_String || top_ptr(stack)->kind == RCL_Value_Quotation);
+    if (top_ptr(stack)->kind == RCL_Value_Quotation)
+        rreverse_RawCode(top_ptr(stack)->u.quote_);
+    else
+        reverse_str(top_ptr(stack)->u.string_, strlen(top_ptr(stack)->u.string_));
+}
+
+static void doUncons(Stack *stack)
+{
+    // [X Xs] uncons -> X [Xs]
+    rcl_assert(stack->used >= 1);
+    rcl_assert(top_ptr(stack)->kind == RCL_Value_String || top_ptr(stack)->kind == RCL_Value_Quotation);
+
+    doReverse(stack);
+    doPick(stack);
+    doSwap(stack);
 }
 
 static void doDip(Stack *stack, BResult *bresult)
@@ -669,6 +690,28 @@ static void do_itos(Stack *stack)
     push(stack, RCL_String(res));
 }
 
+static void do_crave(Stack *stack)
+{
+    // "abc def ghi" " " crave  ==  ["abc" "def" "ghi"]
+    rcl_assert(stack->used >= 2);
+    rcl_assert(topx_ptr(stack, 2)->kind == RCL_Value_String || topx_ptr(stack, 2)->kind == RCL_Value_Quotation);
+
+    const String patron = drop(stack).u.string_;
+    const String str = drop(stack).u.string_;
+    RawCode *result = malloc(sizeof *result);
+    *result = new_RawCode(strlen(str));
+
+    String token = strtok(str, patron);
+
+    while (token)
+    {
+        push_RawCode(result, RCL_String(token));
+        token = strtok(NULL, patron);
+    }
+
+    push(stack, RCL_Quotation(result));
+}
+
 /*
     4
     [7 5 9]
@@ -744,8 +787,14 @@ inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
     case CONS:
         return doCons(stack);
 
+    case PICK:
+        return doPick(stack);
+
     case UNCONS:
         return doUncons(stack);
+
+    case REVERSE:
+        return doReverse(stack);
 
     case SAP:
         return doSap(stack, bresult);
@@ -802,6 +851,9 @@ inline void doComb(Stack *stack, const Combinator comb, BResult *bresult)
 
     case ALEN:
         return push(stack, RCL_Integer_I(drop(stack).u.array_.length));
+
+    case CRAVE:
+        return do_crave(stack);
 
     case HALT:
         exit(EXIT_SUCCESS);

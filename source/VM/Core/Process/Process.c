@@ -60,9 +60,6 @@ inline size_t refsize(char *s[], size_t nbr)
 
 inline void concatWordico(BResult *dest, const BResult source)
 {
-    for (Iterator i = 0; i < source.wordico.externs.used; i++)
-        vec_add_externs_data(&dest->wordico.externs, source.wordico.externs.array[i]);
-
     for (Iterator i = 0; i < source.wordico.functions.used; i++)
         vec_add_function_data(&dest->wordico.functions, source.wordico.functions.array[i]);
 

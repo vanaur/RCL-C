@@ -33,27 +33,5 @@
 #include <VM\Core\Syntax\Absyn.h>
 #include <VM\Core\FFI\C\cffi.h>
 
-struct RCL_Extern
-{
-    struct rcl_ffi_C_function_t fun;
-    hash_t hash_code; // Hash code of the external function
-    String name;
-    String dll;
-
-    /*     String name;      // Extern function name
-    String dll;       // Extern function DLL
-    size_t nargs;     // Number of arguments
-    ffi_type **targs; // Type of arguments (array of pointer)
-    ffi_type *tret;   // Return type (pointer) */
-} __attribute__((packed)) RCL_Extern;
-
-// Vector of extern functions
-Vector(VEC_Externs, struct RCL_Extern);
-
-struct RCL_Extern make_RCL_extern(String, String, Definition);
 size_t count_args(Definition);
-
-void vec_init_externs(struct VEC_Externs *, size_t);
-void vec_add_externs(struct VEC_Externs *, Definition, rcl_ffi_C_lib_map_t *, struct State *);
-
-void vec_add_externs_data(struct VEC_Externs *, struct RCL_Extern);
+void cffilibmap_add_extern(Definition, rcl_ffi_C_lib_map_t *, struct State *);

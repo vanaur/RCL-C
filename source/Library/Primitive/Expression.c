@@ -40,7 +40,7 @@
 
 inline rcl_expr_t rcl_expr__var(const String var)
 {
-    return singleton_RawCode(RCL_Word(var));
+    return singleton_RawCode(UNIQUE_QUAL_FROM_STR(var));
 }
 
 inline rcl_expr_t rcl_expr__cst_int(const int n)

@@ -49,12 +49,17 @@ static inline bool cmpvalue_char(const Value v1, const Value v2)
 
 static inline bool cmpvalue_string(const Value v1, const Value v2)
 {
-    return (bool)(strcmp(v1.u.string_, v2.u.string_));
+    return (bool)(!strcmp(v1.u.string_, v2.u.string_));
 }
 
-static inline bool cmpvalue_word(const Value v1, const Value v2)
+static inline bool cmpvalue_qual(const Value v1, const Value v2)
 {
-    return (bool)(v1.u.word_.hash_code == v2.u.word_.hash_code);
+    if (v1.u.qual_.nbrof_qual != v2.u.qual_.nbrof_qual)
+        return false;
+    for (int i = 0; i < v1.u.qual_.nbrof_qual; i++)
+        if (v1.u.qual_.quals[i].hash_code != v2.u.qual_.quals[i].hash_code)
+            return false;
+    return true;
 }
 
 static inline bool cmpvalue_comb(const Value v1, const Value v2)
@@ -103,8 +108,8 @@ inline bool cmpvalue(const Value v1, const Value v2)
     case RCL_Value_String:
         return cmpvalue_string(v1, v2);
 
-    case RCL_Value_Word:
-        return cmpvalue_word(v1, v2);
+    case RCL_Value_Qual:
+        return cmpvalue_qual(v1, v2);
 
     case RCL_Value_Combinator:
         return cmpvalue_comb(v1, v2);

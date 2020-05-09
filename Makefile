@@ -16,7 +16,8 @@ CCFLAGS_WARNS =		-Wno-discarded-qualifiers \
 					-Wno-missing-braces \
 					-Wno-strict-aliasing \
 					-Wno-parentheses \
-					-Wno-unused-variable
+					-Wno-unused-variable \
+					-Wno-address-of-packed-member
 CCFLAGS_OPTIMIZE = 	-ftree-loop-distribution \
 					-faggressive-loop-optimizations \
 					-fno-leading-underscore \
@@ -29,7 +30,7 @@ CCFLAGS_OPTIMIZE = 	-ftree-loop-distribution \
 					-fsplit-loops \
 					-ftree-loop-if-convert \
 					-O2
-CCFLAGS_SIMD =		-mavx2
+CCFLAGS_SIMD =		-mavx2 -mssse3
 CCFLAGS_MISC =		-g -Wall -static -Iinclude
 
 CCFLAGS = ${CCFLAGS_MISC} ${CCFLAGS_WARNS} ${CCFLAGS_OPTIMIZE} ${CCFLAGS_SIMD}
@@ -40,7 +41,7 @@ export CFLAGS = ${CCFLAGS}
 
 LIBS = -lffi -lgmp -lpthread
 
-CSRC_SUBDIR_PATHS = *.c */*.c */*/*.c */*/*/*.c */*/*/*/*.c */*/*/*/*/*.c */*/*/*/*/*/*.c */*/*/*/*/*/*/*.c
+CSRC_SUBDIR_PATHS = *.c */*.c */*/*.c */*/*/*.c */*/*/*/*.c */*/*/*/*/*.c */*/*/*/*/*/*.c */*/*/*/*/*/*/*.c */*/*/*/*/*/*/*/*.c
 
 csrc_abstract_paths = $(wildcard $(1) $(CSRC_SUBDIR_PATHS))
 

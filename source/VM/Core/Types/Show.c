@@ -50,9 +50,10 @@ static String show_type_value(RCL_Type type)
     case RCL_Value_String:
         return "String";
 
-    case RCL_Value_Word:
+    case RCL_Value_Qual:
         // show function type
         break;
+
     case RCL_Value_EndLamScope:
         return "Void";
 

@@ -28,6 +28,4 @@
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Wordefinition\RCL_Extern.h>
 
-void eval_external_call(Stack *, BResult *, struct RCL_Extern *);
-
 void eval_C_call(Stack *stack, BResult *bresult, const struct rcl_ffi_C_dynflib_t);

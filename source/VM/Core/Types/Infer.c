@@ -471,23 +471,23 @@ RCL_Type infer_type(Env_map_t *env, RawCode *rcode, fununtyped_table_t *fununtyp
 
 static RCL_Type get_current_type(const Value value, Env_map_t *env, fununtyped_table_t *fununtyped_table_ptr, struct State *state)
 {
-    if (value.kind != RCL_Value_Word)
-        return type_of(&value, value.u.word_.word_str, NULL);
+    if (value.kind != RCL_Value_Qual)
+        return type_of(&value, value.u.qual_.quals[0].word_str, NULL);
 
-    const int found = key_find_Env(env, value.u.word_.hash_code, &cmp_hashs);
+    const int found = key_find_Env(env, value.u.qual_.quals[0].hash_code, &cmp_hashs);
 
     if (found != map_unfound)
         return env->array[found].val;
 
     if (fununtyped_table_ptr == NULL)
     {
-        state_put_err_ch_cst(state, "Can't find function `%s'.", value.u.word_.word_str);
+        state_put_err_ch_cst(state, "Can't find function `%s'.", value.u.qual_.quals[0].word_str);
         return T_ERR;
     }
 
-    push_fununtyped_table_t(fununtyped_table_ptr, value.u.word_.hash_code);
+    push_fununtyped_table_t(fununtyped_table_ptr, value.u.qual_.quals[0].hash_code);
 
-    return T_VARIABLE(value.u.word_.word_str);
+    return T_VARIABLE(value.u.qual_.quals[0].word_str);
 }
 
 Env_map_t inferall(BResult *bresult_ptr, struct State *state)

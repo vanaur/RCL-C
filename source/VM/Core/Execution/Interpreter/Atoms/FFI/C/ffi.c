@@ -234,7 +234,7 @@ static void popx_psh0(Stack *stack, const size_t nbr)
 {
     rcl_assert(stack->used >= nbr);
     stack->used -= nbr; //TODO! Apply `free`!
-    push(stack, RCL_Word(RCL_NIL_WRD));
+    push(stack, UNIQUE_QUAL_FROM_STR(RCL_NIL_WRD));
 }
 
 static void rcl_ffi_C_call(
@@ -260,15 +260,6 @@ static void rcl_ffi_C_call(
     state_put_err_it_cst(
         state, "Unable to invoke the function `%s' from the loaded library `%s'.\n       [FFI error code: %d].",
         fname, libpath, ffi_attribs_ptr->status);
-}
-
-void eval_external_call(Stack *stack, BResult *bresult, struct RCL_Extern *external)
-{
-    /*     struct rcl_ffi_C_attributes_t ffi_attribs =
-        new_rcl_ffi_C_attributes(external->name, external->dll, external->nargs, external->tret, external->targs, &bresult->state);
-    rcl_ffi_C_call(stack, external->name, external->dll, &ffi_attribs, &bresult->state); */
-
-    rcl_ffi_C_call(stack, external->fun.fname, external->dll, &external->fun.attribs, &bresult->state);
 }
 
 void eval_C_call(Stack *stack, BResult *bresult, const struct rcl_ffi_C_dynflib_t dynflib)

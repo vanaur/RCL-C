@@ -71,8 +71,8 @@ String show_kind(const enum Value_Kind kind)
     case RCL_Value_String:
         return "character string";
 
-    case RCL_Value_Word:
-        return "word";
+    case RCL_Value_Qual:
+        return "(qualified) word";
 
     case RCL_Value_Lambda:
         return "new lambda declaration";
@@ -135,7 +135,8 @@ Value make_RCL_Value_Integer_i(const signed int x)
 Value make_RCL_Value_Float_f(const double x)
 {
     Value result = {.kind = RCL_Value_Float};
-    mpf_init_set_si(result.u.float_, (signed long)x);
+    //mpf_init_set_si(result.u.float_, (signed long)x);
+    mpf_init_set_d(result.u.float_, x);
     return result;
 }
 
@@ -149,19 +150,22 @@ Value make_RCL_Value_String(const RCL_Value_String_t s)
     return (Value){.kind = RCL_Value_String, .u.string_ = s};
 }
 
-Value make_RCL_Value_Word(const String word)
-{
-    return (Value){.kind = RCL_Value_Word, .u.word_.word_str = word, .u.word_.hash_code = hash_djb2(word)};
-}
-
 Value make_RCL_Value_EndLamScope(const String name)
 {
-    return (Value){.kind = RCL_Value_EndLamScope, .u.word_.word_str = name, .u.word_.hash_code = hash_djb2(name)};
+    Value result;
+    result.kind = RCL_Value_EndLamScope;
+    result.u.endLamScope_.hash_code = hash_djb2(name);
+    result.u.endLamScope_.word_str = name;
+    return result;
 }
 
 Value make_RCL_Value_Lambda(const String name)
 {
-    return (Value){.kind = RCL_Value_Lambda, .u.word_.word_str = name, .u.word_.hash_code = hash_djb2(name)};
+    Value result;
+    result.kind = RCL_Value_Lambda;
+    result.u.lam_.hash_code = hash_djb2(name);
+    result.u.lam_.word_str = name;
+    return result;
 }
 
 Value make_RCL_Value_LiteralOperation(const RCL_Value_LiteralOperation_t lo)
@@ -220,6 +224,53 @@ Value make_RCL_Value_Concatenation(RawCode *concatenation)
     return (Value){.kind = RCL_Value_Concatenation, .u = {.concatenation_ = concatenation}};
 }
 
+static RCL_Value_Word_t make_word(const String str)
+{
+    return (RCL_Value_Word_t){str, hash_djb2(str)};
+}
+
+qual_word_t qual_word_from_absyn(const Identifier id)
+{
+    Identifier curr = id;
+    const size_t nbrof_quals = count_quals(id);
+    int index = 0;
+    RCL_Value_Word_t *quals = malloc(nbrof_quals * sizeof *quals);
+    rcl_assert(quals != NULL);
+
+    while (curr->kind != is_Name)
+    {
+        rcl_assert(curr != NULL);
+        quals[index++] = make_word(curr->u.qualname_.uident_);
+        curr = curr->u.qualname_.identifier_;
+    }
+    quals[index] = make_word(curr->u.name_.lident_);
+    return (qual_word_t){nbrof_quals, quals};
+}
+
+qual_word_t qual_word_from_array(const size_t n, const String xs[n])
+{
+    RCL_Value_Word_t *tmp = malloc(n * sizeof *tmp);
+    for (Iterator i = 0; i < n; i++)
+        tmp[i] = make_word(xs[i]);
+    return (qual_word_t){n, tmp};
+}
+
+Value make_RCL_Value_Qual(const qual_word_t qual)
+{
+    return (Value){.kind = RCL_Value_Qual, .u = {.qual_ = qual}};
+}
+
+String show_qual(const qual_word_t qual)
+{
+    String result = "";
+    for (Iterator i = 0; i < qual.nbrof_qual; i++)
+        if (i == 0)
+            rcl_asprintf(&result, "%s", qual.quals[i].word_str);
+        else
+            rcl_asprintf(&result, "%s.%s", result, qual.quals[i].word_str);
+    return result;
+}
+
 static Value otov_lit(Operation op)
 {
     switch (op->u.lit_.data_->kind)
@@ -257,12 +308,40 @@ static Value otov_quote(Operation op)
     return make_RCL_Value_Quotation(quote);
 }
 
+/*
+static bool is_identifier_combinator(const Identifier id)
+{
+    if (count_quals(id) == 1)
+        return is_combinator(id->u.name_.lident_);
+    return false;
+}
+
+void _handle_qual(BResult *bresult, const Identifier id)
+{
+    if (is_identifier_combinator(id))
+        return push_rcode(&bresult->psdata.rcode, make_RCL_Value_Combinator(str_to_comb(id->u.name_.lident_)));
+    push_rcode(&bresult->psdata.rcode, make_RCL_Value_Qual(qual_word_from_absyn(id)));
+}
+*/
+
+static bool is_identifier_combinator(const Identifier id)
+{
+    if (count_quals(id) == 1)
+        return is_combinator(id->u.name_.lident_);
+    return false;
+}
+
 static Value otov_var(Operation op)
 {
-    if (is_combinator(show_ast_identifier(op->u.var_.identifier_)))
+    const Identifier id = op->u.var_.identifier_;
+    if (is_identifier_combinator(id))
+        return make_RCL_Value_Combinator(str_to_comb(id->u.name_.lident_));
+    return make_RCL_Value_Qual(qual_word_from_absyn(op->u.var_.identifier_));
+    //return make_RCL_Value_Qual(qual_word_from_absyn(op->u.var_.identifier_));
+/*     if (is_combinator(show_ast_identifier(op->u.var_.identifier_)))
         return make_RCL_Value_Combinator(str_to_comb(show_ast_identifier(op->u.var_.identifier_)));
     else
-        return make_RCL_Value_Word(show_ast_identifier(op->u.var_.identifier_));
+        return make_RCL_Value_Word(show_ast_identifier(op->u.var_.identifier_)); */
 }
 
 static Value otov_concatenation(Operation op)

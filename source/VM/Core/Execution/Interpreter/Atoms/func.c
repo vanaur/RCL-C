@@ -76,9 +76,10 @@ static void th_simple_eval_rcode(struct th_simple_eval_rcode_args_t args)
 
 static bool value_is_fname(const Value value, hash_t f_hash)
 {
-    if (value.kind == RCL_Value_Word)
-        if (value.u.word_.hash_code == f_hash)
-            return true;
+    if (value.kind == RCL_Value_Qual)
+        if (value.u.qual_.nbrof_qual == 1)
+            if (value.u.qual_.quals[0].hash_code == f_hash)
+                return true;
     return false;
 }
 

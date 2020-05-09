@@ -79,6 +79,6 @@ inline rcl_expr_t rcl_fun_call(const String name, const rcl_fun_args_t args)
     RawCode result = new_RawCode(args.nbr + 1);
     for (Iterator i = args.nbr - 1; i >= 0; i--)
         concat_RawCode(&result, args.args[i]);
-    push_RawCode(&result, RCL_Word(name));
+    push_RawCode(&result, UNIQUE_QUAL_FROM_STR(name));
     return result;
 }

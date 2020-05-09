@@ -38,8 +38,6 @@ struct Wordico
 {
     // List of functions
     struct VEC_Functions functions;
-    // List of extern functions
-    struct VEC_Externs externs;
     // List of lambdas
     struct VEC_Lambdas lambdas;
     // List of structures
@@ -61,11 +59,6 @@ size_t count_externs(ListDefinition);
 size_t count_structures(ListDefinition);
 
 struct RCL_Function *getSpecific_function(struct Wordico *, hash_t);
-struct RCL_Extern *getSpecific_extern(struct Wordico *, hash_t);
 struct RCL_Structure *getSpecific_structure(struct Wordico *, hash_t);
 struct RCL_Lambda *getSpecific_lambda(struct Wordico *, hash_t);
 struct RCL_Structure_field *getSpecific_field(struct Wordico *, hash_t);
-
-// Checks if a structure, function or external data definition already exists in the table
-// Take a string pointer to indicate the kind of data if yet defined (for error messages)
-bool yetDefined(String *, struct Wordico *, String);

@@ -137,8 +137,8 @@ RCL_Type gettype(const Value value, IdentifierTypeEnv_map_t *env_ptr, BResult *b
     case RCL_Value_Integer ... RCL_Value_String:
         return T_LITERAL(value.kind);
 
-    case RCL_Value_Word:
-        return gettype_word(value.u.word_, env_ptr);
+    case RCL_Value_Qual: //! This is maybe a qual...
+        return gettype_word(value.u.qual_.quals[0], env_ptr);
 
     case RCL_Value_Lambda:
         return gettype_lambda(value.u.lam_, env_ptr);

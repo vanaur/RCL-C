@@ -61,7 +61,7 @@ static String show_concatenation(RCL_Value_Concatenation_t concatenation)
 
 String show_value(Value value)
 {
-    String result;
+    String result = "";
     switch (value.kind)
     {
     case RCL_Value_Integer:
@@ -84,12 +84,17 @@ String show_value(Value value)
         rcl_asprintf(&result, "\"%s\"", value.u.string_);
         break;
     }
-    case RCL_Value_Word:
+/*     case RCL_Value_Word:
     {
         if (!strcmp(value.u.word_.word_str, RCL_NIL_WRD))
             return "<nil>";
         else
             rcl_asprintf(&result, "%s", value.u.word_.word_str);
+        break;
+    } */
+    case RCL_Value_Qual:
+    {
+        result = show_qual(value.u.qual_);
         break;
     }
     case RCL_Value_Quotation:

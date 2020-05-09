@@ -36,13 +36,6 @@ static int hash_cmp_fn(const void *p1, const void *p2)
     return (va > vb) - (va < vb);
 }
 
-static int hash_cmp_ex(const void *p1, const void *p2)
-{
-    int va = ((struct RCL_Extern *)p1)->hash_code;
-    int vb = ((struct RCL_Extern *)p2)->hash_code;
-    return (va > vb) - (va < vb);
-}
-
 static int hash_cmp_st(const void *p1, const void *p2)
 {
     int va = ((struct RCL_Structure *)p1)->hash_code;
@@ -55,14 +48,6 @@ void *sort_functions(struct VEC_Functions *functions)
     if (!functions->used)
         return NULL;
     qsort(functions->array, functions->used, sizeof(struct RCL_Function), hash_cmp_fn);
-    return NULL;
-}
-
-void *sort_externs(struct VEC_Externs *externs)
-{
-    if (!externs->used)
-        return NULL;
-    qsort(externs->array, externs->used, sizeof(struct RCL_Extern), hash_cmp_ex);
     return NULL;
 }
 

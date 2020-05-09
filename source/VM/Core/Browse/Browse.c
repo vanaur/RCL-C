@@ -144,10 +144,10 @@ BResult browseAbsyn(Program prog, String filename)
         break;
     }
 
-    pthread_t t1, t2, t3;
+    pthread_t t1, t2;
 
     /*
-    * Sorting the definitions (functions, external and structures) according to their hash code will then make it possible
+    * Sorting the definitions (functions and structures) according to their hash code will then make it possible
     * to be more efficient when searching for one of the elements, using in particular the binary search algorithm ( O(log n) ),
     * so that if we have for example 20,000 functions, it will only be sufficient for a maximum of 14 search iterations,
     * instead of 20,000 with a linear search.
@@ -155,12 +155,10 @@ BResult browseAbsyn(Program prog, String filename)
     */
 
     pthread_create(&t1, NULL, (void *(*)(void *))sort_functions, (void *)&bresult.wordico.functions);
-    pthread_create(&t2, NULL, (void *(*)(void *))sort_externs, (void *)&bresult.wordico.externs);
-    pthread_create(&t3, NULL, (void *(*)(void *))sort_structures, (void *)&bresult.wordico.structures);
+    pthread_create(&t2, NULL, (void *(*)(void *))sort_structures, (void *)&bresult.wordico.structures);
 
     pthread_join(t1, NULL);
     pthread_join(t2, NULL);
-    pthread_join(t3, NULL);
 
     return bresult;
 }
@@ -367,11 +365,41 @@ void handle_code(struct Code_handler *code_h)
     }
 }
 
-void _handle_word(BResult *bresult, String word)
+/* void _handle_word(BResult *bresult, String word)
 {
     if (is_combinator(word))
         return push_rcode(&bresult->psdata.rcode, make_RCL_Value_Combinator(str_to_comb(word)));
     push_rcode(&bresult->psdata.rcode, make_RCL_Value_Word(word));
+} */
+
+/* static String last_id(const Identifier id)
+{
+    Identifier tmp = id;
+    
+    if (tmp == NULL)
+        return NULL;
+    
+    if (tmp->kind == is_Name)
+        return tmp->u.name_.lident_;
+    
+    while (tmp->u.qualname_.identifier_ != NULL)
+        tmp = tmp->u.qualname_.identifier_;
+    
+    return tmp->u.name_.lident_;
+} */
+
+static bool is_identifier_combinator(const Identifier id)
+{
+    if (count_quals(id) == 1)
+        return is_combinator(id->u.name_.lident_);
+    return false;
+}
+
+void _handle_qual(BResult *bresult, const Identifier id)
+{
+    if (is_identifier_combinator(id))
+        return push_rcode(&bresult->psdata.rcode, make_RCL_Value_Combinator(str_to_comb(id->u.name_.lident_)));
+    push_rcode(&bresult->psdata.rcode, make_RCL_Value_Qual(qual_word_from_absyn(id)));
 }
 
 void _handle_lambda(BResult *bresult, String name)
@@ -403,7 +431,8 @@ void case_operation(BResult *bresult, const Operation op)
     switch (op->kind)
     {
     case is_Var:
-        _handle_word(bresult, show_ast_identifier(op->u.var_.identifier_));
+        // _handle_word(bresult, show_ast_identifier(op->u.var_.identifier_));
+        _handle_qual(bresult, op->u.var_.identifier_);
         break;
 
     case is_Lambda:

@@ -24,57 +24,42 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <stdint.h>
 
-#include <VM\Core\State\State.h>
+#include <VM\Core\RCL.h>
+#include <VM\Core\Browse\Browse.h>
+#include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Exec.h>
 #include <VM\Core\Arguments.h>
 #include <VM\Core\Argv.h>
 #include <VM\Core\Process\Process.h>
-#include <VM\Core\Argv.h>
-#include <VM\Core\Browse\BResult.h>
-#include <VM\Core\Show\Show.h>
-#include <VM\Core\Checker\Checker.h>
-#include <VM\Core\RCL.h>
-#include <VM\Core\Execution\Interpreter\Interpreter.h>
-#include <VM\Core\Execution\JIT\RCL_JIT.h>
-#include <VM\Core\Execution\Compiler\Compiler.h>
 #include <VM\Core\Execution\Compiler\Assembler\Assemble.h>
 #include <VM\Core\Execution\Compiler\Assembler\Show.h>
+#include <VM\Core\Execution\Interpreter\Interpreter.h>
+#include <VM\Core\Execution\JIT\RCL_JIT.h>
+#include <VM\Core\Checker\Checker.h>
+#include <VM\Core\Show\Show.h>
 #include <VM\REPL\REPL.h>
-#include <Tools\Map\Map.h>
-#include <Tools\Utils\Utils.h>
-#include <Tools\console-color\console-color.h>
 #include <Tools\Time_Measure\Time_Measure.h>
-#include <Library\Primitive\Primitive.h>
-#include <Library\Primitive\Expression.h>
-#include <Library\Primitive\Function.h>
-#include <Library\rclib.h>
 
 void atex()
 {
-    printf("----\n\n");
+    printf("\n----\n\n");
 }
 
 void clean_heap(BResult *bresult, const Exec exec)
 {
     if (bresult->psdata.rcode.size > 0)
         free(bresult->psdata.rcode.array);
-    // TODO BETTER
     if (bresult->psdata.imports.size > 0)
         free(bresult->psdata.imports.array);
     if (bresult->psdata.includes.size > 0)
         free(bresult->psdata.includes.array);
-    // ------
     if (bresult->argvs.u.interpreted.args.used > 0)
         free(bresult->argvs.u.interpreted.args.array);
     if (bresult->resulting.size > 0 && exec.ioc != Compiled)
         free(bresult->resulting.array);
     if (bresult->state.size > 0)
         free(bresult->state.array);
-    if (bresult->wordico.externs.size > 0)
-        free(bresult->wordico.externs.array);
     if (bresult->wordico.functions.size > 0)
         free(bresult->wordico.functions.array);
     if (bresult->wordico.lambdas.size > 0)
@@ -129,11 +114,10 @@ void make_noise(
     }
 
     _display_info("Initial operations number: %I64d.", bresult.psdata.rcode.used);
-    _display_info("Non-native words: %I64d.\n", bresult.wordico.externs.used + bresult.wordico.functions.used + bresult.wordico.structures.used);
+    _display_info("Non-native words: %I64d.\n", /* bresult.wordico.externs.used + */ bresult.wordico.functions.used + bresult.wordico.structures.used);
     printf("     > %I64d functions.\n\
-     > %I64d structures.\n\
-     > %I64d externals.",
-           bresult.wordico.functions.used, bresult.wordico.structures.used, bresult.wordico.externs.used);
+     > %I64d structures.\n",
+           bresult.wordico.functions.used, bresult.wordico.structures.used);
     _display_info("Included DLLs: ....................... %I64d.", bresult.psdata.includes.used);
     _display_info("Imported files: ...................... %I64d.", bresult.psdata.imports.used);
     _display_info("Recursion optimization: .............. %s.", bresult.exec_infos.optimize_rec == true ? "yes" : "no");
@@ -160,24 +144,33 @@ int noarg()
     return 0;
 }
 
-/*** Entry point ***/
 
+typedef struct
+{
+  unsigned char uc;
+  double d;
+  unsigned int ui;
+} test_structure_1;
+
+static test_structure_1 struct1(test_structure_1 ts)
+{
+  ts.uc++;
+  ts.d--;
+  ts.ui++;
+
+  return ts;
+}
+
+
+/*** Entry point ***/
 int main(int argc, String argv[])
 {
-    atexit(atex);
-
-/*     const rcl_fun_params_t f1params = rcl_fun_params(2, (const String[]){"x", "y"});
+    /*     const rcl_fun_params_t f1params = rcl_fun_params(2, (const String[]){"x", "y"});
     const rcl_fun_t fn1 = rcl_fun_define("addition", f1params, rcl_expr__add(rcl_expr__var("x"), rcl_expr__var("y")));
 
     const rcl_fun_args_t f1args = rcl_fun_args(2, (const rcl_expr_t[]){rcl_expr__cst_int(6), rcl_expr__cst_int(21)});
     const rcl_fun_t fn2 = rcl_fun_define("example", rcl_fun_params_0, rcl_expr__mul(rcl_fun_call("addition", f1args), rcl_expr__cst_int(2)));
-
-    printf("%s\n", rcl_show_ir_fun(fn1));
-    printf("%s\n", rcl_show_ir_fun(fn2));
-
-    return 0; */
-
-
+ */
     // If the RCL is launch without argument
     if (argc == 1)
         return noarg();
@@ -196,6 +189,7 @@ int main(int argc, String argv[])
     // Don't display anything if this is the flag 'noise'
     if (exec.noise_level == Noise)
     {
+        atexit(atex);
         putchar('\n');
         PRINT_RCL_TEXT;
     }
@@ -218,6 +212,10 @@ int main(int argc, String argv[])
     BResult bresult = processFiles(files, argc, exec);
     bresult.argvs = rcl_argv;
     bresult.exec_infos = exec;
+
+    /*     foo(&bresult);
+    prettyPrint_state(bresult.state);
+    return 0; */
 
     Checked_out checked = check_program(&bresult);
 
@@ -267,14 +265,21 @@ int main(int argc, String argv[])
     // If we want more informations about execution or compilation
     if (exec.noise_level == Noise && exec.ioc == Interpreted)
         make_noise(bresult, exec, files, argc, all_time, eval_time, process_time);
-    else
+    /*     else
     {
         printf("\n[i] All time taken: %s.\n", show_time(all_time));
         printf("[i] Compilation time taken: %s.\n", show_time(process_time));
-    }
+    } */
 
     if (bresult.exec_infos.repl)
         run_repl(&bresult);
+
+/*     for (Iterator i = 0; i < bresult.psdata.cffi_map.used; i++)
+    {
+        printf(" > %s:\n", bresult.psdata.cffi_map.array[i].val.libname);
+        for (Iterator j = 0; j < bresult.psdata.cffi_map.array[i].val.functions.used; j++)
+            printf("   --- %s\n", bresult.psdata.cffi_map.array[i].val.functions.array[j].val.fname);
+    } */
 
     // Free the allocated memory areas
     clean_heap(&bresult, exec);

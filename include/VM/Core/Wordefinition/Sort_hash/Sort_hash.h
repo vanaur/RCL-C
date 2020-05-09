@@ -32,5 +32,4 @@
 /*** Sorting functions for .defines ***/
 
 void *sort_functions(struct VEC_Functions *);
-void *sort_externs(struct VEC_Externs *);
 void *sort_structures(struct VEC_Structures *);

@@ -39,7 +39,6 @@
 
 void init_wordico(struct Wordico *wordico, ListDefinition ld)
 {
-    vec_init_externs(&wordico->externs, count_externs(ld) + 1);
     vec_init_function(&wordico->functions, count_functions(ld) + 1);
     vec_init_structures(&wordico->structures, count_structures(ld) + 1);
     vec_init_lambdas(&wordico->lambdas, 1);
@@ -47,7 +46,6 @@ void init_wordico(struct Wordico *wordico, ListDefinition ld)
 
 void init_wordico_nbr(struct Wordico *wordico, size_t nbr)
 {
-    vec_init_externs(&wordico->externs, nbr);
     vec_init_function(&wordico->functions, nbr);
     vec_init_structures(&wordico->structures, nbr);
     vec_init_lambdas(&wordico->lambdas, 1);
@@ -64,7 +62,7 @@ void set_wordico(struct Wordico *wordico, BrowsedAbsyn *psdata, ListDefinition l
             break;
 
         case is_Extern:
-            vec_add_externs(&wordico->externs, ld->definition_, &psdata->cffi_map, state);
+            cffilibmap_add_extern(ld->definition_, &psdata->cffi_map, state);
             break;
 
         case is_Structure:
@@ -93,29 +91,6 @@ struct RCL_Function *getSpecific_function(struct Wordico *wordico, const hash_t 
             return &wordico->functions.array[mid];
 
         if (wordico->functions.array[mid].hash_code < hash_word)
-            left = mid + 1;
-
-        else
-            right = mid - 1;
-    }
-
-    return NULL;
-}
-
-struct RCL_Extern *getSpecific_extern(struct Wordico *wordico, const hash_t hash_word)
-{
-    int left = 0;
-    int right = wordico->externs.used;
-    int mid = 0;
-
-    while (left <= right)
-    {
-        mid = left + (right - left) / 2;
-
-        if (wordico->externs.array[mid].hash_code == hash_word)
-            return &wordico->externs.array[mid];
-
-        if (wordico->externs.array[mid].hash_code < hash_word)
             left = mid + 1;
 
         else
@@ -202,27 +177,4 @@ size_t count_structures(ListDefinition ld)
         tmp = tmp->listdefinition_;
     }
     return result;
-}
-
-bool yetDefined(String *kst, struct Wordico *wordico, const String name)
-{
-    /*     if (wordico->functions.used)
-        if (getSpecific_function(wordico, hash_djb2(name)) != NULL)
-        {
-            rcl_asprintf(kst, "function");
-            return true;
-        }
-    if (wordico->externs.used)
-        if (getSpecific_extern(wordico, name) != NULL)
-        {
-            rcl_asprintf(kst, "external function");
-            return true;
-        }
-    if (wordico->structures.used)
-        if (getSpecific_structure(wordico, name) != NULL)
-        {
-            rcl_asprintf(kst, "structure");
-            return true;
-        }
-    return false; */
 }

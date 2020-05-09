@@ -22,9 +22,9 @@
  * under the License.
  */
 
-#pragma once
-
+#include <VM\Core\RawCode\RawCode.h>
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Execution\Interpreter\Stack\Stack.h>
 
-void evalword(Stack *, BResult *, RCL_Value_Word_t *);
+// Evaluate `qual(ified)' expression
+void eval_qual(Stack *, BResult *, const RCL_Value_Qual_t *);

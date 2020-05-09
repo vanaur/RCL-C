@@ -43,33 +43,33 @@ typedef enum
     , FLIP, ID, DIP, GIS
     , QUOTE, UNQUOTE
     , QAP, CAT, REP
-    , KAP, PAK, CONS, UNCONS
+    , KAP, PAK, CONS, UNCONS, PICK
     , SAP, TAKE, TAKEX
     , COMB_MAP, REC, STEQ
     , STEP, NPREC, PUTC, PUTS, NVSHOW
-    , IFTE, CASE, SELECT
+    , IFTE, CASE, SELECT, CRAVE
     , EQ, LW, LEQ, GR, GEQ, NEQ, NOT
     , NEG
     , FTOI, ITOF, ITOC, CTOI, ITOB, STOI, ITOS
-    , QLEN, ALEN
+    , QLEN, ALEN, REVERSE
     , WTDO, HALT
     , GENREC, LINREC, BINREC, TAILREC, PRIMREC }
 Combinator;
 
-static const char Combinators[][8] =
+static const char Combinators[][10] =
     { "vq", "pop", "dup", "swap"
     , "flip", "id", "dip", "gis"
     , "quote", "unquote"
     , "qap", "cat", "rep"
-    , "kap", "pak", "cons", "uncons"
+    , "kap", "pak", "cons", "uncons", "pick"
     , "sap", "take", "takex"
     , "comb_map", "rec", "steq"
     , "step", "nprec", "putc", "puts", "nvshow"
-    , "ifte", "case", "select"
+    , "ifte", "case", "select", "crave"
     , "eq", "lw", "leq", "gr", "geq", "neq", "not"
     , "neg"
     , "ftoi", "itof", "itoc", "ctoi", "itob", "stoi", "itos"
-    , "qlen", "alen"
+    , "qlen", "alen", "reverse"
     , "wtdo", "halt"
     , "genrec", "linrec", "binrec", "tailrec", "primrec" };
 

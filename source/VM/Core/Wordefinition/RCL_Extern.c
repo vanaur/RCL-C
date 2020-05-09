@@ -49,49 +49,14 @@ size_t count_args(Definition define)
     return result;
 }
 
-#include <VM\Core\State\State.h>
-
-struct RCL_Extern make_RCL_extern(String name, String dll, Definition define)
+void cffilibmap_add_extern(Definition define, rcl_ffi_C_lib_map_t *cffilibmap, struct State *state)
 {
-    struct State state; //! State!
-    state_init(&state);
-    size_t nargs = count_ffi_types(define->u.extern_.listffi_type_signature_);
-    ffi_type *tret = ffi_ctype_to_real_ctype(define->u.extern_.ffi_type_signature_);
-    ffi_type **targs = malloc(nargs * sizeof *targs);
-    ffi_ctype_to_real_ctypes(targs, define->u.extern_.listffi_type_signature_);
-    struct RCL_Extern result;
-    result.dll = dll;
-    result.hash_code = hash_djb2(rcl_sprintf_s("%s.%s", dll, name));
-    struct rcl_ffi_C_function_t fn = make_rcl_ffi_C_function(name, new_rcl_ffi_C_attributes(name, dll, nargs, tret, targs, &state));
-    result.fun = fn;
-    return result;
 
-    /*     const String hsh_str_code = rcl_sprintf_s("%s.%s", dll, name);
-    struct RCL_Extern result = {.name = name, .dll = dll, .hash_code = hash_djb2(hsh_str_code)};
-    size_t nargs = count_ffi_types(define->u.extern_.listffi_type_signature_);
-    result.nargs = nargs;
-    result.targs = malloc(nargs * sizeof(ffi_type *));
-    ffi_ctype_to_real_ctypes(result.targs, define->u.extern_.listffi_type_signature_);
-    result.tret = ffi_ctype_to_real_ctype(define->u.extern_.ffi_type_signature_);
+    /**************************************************************************
+    *!  We consider everything to be in a single file FOR THE MOMENT,         *
+    *!  until we have an implementation of the import file management system. *
+    ***************************************************************************/
 
-struct State my_state;
-state_init(&my_state);
-
-    struct rcl_ffi_C_function_t fn = make_rcl_ffi_C_function(name, new_rcl_ffi_C_attributes(name, dll, nargs, result.tret, result.targs, &my_state));
-    result.fun = fn;
-
-prettyPrint_state(my_state);
-
-    return result; */
-}
-
-void vec_init_externs(struct VEC_Externs *vec, size_t i)
-{
-    InitVector(vec, i, struct RCL_Extern);
-}
-
-void vec_add_externs(struct VEC_Externs *vec, Definition define, rcl_ffi_C_lib_map_t *cffilibmap, struct State *state)
-{
     const String fname = get_last_qual(define->u.extern_.identifier_);
     const String lname = define->u.extern_.identifier_->u.qualname_.uident_;
 
@@ -103,21 +68,15 @@ void vec_add_externs(struct VEC_Externs *vec, Definition define, rcl_ffi_C_lib_m
         return;
     }
 
-    size_t nargs = count_ffi_types(define->u.extern_.listffi_type_signature_);
-    ffi_type *tret = ffi_ctype_to_real_ctype(define->u.extern_.ffi_type_signature_);
+    const size_t nargs = count_ffi_types(define->u.extern_.listffi_type_signature_);
+    const ffi_type *tret = ffi_ctype_to_real_ctype(define->u.extern_.ffi_type_signature_);
     ffi_type **targs = malloc(nargs * sizeof *targs);
     ffi_ctype_to_real_ctypes(targs, define->u.extern_.listffi_type_signature_);
-    struct rcl_ffi_C_function_t fn = make_rcl_ffi_C_function(fname, new_rcl_ffi_C_attributes(fname, lname, nargs, tret, targs, state));
+    const struct rcl_ffi_C_attributes_t attributes = new_rcl_ffi_C_attributes(fname, lname, nargs, tret, targs, state);
+    const struct rcl_ffi_C_function_t fn = make_rcl_ffi_C_function(fname, attributes);
 
     if (cffilibmap->array[found].val.functions.size == 0)
         cffilibmap->array[found].val.functions = new_rcl_ffi_C_function_map_t(1);
 
     add_rcl_ffi_C_function(&cffilibmap->array[found].val.functions, hash_djb2(fname), fn);
-
-    PushToVector(vec, struct RCL_Extern, make_RCL_extern(fname, get_ast_DLL_extern(define), define));
-}
-
-void vec_add_externs_data(struct VEC_Externs *vec, struct RCL_Extern rcl_extern)
-{
-    PushToVector(vec, struct RCL_Extern, rcl_extern);
 }

@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <tmmintrin.h>
 
 #include <Tools\Utils\Utils.h>
 
@@ -286,4 +287,26 @@ String trim(const String str)
     end[1] = '\0';
 
     return res;
+}
+
+static void reverse(String start, String end)
+{
+    while (start < end)
+    {
+        const char c = *start;
+        *start = *end;
+        *end = c;
+        ++start;
+        --end;
+    }
+}
+
+void reverse_str(String str, size_t len)
+{
+    for (Iterator i = len / 2 - 1; i >= 0; --i)
+    {
+        char c = str[i];
+        str[i] = str[len - i - 1];
+        str[len - i - 1] = c;
+    }
 }

@@ -35,7 +35,7 @@
 #include <VM\Core\Execution\Interpreter\Stack\Combinators\Basics.h>
 #include <VM\Core\Execution\Interpreter\Arithmetic.h>
 #include <VM\Core\Execution\Interpreter\Atoms\operation.h>
-#include <VM\Core\Execution\Interpreter\Atoms\word.h>
+#include <VM\Core\Execution\Interpreter\Atoms\qual.h>
 #include <VM\Core\Execution\Interpreter\Atoms\struct_builder.h>
 #include <VM\Core\Execution\Interpreter\Atoms\lambda.h>
 #include <VM\Core\Execution\Interpreter\Atoms\func.h>
@@ -51,8 +51,8 @@ inline void evalop(Stack *stack, Value *op, BResult *bresult)
 
     switch (op->kind)
     {
-    case RCL_Value_Word:
-        return evalword(stack, bresult, &op->u.word_);
+    case RCL_Value_Qual:
+        return eval_qual(stack, bresult, &op->u.qual_);
 
     case RCL_Value_Array ... RCL_Value_String:
         return push(stack, *op);
@@ -67,7 +67,7 @@ inline void evalop(Stack *stack, Value *op, BResult *bresult)
         return do_arithmetic(stack, op->u.litOperation_, bresult);
 
     case RCL_Value_Parallel:
-        printf("TODO");
+        _interr_ext("Parallelism is not yet available.", NULL);
         break;
 
     case RCL_Value_Replicated:

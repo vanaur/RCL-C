@@ -91,7 +91,7 @@ RCL_Type type_of(const Value *value, const String function_name, const BResult *
     case RCL_Value_Integer ... RCL_Value_String:
         return T_LITERAL(value->kind);
 
-    case RCL_Value_Word:
+    case RCL_Value_Qual:
         break;
 
     case RCL_Value_Lambda:

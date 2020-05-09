@@ -45,11 +45,6 @@ String rcl_show_ir_fun(const rcl_fun_t f)
     return rcl_sprintf_s("%s = %s ;", f.name, show_rcode(f.body));
 }
 
-String rcl_show_ir_extern(const rcl_extern_t ef)
-{
-    return rcl_sprintf_s("extern %f ;", ef.name);
-}
-
 String rcl_show_ir_struct(const rcl_struct_t s)
 {
     return rcl_sprintf_s("structure %s ;", s.name);
@@ -63,16 +58,7 @@ rcl_program_t new_rcl_program(const String prog_name, const String src_lang, con
     result.pexecinfos = exec_infos;
     init_rcode(&result.pmain, INIT_DEFAULT_SIZE);
     init_rcl_const_array_vec(&result.pconstarrays, INIT_DEFAULT_SIZE);
-    init_rcl_extern_vec(&result.pexternals, INIT_DEFAULT_SIZE);
     init_rcl_fun_vec(&result.pfunctions, INIT_DEFAULT_SIZE);
     init_rcl_struct_vec(&result.pstructures, INIT_DEFAULT_SIZE);
     return result;
 }
-
-// Recompilateur:
-//     IR -> Language
-//  Par exemple compiler Arlia -> IR
-//                       IR -> Lazen
-//  Ce qui est encore plus fort dans la transcompilation
-//  et permet aussi d'observer les modifications faites.
-//  Faire ça avec du pattern-matching

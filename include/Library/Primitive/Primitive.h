@@ -52,14 +52,6 @@ typedef rcl_fun_t *rcl_fun_ptr_t;
 // Returns the string representation of the given function
 _export String rcl_show_ir_fun(const rcl_fun_t);
 
-// This corresponds to a function to be called from the FFI, for exemple
-// if you want to use the function `qsort` from the C standard library.
-_export typedef struct RCL_Extern rcl_extern_t;
-typedef rcl_extern_t *rcl_extern_ptr_t;
-
-// Returns the string representation of the given external function
-_export String rcl_show_ir_extern(const rcl_extern_t);
-
 // This refers to the IR structures of the VM, which are C-like structures
 // but can also behave as an enumeration of constants.
 _export typedef struct RCL_Structure rcl_struct_t;
@@ -74,8 +66,6 @@ typedef rcl_const_array_t *rcl_const_array_ptr_t;
 
 // Set of functions
 _export typedef Vector(rcl_fun_vec, rcl_fun_t);
-// Set of external functions
-_export typedef Vector(rcl_extern_vec, rcl_extern_t);
 // Set of structures
 _export typedef Vector(rcl_struct_vec, rcl_struct_t);
 // Set of constant arrays
@@ -97,7 +87,6 @@ _export typedef struct
     // The source language using RCL as backend (C -> RCL, for example)
     String src_language;
     rcl_fun_vec pfunctions;
-    rcl_extern_vec pexternals;
     rcl_struct_vec pstructures;
     rcl_const_array_vec pconstarrays;
     rcl_expr_t pmain;

@@ -42,7 +42,8 @@ enum Value_Kind
     RCL_Value_Float,
     RCL_Value_Char,
     RCL_Value_String,
-    RCL_Value_Word,
+    //RCL_Value_Word,
+    RCL_Value_Qual,
     RCL_Value_Lambda,
     RCL_Value_EndLamScope,
     RCL_Value_LiteralOperation,
@@ -133,6 +134,27 @@ typedef struct
     size_t times;
 } __attribute__((packed)) RCL_Value_Repeat_t;
 
+// Qualified word
+typedef struct qual_word_s
+{
+    size_t nbrof_qual;
+    RCL_Value_Word_t *quals;
+} qual_word_t;
+
+// When there is no qualification, for example `my_function' has no one
+// but `Test.my_function' has.
+#define IS_NO_QUALIFIED(quals) (quals->nbrof_qual == 1)
+#define UNIQUE_QUAL_FROM_STR(str) (make_RCL_Value_Qual(qual_word_from_array(1, (const String[]){str})))
+
+qual_word_t qual_word_from_absyn(const Identifier);
+qual_word_t qual_word_from_array(const size_t, const String[]);
+
+Value make_RCL_Value_Qual(const qual_word_t);
+
+String show_qual(const qual_word_t);
+
+typedef qual_word_t RCL_Value_Qual_t;
+
 typedef struct ValueTag
 {
     enum Value_Kind kind;
@@ -142,7 +164,8 @@ typedef struct ValueTag
         RCL_Value_Float_t float_;
         RCL_Value_Char_t char_;
         RCL_Value_String_t string_;
-        RCL_Value_Word_t word_;
+        //RCL_Value_Word_t word_;
+        RCL_Value_Qual_t qual_;
         RCL_Value_LamdaDecl_t lam_;
         RCL_Value_EndLambdaScope_t endLamScope_;
         RCL_Value_LiteralOperation_t litOperation_;
@@ -171,7 +194,6 @@ typedef struct ValueTag
 #define RCL_Float_F(Float) make_RCL_Value_Float_f(Float)
 #define RCL_Char(Char) make_RCL_Value_Char(Char)
 #define RCL_String(String) make_RCL_Value_String(String)
-#define RCL_Word(Word) make_RCL_Value_Word(Word)
 #define RCL_EndLamScope(EndLambdaScope) make_RCL_Value_EndLamScope(EndLambdaScope)
 #define RCL_Lambda(LamdaDecl) make_RCL_Value_Lambda(LamdaDecl)
 #define RCL_All() \
@@ -191,7 +213,6 @@ Value make_RCL_Value_Float(const RCL_Value_Float_t);
 Value make_RCL_Value_Float_f(const double);
 Value make_RCL_Value_Char(const RCL_Value_Char_t);
 Value make_RCL_Value_String(const RCL_Value_String_t);
-Value make_RCL_Value_Word(const String);
 Value make_RCL_Value_EndLamScope(const String);
 Value make_RCL_Value_Lambda(const String);
 Value make_RCL_Value_LiteralOperation(const RCL_Value_LiteralOperation_t);
@@ -207,10 +228,10 @@ Value otov(Operation);
 
 /*** Some words to work with structures ***/
 
-#define RCL_NIL_WRD  "nil"  // It allows you to fill a field with "empty" data.
-#define RCL_NIL_HSH  ((hash_t)193500360)
-#define RCL_NEW_WRD  "new"  // It fills the fields of structure S in order with what is in the stack.
-#define RCL_NEW_HSH  ((hash_t)193500239)
+#define RCL_NIL_WRD "nil" // It allows you to fill a field with "empty" data.
+#define RCL_NIL_HSH ((hash_t)193500360)
+#define RCL_NEW_WRD "new" // It fills the fields of structure S in order with what is in the stack.
+#define RCL_NEW_HSH ((hash_t)193500239)
 #define RCL_NEWF_WRD "newf" // It fills the fields {C} of structure S with what is on the stack and fills the other fields with A.
 #define RCL_NEWF_HSH ((hash_t)2090540693)
 #define RCL_NEWA_WRD "newa" // It initializes all fields of structure S with data A.
@@ -220,8 +241,8 @@ Value otov(Operation);
 
 typedef Vector(RawCode, Value);
 
-#define RCODE_TO_STACK(rcode)     (*((Stack *)&rcode))
-#define STACK_TO_RCODE(stack)     (*((RawCode *)&stack))
+#define RCODE_TO_STACK(rcode) (*((Stack *)&rcode))
+#define STACK_TO_RCODE(stack) (*((RawCode *)&stack))
 #define RCODE_TO_STACK_PTR(rcode) ((Stack *)rcode)
 #define STACK_TO_RCODE_PTR(stack) ((RawCode *)stack)
 
@@ -241,7 +262,7 @@ RawCode fast_rcode_subv(const RawCode src, const size_t from, const size_t until
 // Replace all sequences corresponding to `seq1` with `seq2` in the sent `RawCode`.
 // Length must be specified.
 void seq_replace(
-    RawCode * rcode,
+    RawCode *rcode,
     const Value seq1[], size_t size1,
     const Value seq2[], size_t size2);
 
