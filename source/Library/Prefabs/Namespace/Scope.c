@@ -89,7 +89,7 @@ size_t rcl_count_scopes(const rcl_scope_env_t env)
 
 void rcl_free_scope_env(rcl_scope_env_t env)
 {
-    rcl_scope_env_t current;
+    rcl_scope_env_t current = env;
     while (current != NULL)
     {
         current = env;
