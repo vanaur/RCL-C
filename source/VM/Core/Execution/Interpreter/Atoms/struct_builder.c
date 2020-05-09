@@ -74,7 +74,7 @@ void eval_newf(Stack *stack, BResult *bresult)
 
     rcl_assert(stack->used >= len);
 
-    Value values[len * sizeof(Value)];
+    Value *values = malloc(len * sizeof(Value));
     for (Iterator i = 0; i < len; i++)
         values[i] = drop(stack);
 

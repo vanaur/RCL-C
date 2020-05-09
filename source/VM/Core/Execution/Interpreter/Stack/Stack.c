@@ -109,7 +109,9 @@ inline void push(Stack *stack, const Value item)
 
 inline void pop(Stack *stack)
 {
-    stack->array[stack->used == 0 ? 0 : stack->used--];
+    //stack->array[stack->used == 0 ? 0 : stack->used--];
+    stack->used--;
+    //TODO! Apply `free()` ?
 }
 
 Value drop(Stack *stack)
