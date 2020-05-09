@@ -850,7 +850,6 @@ static void cgen(const RawCode rcode, struct Bunch *bunch_ptr)
     assemble_function(bunch_ptr, &bunch_ptr->result, ENTRY_NAME, "This is the entry point", &bunch_ptr->bresult->psdata.rcode);
 }
 
-static void *th_assemble_externs(struct VEC_Externs *externs) {}
 static void *th_assemble_structure(struct VEC_Structures *structures) {}
 static void *th_assemble_functions(struct VEC_Functions *functions) {}
 
