@@ -10,6 +10,9 @@
  - [Installing](#installing)
  - [Testing and examples](#testing-and-examples)
  - [Contributing](#contributing)
+ - [Questions & answers](#questions--answers)
+ - [Notes on the project](#notes-on-the-project-and-its-stability--construction)
+ - [Ressources](#ressources)
  - [Version 2.0 Forecast](#version-20-forecast)
  - [License](#license)
 
@@ -34,8 +37,8 @@ The project is not sufficiently developed to be available from a package manager
 
 The dependencies of external dynamic libraries are:
 
- - [libffi](https://sourceware.org/libffi/)
- - [gmp](https://gmplib.org/)
+ - [libffi](https://sourceware.org/libffi/) (used for FFI with C)
+ - [gmp](https://gmplib.org/) (used for large number arithmetic)
 
 The programs needed to build the project:
 
@@ -188,7 +191,50 @@ Don't worry, it sounds barbaric when you put it that way, but what we've done he
 
 If you have constructive questions, suggestions for improvements or features to be added, bug or performance reports, then check if a report has not already been raised in [issues](https://github.com/vanaur/RCL/issues), in which case it has probably already been processed or is being maintained, otherwise feel free to do so and/or actively participate in the project by forking it. Amendments will be made if they are relevant.
 
+## Questions & Answers
+
+A list of anticipated questions that I think are legitimate, for those interested in the project...
+
+<details><summary><b>What does RCL bring compared to LLVM or other compilation tool chains?</b></summary>
+The project is still very young, so absolutely nothing at the moment. It is rather a "proof of concepts" intended to put forward an abstract and functional intermediate representation. Nevertheless, this supposes, for more advanced versions of the project, that the lib will manage all the technical details (performance, memory, pointers, ...) that it is sometimes more complicated to manage.
+</details>
+
+<details><summary><b>Could we consider using RCL for low-level languages?</b></summary>
+A priori, this would not be impossible, however the resulting code would not be low-level and would probably not correspond at all to what is expected from a compiler for low-level languages.
+</details>
+
+<details><summary><b>Do we need to know the IR specifications to compile to RCL?</b></summary>
+It's always useful to have a deeper knowledge of what you're using, but the library will provide layers of abstraction so that you don't have to worry about the resulting code/IR at compile time at all. So, no!
+</details>
+
+## Notes on the project and its stability / construction
+
+<details><summary><b>Motivations</b></summary>
+There are 3 reasons that pushed me to realize this project:
+
+ - I'm in the process of creating a programming language, I wanted a way to compile, interpret and analyze my executions. There are of course other popular VMs that do a great job, but I wanted to have something of my own, as well as open to proposals and contributions for other projects.
+ - The fields of programming languages, their implementation and compilers are part of what I prefer in computer science. In order to better understand their internal workings, I wanted to embark on a "large scale" project in this direction.
+ - A lot of VMs or tools to help evaluate and compile languages of all kinds require quite a lot of effort, and most of the time use a machine-like intermediate representation (actually, I don't know of any that don't do otherwise (but it must surely exist)). I wanted to "put aside" this way of doing things a bit, to experiment with a different approach in representation and compilation as well as use.
+</details>
+
+<details><summary><b>Stability</b></summary>
+The RCL is a relatively "old" project for me, its idea goes back to April 2018, but I didn't have enough programming and computer knowledge to start it. In the meantime the ideas were born, but still no realization. This repository presents the first version of the RCL I wrote in C, its base dates from March 2019.
+
+For me it was therefore a project of (re)learning compilers, language theory, and everything that comes close to that (with of course learning C and project management). So there are some elementary parts of the RCL that are old and would be hard to modify, however this is part of my goals.
+
+In terms of "frondend", few changes should be made on what already exists, it's more about the "backend" (at the time I didn't care about freeing the allocated memory!). In the long term, all these old foundations should be updated properly, however, in the meantime, the project remains fully usable, it is rather bad practice in the [/Core](source/VM/Core).
+</details>
+
+<details><summary><b>Usable for "real projects"?</b></summary>
+Of course, these are big words compared to the current progress. What I mean by this is that, in the long term, RCL being a potential choice for the compilation backend for languages, in the sense of its capabilities.
+</details>
+
+## Ressources
+
+[Inventory of links](.ressources/README.md) to interesting resources on the subject of compilation, intermediate representations and optimizations.
+
 ## Version 2.0 Forecast
+##### These are ideas of the features I am considering for a future version of the project
 
 The current version is a prototype under construction which aims to be really usable (I'd like in any case 😛). This version is therefore relatively rigid to extensions and customizations as well as limited in terms of code generation backend or optimizations.
 
