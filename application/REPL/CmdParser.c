@@ -31,6 +31,7 @@
 const String commands[] =
     {"stack", "free", "quit", "help", "typeof",
      "step", "exec", "exect", "show", "oof",
+     "funs", "externs", "structs"
      "opt", "set"};
 
 void help_if_unknown(const String str)
@@ -61,6 +62,12 @@ REPL_AST repl_cmd_parse(const String cmd)
 
     if (!strcmp(trimed_cpy, "stack"))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_STACK, repl_stack);
+    if (!strcmp(trimed_cpy, "funs"))
+        return SIGMA_FILL_CTOR(REPL_AST, REPL_FUNS, repl_funs);
+    if (!strcmp(trimed_cpy, "externs"))
+        return SIGMA_FILL_CTOR(REPL_AST, REPL_EXTERNS, repl_externs);
+    if (!strcmp(trimed_cpy, "structs"))
+        return SIGMA_FILL_CTOR(REPL_AST, REPL_STRUCTS, repl_structs);
     if (!strcmp(trimed_cpy, "free"))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_FREE, repl_free);
     if (!strcmp(trimed_cpy, "quit"))

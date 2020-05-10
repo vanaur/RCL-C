@@ -38,6 +38,9 @@ enum REPL_Command
     REPL_OOF,    // Display the algorithm time complexity of the given function      : oof F
     REPL_FREE,   // Free all lambdas                                                 : free
     REPL_QUIT,   // Exit the REPL                                                    : quit
+    REPL_FUNS,   // Display all the loaded functions                                 : funs
+    REPL_STRUCTS,// Display all the loaded structures                                : structs
+    REPL_EXTERNS,// Display all the loaded external functions                        : externs
     REPL_HELP,   // Display the help                                                 : help
     CMDERR       // When there is an error of parsing
 };
@@ -53,6 +56,9 @@ typedef SIGMA_TYPE(
     SIGMA_CTOR(repl_set, String option);
     SIGMA_CTOR(repl_oof, String fname);
     SIGMA_CTOR(cmderr, String err);
+    SIGMA_CTOR(repl_funs);
+    SIGMA_CTOR(repl_structs);
+    SIGMA_CTOR(repl_externs);
     SIGMA_CTOR(repl_stack);
     SIGMA_CTOR(repl_free);
     SIGMA_CTOR(repl_quit);

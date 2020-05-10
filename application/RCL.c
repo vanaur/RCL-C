@@ -145,24 +145,6 @@ int noarg()
     return 0;
 }
 
-
-typedef struct
-{
-  unsigned char uc;
-  double d;
-  unsigned int ui;
-} test_structure_1;
-
-static test_structure_1 struct1(test_structure_1 ts)
-{
-  ts.uc++;
-  ts.d--;
-  ts.ui++;
-
-  return ts;
-}
-
-
 /*** Entry point ***/
 int main(int argc, String argv[])
 {
@@ -274,13 +256,6 @@ int main(int argc, String argv[])
 
     if (bresult.exec_infos.repl)
         run_repl(&bresult);
-
-/*     for (Iterator i = 0; i < bresult.psdata.cffi_map.used; i++)
-    {
-        printf(" > %s:\n", bresult.psdata.cffi_map.array[i].val.libname);
-        for (Iterator j = 0; j < bresult.psdata.cffi_map.array[i].val.functions.used; j++)
-            printf("   --- %s\n", bresult.psdata.cffi_map.array[i].val.functions.array[j].val.fname);
-    } */
 
     // Free the allocated memory areas
     clean_heap(&bresult, exec);
