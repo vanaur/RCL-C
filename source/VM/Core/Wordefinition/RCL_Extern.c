@@ -64,15 +64,20 @@ void cffilibmap_add_extern(Definition define, rcl_ffi_C_lib_map_t *cffilibmap, s
     const int found = key_find_rcl_ffi_C_lib(cffilibmap, extern_from_lib_hash_code, &cmp_f_hash);
     if (found == map_unfound)
     {
-        state_put_err_br_cst(state, "Attempt to define the external function `%s' from an undefined library identifier: `%s'.", fname, lname);
+        state_put_err_br_cst(
+            state,
+            "Attempt to define the external function `%s' from an undefined library identifier: `%s'.",
+            fname,
+            lname);
         return;
     }
 
+    const String lpath = cffilibmap->array[found].val.libpath;
     const size_t nargs = count_ffi_types(define->u.extern_.listffi_type_signature_);
     const ffi_type *tret = ffi_ctype_to_real_ctype(define->u.extern_.ffi_type_signature_);
     ffi_type **targs = malloc(nargs * sizeof *targs);
     ffi_ctype_to_real_ctypes(targs, define->u.extern_.listffi_type_signature_);
-    const struct rcl_ffi_C_attributes_t attributes = new_rcl_ffi_C_attributes(fname, lname, nargs, tret, targs, state);
+    const struct rcl_ffi_C_attributes_t attributes = new_rcl_ffi_C_attributes(fname, lpath, nargs, tret, targs, state);
     const struct rcl_ffi_C_function_t fn = make_rcl_ffi_C_function(fname, attributes);
 
     if (cffilibmap->array[found].val.functions.size == 0)
