@@ -365,29 +365,6 @@ void handle_code(struct Code_handler *code_h)
     }
 }
 
-/* void _handle_word(BResult *bresult, String word)
-{
-    if (is_combinator(word))
-        return push_rcode(&bresult->psdata.rcode, make_RCL_Value_Combinator(str_to_comb(word)));
-    push_rcode(&bresult->psdata.rcode, make_RCL_Value_Word(word));
-} */
-
-/* static String last_id(const Identifier id)
-{
-    Identifier tmp = id;
-    
-    if (tmp == NULL)
-        return NULL;
-    
-    if (tmp->kind == is_Name)
-        return tmp->u.name_.lident_;
-    
-    while (tmp->u.qualname_.identifier_ != NULL)
-        tmp = tmp->u.qualname_.identifier_;
-    
-    return tmp->u.name_.lident_;
-} */
-
 static bool is_identifier_combinator(const Identifier id)
 {
     if (count_quals(id) == 1)
