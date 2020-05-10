@@ -22,9 +22,10 @@
  * under the License.
  */
 
+#include "CmdParser.h"
+
 #include <Tools\Utils\Utils.h>
 #include <Tools\console-color\console-color.h>
-#include <VM\REPL\CmdParser.h>
 #include <string.h>
 
 const String commands[] =

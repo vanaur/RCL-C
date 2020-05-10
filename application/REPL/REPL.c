@@ -22,8 +22,9 @@
  * under the License.
  */
 
-#include <VM\REPL\REPL.h>
-#include <VM\REPL\CmdParser.h>
+#include "REPL.h"
+#include "CmdParser.h"
+
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Show\Show.h>
 #include <VM\Core\Types\Infer.h>

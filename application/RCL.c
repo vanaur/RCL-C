@@ -25,7 +25,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <VM\Core\RCL.h>
+#include "REPL\REPL.h"
+#include "RCL.h"
+
 #include <VM\Core\Browse\Browse.h>
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Exec.h>
@@ -38,7 +40,6 @@
 #include <VM\Core\Execution\JIT\RCL_JIT.h>
 #include <VM\Core\Checker\Checker.h>
 #include <VM\Core\Show\Show.h>
-#include <VM\REPL\REPL.h>
 #include <Tools\Time_Measure\Time_Measure.h>
 
 void atex()
