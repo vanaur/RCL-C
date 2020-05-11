@@ -85,3 +85,11 @@ void cffilibmap_add_extern(Definition define, rcl_ffi_C_lib_map_t *cffilibmap, s
 
     add_rcl_ffi_C_function(&cffilibmap->array[found].val.functions, hash_djb2(fname), fn);
 }
+
+size_t count_cffi_externs(const struct rcl_ffi_C_lib_map_t *cffi_ptr)
+{
+    size_t result = 0;
+    for (Iterator i = 0; i < cffi_ptr->used; i++)
+        result += cffi_ptr->array[i].val.functions.used;
+    return result;
+}

@@ -35,3 +35,4 @@
 
 size_t count_args(Definition);
 void cffilibmap_add_extern(Definition, rcl_ffi_C_lib_map_t *, struct State *);
+size_t count_cffi_externs(const struct rcl_ffi_C_lib_map_t *);

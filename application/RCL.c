@@ -117,8 +117,9 @@ void make_noise(
     _display_info("Initial operations number: %I64d.", bresult.psdata.rcode.used);
     _display_info("Non-native words: %I64d.\n", /* bresult.wordico.externs.used + */ bresult.wordico.functions.used + bresult.wordico.structures.used);
     printf("     > %I64d functions.\n\
-     > %I64d structures.\n",
-           bresult.wordico.functions.used, bresult.wordico.structures.used);
+     > %I64d structures.\n\
+     > %I64d external functions.\n",
+           bresult.wordico.functions.used, bresult.wordico.structures.used, count_cffi_externs(&bresult.psdata.cffi_map));
     _display_info("Included DLLs: ....................... %I64d.", bresult.psdata.includes.used);
     _display_info("Imported files: ...................... %I64d.", bresult.psdata.imports.used);
     _display_info("Recursion optimization: .............. %s.", bresult.exec_infos.optimize_rec == true ? "yes" : "no");
