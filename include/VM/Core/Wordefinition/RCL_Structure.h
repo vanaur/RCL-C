@@ -31,7 +31,7 @@
 
 typedef enum Kind_Structure Kind_Structure;
 
-struct RCL_Structure_field {
+struct __attribute__((packed)) RCL_Structure_field {
     String name;
     hash_t hash_code;
     enum Kind_Structure { _is_Enum, _is_Field, _is_Spec } kind;
@@ -40,15 +40,15 @@ struct RCL_Structure_field {
         struct { } _field;
         struct { String struct_name; } _typed;
     } u;
-} __attribute__((packed)) RCL_Structure_field;
+};
 
-struct RCL_Structure {
+struct __attribute__((packed)) RCL_Structure {
     String name;
     hash_t hash_code;
     struct RCL_Structure_field* fields;
     size_t field_alloc_size;
     size_t field_alloc_used;
-} __attribute__((packed)) RCL_Structure;
+};
 
 // Vector of structures
 Vector (VEC_Structures, struct RCL_Structure);

@@ -37,7 +37,7 @@
 #include <VM\Core\RawCode\RawCode.h>
 #include <VM\Core\Syntax\Absyn.h>
 
-struct RCL_Lambda {
+struct __attribute__((packed)) RCL_Lambda {
     String name;
     hash_t hash_code;
     enum LamKind { is_Argv, is_Lam } kind;
@@ -51,7 +51,7 @@ struct RCL_Lambda {
             struct { Value value; } c_lam;
         } On_Compiled;
     } u;
-} __attribute__((packed)) RCL_Lambda;
+};
 
 // Vector of lambdas
 Vector (VEC_Lambdas, struct RCL_Lambda);

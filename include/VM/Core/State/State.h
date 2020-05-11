@@ -63,7 +63,7 @@
 
 enum Origin { Browser, Interpreter, Compiler, Optimizer, Checker };
 
-struct StateKind {
+struct __attribute__((packed)) StateKind {
     enum { Error, Warning, Info } kind;
     union {
         struct { String msg; } error;
@@ -71,14 +71,14 @@ struct StateKind {
         struct { String msg; } info;
     } u;
     enum Origin origin;
-} __attribute__((packed)) StateKind;
+};
 
-struct State {
+struct __attribute__((packed)) State {
     struct StateKind* array;
     size_t size;
     size_t used;
     bool hasError;
-} __attribute__((packed)) State;
+};
 
 #define S_ERR make_error
 #define S_WARN make_warning

@@ -162,7 +162,7 @@ static void handle_cmd(const REPL_AST cmd, BResult *bresult_ptr)
         break;
 
     case REPL_FUNS:
-        printf("[%d functions at all]:\n", bresult_ptr->wordico.functions.used);
+        printf("[%u functions at all]:\n", (unsigned)bresult_ptr->wordico.functions.used);
         for (int i = 0; i < bresult_ptr->wordico.functions.used; i++)
             printf("%s, ", bresult_ptr->wordico.functions.array[i].name);
         printf("\n");
@@ -170,12 +170,12 @@ static void handle_cmd(const REPL_AST cmd, BResult *bresult_ptr)
 
     case REPL_EXTERNS:
     {
-        printf(" [%d libs at all]:\n", bresult_ptr->psdata.cffi_map.used);
+        printf(" [%u libs at all]:\n", (unsigned)bresult_ptr->psdata.cffi_map.used);
         for (Iterator i = 0; i < bresult_ptr->psdata.cffi_map.used; i++)
         {
             const struct rcl_ffi_C_lib_t current = bresult_ptr->psdata.cffi_map.array[i].val;
             printf(" > %s (\"%s\"):\n", current.libname, current.libpath);
-            printf("   [%d foreign functions at all]:\n", current.functions.used);
+            printf("   [%u foreign functions at all]:\n", (unsigned)current.functions.used);
             for (Iterator j = 0; j < current.functions.used; j++)
                 printf("     --- %s\n", current.functions.array[j].val.fname);
         }
@@ -183,7 +183,7 @@ static void handle_cmd(const REPL_AST cmd, BResult *bresult_ptr)
     }
 
     case REPL_STRUCTS:
-        printf("[%d structures at all]:\n", bresult_ptr->wordico.structures.used);
+        printf("[%u structures at all]:\n", (unsigned)bresult_ptr->wordico.structures.used);
         for (int i = 0; i < bresult_ptr->wordico.structures.used; i++)
             printf("%s, ", bresult_ptr->wordico.structures.array[i].name);
         printf("\n");

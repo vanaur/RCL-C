@@ -26,13 +26,13 @@
 #include <VM\Core\Exec.h>
 #include <VM\Core\RawCode\RawCode.h>
 
-struct RCL_Argv {
+struct __attribute__((packed)) RCL_Argv {
     IOC ioc;
     union {
         struct { RawCode args; } interpreted;
         struct { } compiled;
     } u;
-} __attribute__((packed)) RCL_Argv;
+};
 
 
 char** pargs(int*, char**);

@@ -65,11 +65,11 @@ _export typedef RCL_Value_Array_t rcl_const_array_t;
 typedef rcl_const_array_t *rcl_const_array_ptr_t;
 
 // Set of functions
-_export typedef Vector(rcl_fun_vec, rcl_fun_t);
+_export Vector(rcl_fun_vec, rcl_fun_t);
 // Set of structures
-_export typedef Vector(rcl_struct_vec, rcl_struct_t);
+_export Vector(rcl_struct_vec, rcl_struct_t);
 // Set of constant arrays
-_export typedef Vector(rcl_const_array_vec, rcl_const_array_t);
+_export Vector(rcl_const_array_vec, rcl_const_array_t);
 // This is the entry point code
 _export typedef rcl_expr_t rcl_entry_point;
 

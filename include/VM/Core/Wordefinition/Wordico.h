@@ -34,7 +34,7 @@
 #include <VM\Core\Wordefinition\RCL_Lambda.h>
 #include <VM\Core\Wordefinition\RCL_Structure.h>
 
-struct Wordico
+struct __attribute__((packed)) Wordico
 {
     // List of functions
     struct VEC_Functions functions;
@@ -42,7 +42,7 @@ struct Wordico
     struct VEC_Lambdas lambdas;
     // List of structures
     struct VEC_Structures structures;
-} __attribute__((packed)) Wordico;
+};
 
 /* Note about lambdas:
     Unlike the rest of the nominal data that is defined in the `.define` section,

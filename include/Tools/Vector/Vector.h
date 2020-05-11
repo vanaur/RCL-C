@@ -47,13 +47,15 @@
 #define PopVector(name) \
     name->array[name->used--];
 
+// The vector is typedefed by default
 #define Vector(name, T)                                                                  \
     struct name                                                                          \
     {                                                                                    \
         T *array;                                                                        \
         size_t used;                                                                     \
         size_t size;                                                                     \
-    } __attribute__((packed)) name;                                                      \
+    };                                                                                   \
+    typedef struct name name;                                                            \
     inline void init_##name(struct name *vec_ptr, size_t size)                           \
     {                                                                                    \
         InitVector(vec_ptr, size, T);                                                    \

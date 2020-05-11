@@ -33,11 +33,11 @@
 #include <VM\Core\Browse\BrowsedAbsyn.h>
 #include <VM\Core\Syntax\Absyn.h>
 
-struct RCL_Function {
+struct __attribute__((packed)) RCL_Function {
     String name;
     RawCode body;
     hash_t hash_code;
-} __attribute__((packed)) RCL_Function;
+};
 
 struct RCL_Function make_RCL_function(LIdent, Operation, BrowsedAbsyn*);
 

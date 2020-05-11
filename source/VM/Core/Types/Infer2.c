@@ -201,8 +201,8 @@ static svta_t make_svta(tvar_t tvar, sva_t sva, RCL_Type *concrete_type)
     return (svta_t){s, tvar, sva, t};
 }
 
-typedef Vector(type_stack_vec, struct RCL_Type);
-typedef Vector(svtas_vec, svta_t);
+Vector(type_stack_vec, struct RCL_Type);
+Vector(svtas_vec, svta_t);
 
 #define REAL_TVAR_ID 't'
 #define VOID_TVAR_ID 'e'

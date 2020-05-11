@@ -42,7 +42,6 @@ enum Value_Kind
     RCL_Value_Float,
     RCL_Value_Char,
     RCL_Value_String,
-    //RCL_Value_Word,
     RCL_Value_Qual,
     RCL_Value_Lambda,
     RCL_Value_EndLamScope,
@@ -77,7 +76,7 @@ typedef struct ValueTag Value;
 // Returns the value kind in textual form.
 String show_kind(enum Value_Kind);
 
-struct RCL_Value_DataStruct_Field
+struct __attribute__((packed)) RCL_Value_DataStruct_Field
 {
     // Infos about the field of the defined structure as pointer => template
     struct RCL_Structure_field *field_type_info;
@@ -85,16 +84,16 @@ struct RCL_Value_DataStruct_Field
     Value *field_value;
     /*     // The parent structure template
     struct RCL_Structure *template; */
-} __attribute__((packed));
+};
 
 // This is a structure data on the stack
-struct RCL_Value_DataStruct
+struct __attribute__((packed)) RCL_Value_DataStruct
 {
     // Infos about the origin defined structure (type infos pointer)
     struct RCL_Structure *template;
     // Array of RCL_Value fields
     struct RCL_Value_DataStruct_Field *fields;
-} __attribute__((packed));
+};
 
 // Return a pointer of the specific element or NULL of it dosen't exist
 struct RCL_Value_DataStruct_Field *getSpecific_DataStruct_field(struct RCL_Value_DataStruct, hash_t);
@@ -164,7 +163,6 @@ typedef struct ValueTag
         RCL_Value_Float_t float_;
         RCL_Value_Char_t char_;
         RCL_Value_String_t string_;
-        //RCL_Value_Word_t word_;
         RCL_Value_Qual_t qual_;
         RCL_Value_LamdaDecl_t lam_;
         RCL_Value_EndLambdaScope_t endLamScope_;
@@ -239,7 +237,7 @@ Value otov(Operation);
 
 /*** Values vectorization under concatenation form ***/
 
-typedef Vector(RawCode, Value);
+Vector(RawCode, Value);
 
 #define RCODE_TO_STACK(rcode) (*((Stack *)&rcode))
 #define STACK_TO_RCODE(stack) (*((RawCode *)&stack))

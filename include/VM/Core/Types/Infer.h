@@ -26,7 +26,7 @@
 #include <VM\Core\Types\Types.h>
 
 // A table of functions that are non-typed again
-typedef Vector(fununtyped_table_t, hash_t);
+Vector(fununtyped_table_t, hash_t);
 
 bool cmp_hashs(const hash_t, const hash_t);
 

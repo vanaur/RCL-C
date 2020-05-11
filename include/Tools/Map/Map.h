@@ -53,8 +53,8 @@ inline bool cmp_f_hash(const hash_t h1, const hash_t h2)
     {                                                                                                       \
         key_t key;                                                                                          \
         val_t val;                                                                                          \
-    } name##_entry_s;                                                                                       \
-    typedef Vector(name##_map_t, struct name##_entry_s);                                                    \
+    };                                                                                                      \
+    Vector(name##_map_t, struct name##_entry_s);                                                    \
     inline void init_##name(name##_map_t *map_ptr, size_t size)                                             \
     {                                                                                                       \
         InitVector(map_ptr, size, struct name##_entry_s);                                                   \

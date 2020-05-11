@@ -33,7 +33,7 @@ typedef struct
     String asid; // Name given to the file
 } __attribute__((packed)) RCL_File;
 
-typedef Vector(RCL_Files, RCL_File);
+Vector(RCL_Files, RCL_File);
 
 // Included DLLs
 typedef RCL_Files Includes;

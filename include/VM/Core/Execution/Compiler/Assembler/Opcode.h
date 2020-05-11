@@ -45,7 +45,7 @@ enum Register_8
     CH,
     DH,
     BH
-} Register_8;
+};
 enum Register_16
 {
     AX,
@@ -56,7 +56,7 @@ enum Register_16
     BP,
     SI,
     DI
-} Register_16;
+};
 enum Register_32
 {
     EAX,
@@ -67,7 +67,7 @@ enum Register_32
     EBP,
     ESI,
     EDI
-} Register_32;
+};
 enum Register_64
 {
     RAX,
@@ -99,7 +99,7 @@ enum Register_64
     MM5,
     MM6,
     MM7
-} Register_64;
+};
 enum Register_128
 {
     XMM0,
@@ -110,7 +110,7 @@ enum Register_128
     XMM5,
     XMM6,
     XMM7
-} Register_128;
+};
 enum Register_256
 {
     YMM0,
@@ -121,7 +121,7 @@ enum Register_256
     YMM5,
     YMM6,
     YMM7
-} Register_256;
+};
 enum Register_512
 {
     ZMM0,
@@ -132,7 +132,7 @@ enum Register_512
     ZMM5,
     ZMM6,
     ZMM7
-} Register_512;
+};
 
 typedef unsigned short reg_enum_t;
 
@@ -146,7 +146,7 @@ enum Register_Size_kind
     _128,
     _256,
     _512
-} reg_size;
+};
 
 typedef SIGMA_TYPE(
     Register, enum Register_Size_kind,
@@ -171,7 +171,7 @@ enum ASM_Value_kind
     ADD,
     SUB,
     MUL
-} kind;
+};
 
 typedef struct
 {
@@ -209,7 +209,7 @@ enum ASM_data_kind_t
     YWORD,
     ZWORD,
     UNDEF
-} asm_data_kind;
+};
 
 //  https://www.cs.usfca.edu/~galles/compilerdesign/x86.pdf
 //  https://www.felixcloutier.com/x86/
@@ -357,7 +357,7 @@ typedef SIGMA_TYPE(
     SIGMA_CTOR(ret);
     SIGMA_CTOR(empty));
 
-typedef Vector(Opcode_block, ASM_Instr);
+Vector(Opcode_block, ASM_Instr);
 
 #define Anonymous_label "@@"
 #define Anonymous_label_top "@b"
@@ -371,7 +371,7 @@ typedef struct
     String description;
 } Label;
 
-typedef Vector(Labels, Label);
+Vector(Labels, Label);
 
 Map(HashOpBloLbl_const, hash_t, String);
 

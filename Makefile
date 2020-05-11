@@ -17,7 +17,8 @@ CCFLAGS_WARNS =		-Wno-discarded-qualifiers \
 					-Wno-strict-aliasing \
 					-Wno-parentheses \
 					-Wno-unused-variable \
-					-Wno-address-of-packed-member
+					-Wno-address-of-packed-member \
+					-Wno-array-bounds
 CCFLAGS_OPTIMIZE = 	-ftree-loop-distribution \
 					-faggressive-loop-optimizations \
 					-fno-leading-underscore \

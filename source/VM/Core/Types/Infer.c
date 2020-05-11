@@ -39,7 +39,7 @@
 #include <VM\Core\Types\TypeError.h>
 
 // This is the type of the stack, evolving as the expressions are analyzed.
-typedef Vector(type_stack_t, RCL_Type);
+Vector(type_stack_t, RCL_Type);
 // The context is a dictionary between variable types and real types.
 Map(Context, TVar_t, RCL_Type);
 
