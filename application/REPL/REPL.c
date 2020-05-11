@@ -138,9 +138,14 @@ static void handle_cmd(const REPL_AST cmd, BResult *bresult_ptr)
     {
         struct RCL_Function *f_ptr = getSpecific_function(&bresult_ptr->wordico, hash_djb2(cmd.u.repl_show_.fname));
         if (f_ptr == NULL)
+        {
             cc_fprintf(CC_FG_RED, stdout, "Unknown function `%s'\n", cmd.u.repl_show_.fname);
+        }
         else
-            cc_fprintf(CC_FG_WHITE, stdout, "%s = %s\n", f_ptr->name, show_rcode(f_ptr->body));
+        {
+            cc_fprintf(CC_FG_WHITE, stdout, "%s = ", f_ptr->name);
+            cc_fprintf(CC_FG_DARK_CYAN, stdout, "%s\n", show_rcode(f_ptr->body));
+        }
         break;
     }
 

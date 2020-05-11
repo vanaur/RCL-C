@@ -31,28 +31,56 @@
 const String commands[] =
     {"stack", "free", "quit", "help", "typeof",
      "step", "exec", "exect", "show", "oof",
-     "funs", "externs", "structs"
+     "funs", "externs", "structs",
      "opt", "set"};
+
+#define NBR_CMDS (sizeof(commands) / sizeof(commands[0]))
+
+static bool askarg(const String s)
+{
+    return (!strcmp(s, "typeof"))   //
+           || (!strcmp(s, "step"))  //
+           || (!strcmp(s, "exec"))  //
+           || (!strcmp(s, "exect")) //
+           || (!strcmp(s, "show"))  //
+           || (!strcmp(s, "oof"))   //
+           || (!strcmp(s, "opt"))   //
+           || (!strcmp(s, "set"));  //
+}
 
 void help_if_unknown(const String str)
 {
-    int levens[12];
-    for (Iterator i = 0; i < 12; i++)
-        levens[i] = levenshtein(trim(str), strlen(trim(str)), commands[i], strlen(commands[i]));
+    const String cmd = strtok(trim(strdup(str)), " ");
+    const size_t len = strlen(cmd);
 
-    for (Iterator i = 0; i < 12; i++)
+    String rest = strdup(str);
+    int l = len + 1;
+    while (l--)
+        rest++;
+
+    int levens[NBR_CMDS];
+    for (Iterator i = 0; i < NBR_CMDS; i++)
+        levens[i] = levenshtein(cmd, len, commands[i], strlen(commands[i]));
+
+    for (Iterator i = 0; i < NBR_CMDS; i++)
     {
-        if (levens[i] == 0)
+        if (!strcmp(cmd, commands[i]))
         {
-            cc_fprintf(CC_FG_YELLOW, stdout, "Lacking arguments in `%s`.\n", commands[i]);
+            if (askarg(cmd))
+                cc_fprintf(CC_FG_YELLOW, stdout, "Lacking arguments for `%s`.\n", commands[i]);
+            else
+                cc_fprintf(CC_FG_YELLOW, stdout, "Unexpected arguments for `%s`.\n", commands[i]);
             return;
         }
     }
 
-    for (Iterator i = 0; i < 12; i++)
+    for (Iterator i = 0; i < NBR_CMDS; i++)
     {
         if (levens[i] == 1 || levens[i] == 2)
-            cc_fprintf(CC_FG_YELLOW, stdout, "Try `%s`?\n", commands[i]);
+        {
+            cc_fprintf(CC_FG_YELLOW, stdout, "Try: ");
+            cc_fprintf(CC_FG_CYAN, stdout, "%s %s\n", commands[i], rest);
+        }
     }
 }
 
@@ -62,21 +90,21 @@ REPL_AST repl_cmd_parse(const String cmd)
 
     if (!strcmp(trimed_cpy, "stack"))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_STACK, repl_stack);
-    if (!strcmp(trimed_cpy, "funs"))
+    if (!strcmp(trimed_cpy, "funs") || !strcmp(trimed_cpy, "fs"))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_FUNS, repl_funs);
-    if (!strcmp(trimed_cpy, "externs"))
+    if (!strcmp(trimed_cpy, "externs") || !strcmp(trimed_cpy, "es"))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_EXTERNS, repl_externs);
-    if (!strcmp(trimed_cpy, "structs"))
+    if (!strcmp(trimed_cpy, "structs") || !strcmp(trimed_cpy, "ss"))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_STRUCTS, repl_structs);
-    if (!strcmp(trimed_cpy, "free"))
+    if (!strcmp(trimed_cpy, "free") || !strcmp(trimed_cpy, "f"))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_FREE, repl_free);
-    if (!strcmp(trimed_cpy, "quit"))
+    if (!strcmp(trimed_cpy, "quit") || !strcmp(trimed_cpy, "q"))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_QUIT, repl_quit);
-    if (!strcmp(trimed_cpy, "help"))
+    if (!strcmp(trimed_cpy, "help") || !strcmp(trimed_cpy, "?"))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_HELP, repl_help);
-    if (startsWith(trimed_cpy, "typeof "))
+    if (startsWith(trimed_cpy, "typeof ") || !strcmp(trimed_cpy, "t "))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_TYPEOF, repl_typeof, trim(trimed_cpy += 7));
-    if (startsWith(trimed_cpy, "step "))
+    if (startsWith(trimed_cpy, "step ") || !strcmp(trimed_cpy, "st "))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_STEP, repl_step, trim(trimed_cpy += 5));
     if (startsWith(trimed_cpy, "exec "))
         return SIGMA_FILL_CTOR(REPL_AST, REPL_EXEC, repl_exec, trim(trimed_cpy += 5));
