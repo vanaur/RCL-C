@@ -249,7 +249,7 @@ static void rcl_ffi_C_call(
 
     if (!ffi_attribs_ptr->properties.usable)
     {
-        state_put_err_it_cst(state, "Unusable foreign function call of `%s::%s'.", libpath, fname);
+        state_put_err_it_cst(state, "Unusable foreign function call of `%s' from `%s'.", fname, libpath);
         popx_psh0(stack, ffi_attribs_ptr->properties.nargs);
         return;
     }
