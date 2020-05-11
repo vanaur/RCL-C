@@ -96,7 +96,7 @@ String show_value(Value value)
     }
     case RCL_Value_EndLamScope:
     {
-        rcl_asprintf(&result, "%s$", value.u.endLamScope_);
+        rcl_asprintf(&result, "%s$", value.u.endLamScope_.word_str);
         break;
     }
     case RCL_Value_Lambda:
@@ -149,6 +149,10 @@ String show_value(Value value)
     }
     case RCL_Value_Concatenation:
         return show_concatenation(value.u.concatenation_);
+
+    case RCL_Value_Replicated:
+        rcl_asprintf(&result, "~%d %s", value.u.repeat_.times, show_value(*value.u.repeat_.op));
+        break;
 
     default:
         return "'Unknown";
