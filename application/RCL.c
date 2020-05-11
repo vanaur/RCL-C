@@ -27,11 +27,11 @@
 
 #include "REPL\REPL.h"
 #include "RCL.h"
+#include "Arguments.h"
 
 #include <VM\Core\Browse\Browse.h>
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Exec.h>
-#include <VM\Core\Arguments.h>
 #include <VM\Core\Argv.h>
 #include <VM\Core\Process\Process.h>
 #include <VM\Core\Execution\Compiler\Assembler\Assemble.h>

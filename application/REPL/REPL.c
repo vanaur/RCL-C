@@ -24,6 +24,7 @@
 
 #include "REPL.h"
 #include "CmdParser.h"
+#include "../Arguments.h"
 
 #include <VM\Core\Browse\BResult.h>
 #include <VM\Core\Show\Show.h>
@@ -32,7 +33,6 @@
 #include <VM\Core\Execution\Interpreter\Interpreter.h>
 #include <VM\Core\Syntax\Parser.h>
 #include <VM\Core\Browse\Browse.h>
-#include <VM\Core\Arguments.h>
 #include <VM\Core\Wordefinition\Wordico.h>
 #include <Tools\Utils\Utils.h>
 #include <Tools\Time_Measure\Time_Measure.h>
