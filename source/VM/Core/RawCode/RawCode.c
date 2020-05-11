@@ -308,22 +308,6 @@ static Value otov_quote(Operation op)
     return make_RCL_Value_Quotation(quote);
 }
 
-/*
-static bool is_identifier_combinator(const Identifier id)
-{
-    if (count_quals(id) == 1)
-        return is_combinator(id->u.name_.lident_);
-    return false;
-}
-
-void _handle_qual(BResult *bresult, const Identifier id)
-{
-    if (is_identifier_combinator(id))
-        return push_rcode(&bresult->psdata.rcode, make_RCL_Value_Combinator(str_to_comb(id->u.name_.lident_)));
-    push_rcode(&bresult->psdata.rcode, make_RCL_Value_Qual(qual_word_from_absyn(id)));
-}
-*/
-
 static bool is_identifier_combinator(const Identifier id)
 {
     if (count_quals(id) == 1)
@@ -337,11 +321,6 @@ static Value otov_var(Operation op)
     if (is_identifier_combinator(id))
         return make_RCL_Value_Combinator(str_to_comb(id->u.name_.lident_));
     return make_RCL_Value_Qual(qual_word_from_absyn(op->u.var_.identifier_));
-    //return make_RCL_Value_Qual(qual_word_from_absyn(op->u.var_.identifier_));
-/*     if (is_combinator(show_ast_identifier(op->u.var_.identifier_)))
-        return make_RCL_Value_Combinator(str_to_comb(show_ast_identifier(op->u.var_.identifier_)));
-    else
-        return make_RCL_Value_Word(show_ast_identifier(op->u.var_.identifier_)); */
 }
 
 static Value otov_concatenation(Operation op)

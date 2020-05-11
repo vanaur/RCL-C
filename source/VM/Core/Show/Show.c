@@ -84,14 +84,6 @@ String show_value(Value value)
         rcl_asprintf(&result, "\"%s\"", value.u.string_);
         break;
     }
-/*     case RCL_Value_Word:
-    {
-        if (!strcmp(value.u.word_.word_str, RCL_NIL_WRD))
-            return "<nil>";
-        else
-            rcl_asprintf(&result, "%s", value.u.word_.word_str);
-        break;
-    } */
     case RCL_Value_Qual:
     {
         result = show_qual(value.u.qual_);

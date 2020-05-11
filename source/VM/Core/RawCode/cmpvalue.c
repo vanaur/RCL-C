@@ -125,22 +125,3 @@ inline bool cmpvalue(const Value v1, const Value v2)
         perror("TODO cmpval");
     }
 }
-
-/*    RCL_Value_Array,
-    RCL_Value_Quotation,
-    RCL_Value_Integer,
-    RCL_Value_Float,
-    RCL_Value_Char,
-    RCL_Value_String,
-    RCL_Value_Word,
-    RCL_Value_Lambda,
-    RCL_Value_EndLamScope,
-    RCL_Value_LiteralOperation,
-    RCL_Value_Combinator,
-    RCL_Value_Parallel,
-    RCL_Value_Field,
-    RCL_Value_DataStruct,
-    RCL_Value_Replicated,
-    RCL_Value_Empty,
-    RCL_Value_Number,
-    RCL_Value_All*/
