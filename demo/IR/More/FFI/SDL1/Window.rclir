@@ -1,0 +1,16 @@
+//-- This example should call the external function of SDLTEST.dll
+//-- (if the file is compiled under Windows), and display a window.
+
+.idata
+    //-- We include the dynamic library to be called
+    //-- and we give it the chosen name 'SDL' (because de original use the SDL2)
+    include "SDLTEST.dll" as SDL
+
+.define
+    //-- We inform the VM that 'SDL' contains a function named 'draw' and we give it its type.
+    extern SDL.draw(uchar *, int, int) -> void
+
+.main
+    //-- We call the external function (with arguments taken in order on the stack),
+    //-- and we see a window appearing if everything went well.
+    450 450 "Hello, world!" SDL.draw
