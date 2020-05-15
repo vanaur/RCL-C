@@ -46,13 +46,14 @@ CSRC_SUBDIR_PATHS = *.c */*.c */*/*.c */*/*/*.c */*/*/*/*.c */*/*/*/*/*.c */*/*/
 
 csrc_abstract_paths = $(wildcard $(1) $(CSRC_SUBDIR_PATHS))
 
-VM_CSRC = $(call csrc_abstract_paths, VM\)
-VM_OBJS = $(VM_CSRC:.c=.o)
+app = application/RCL.o
+demo = demo/IR/More/FFI/SDL1/SDL.o
 
-exe_main = source/VM/RCL.o
+VM_CSRC = $(call csrc_abstract_paths, VM\)
+VM_OBJS = $(filter-out $(demo), $(VM_CSRC:.c=.o))
 
 LIB_CSRC = $(call csrc_abstract_paths, Library\)
-LIB_OBJS = $(filter-out $(exe_main), $(LIB_CSRC:.c=.o))
+LIB_OBJS = $(filter-out $(app), $(LIB_CSRC:.c=.o))
 
 #src/Core/Syntax/Parser.c src/Tools\Syntax\Parser.h:	src/Core/Syntax/RCL.y
 #	${BISON} ${BISON_OPTS} src/Core/Syntax/RCL.y
