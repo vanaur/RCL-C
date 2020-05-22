@@ -1,0 +1,550 @@
+.idata
+
+    include "RCL.dll" as RCL
+    include "SDLTEST.dll" as SDL
+
+.define
+
+    ack = n\ m\
+        m 0 eq quote
+            [n ++]
+            [n 0 eq quote [m -- 1 ack] [m -- m n -- ack ack] ifte]
+        ifte ;
+
+    fac_acc =
+        dup 1 swap lw quote
+            [pop]
+            [dup flip * swap -- fac_acc]
+        ifte ;
+    fac = 1 swap fac_acc ;
+
+    fibo = dup 1 swap leq quote vq [dup 1 swap - fibo swap 2 swap - fibo +] ifte ;
+
+    fib_acc = b\ a\ n\
+        n 0 eq quote
+            [a]
+            [n 1 eq quote
+                [b]
+                [n -- b a b + fib_acc] ifte
+            ] ifte ;
+    fibi = 0 1 fib_acc b$ a$ n$ ;
+
+    structure Boolean
+        = .false!
+        , .true! ;
+
+    structure List
+        = .data
+        , .next ;
+
+    structure Tuple
+        = .snd
+        , .fst ;
+    
+    new_tuple = tuple new ;
+    fst = .fst ;
+    snd = .snd ;
+
+    new_list = list new ;
+    init_list = nil swap new_list ;
+
+    head = init_list ;
+    o = new_list ;
+
+    len_ = swap dup .next nil eq quote [pop ++] [.next swap ++ len_] ifte ;
+    length = 0 len_ ;
+
+    getnth_ = swap dup 0 eq quote [pop .data] [-- swap .next getnth_] ifte ;
+    getnth = swap getnth_ ;
+
+    front = dup length -- getnth ;
+    tail = .data ;
+
+    beep = 7 itoc putc ;
+
+    print_list_data = .data nvshow puts ;
+    print_list_ = dup .next nil eq quote [print_list_data] [dup print_list_data ", " puts .next print_list_] ifte ;
+    print_list  = "[" puts print_list_ "]" puts ;
+
+    qtol = pick head swap [new_list] step ;
+
+    gis_to_list = [new_list] step ;
+    gis_list = dup head flip ++ swap gis gis_to_list ;
+
+    make_ptr = quote ;
+    get_val_ptr = unquote ;
+    cpy_ptr = dup ;
+    modify_ptr_val = steq ;
+    replace_ptr_val = [pop] swap cat steq ;
+    null = vq ;
+
+    print = nvshow puts ;
+    println = print '\n' putc ;
+    putsln = puts '\n' putc ;
+    print_s = [putc] step ;
+
+    // replace_char = rep\ to_rep\ [dup to_rep eq quote [pop rep] vq ifte] steq rep$ to_rep$ ; //! Pas d'erreur rep = combinator !
+
+    replace_char = r\ to_rep\ [dup to_rep eq quote [pop r] vq ifte] steq r$ to_rep$ ;
+    remove_last_s = pick pop ;
+    inserts = quote steq remove_last_s ;
+
+    strlen_ = pick nil eq quote [pop] [swap 1 + swap strlen_] ifte ;
+    strlen = 0 swap strlen_ ;
+
+    pop2 = ~2 pop ;
+    pop4 = ~4 pop ;
+
+    unfound = 1 0 - ;
+
+    fast_find_ = pick c eq quote [pop acc] [acc ++ acc\ fast_find_] ifte ;
+    fast_find = c\ 0 acc\ fast_find_ c$ acc$ ;
+
+    count_words = " " crave qlen ;
+
+    new_fac = dup
+        [0 1]
+        [[pop 1] [pop 1]]
+        [dup -- new_fac *]
+        select ;
+
+    fast_fac = 1 swap ++ 0 gis [dup 0 eq quote [pop 1] [id] ifte *] step ;
+
+    structure Kind
+        = .a!
+        , .b! ;
+    
+    structure U
+        = .a
+        , .b ;
+
+    build_union_a = {.a} nil u newf ;
+    build_union_b = {.b} nil u newf ;
+
+    structure AB
+        = .kind
+        , .u ;
+
+    make_ab_A = build_union_a kind .a! aB new ;
+    make_ab_B = build_union_b kind .b! aB new ;
+
+    /*
+        enum Kind = { A, B };
+        struct AB
+        {
+            enum Kind kind;
+            union
+            {
+                int a;
+                int b;
+            } u;
+        };
+    */
+
+    structure ExprKind
+        = .add!
+        , .mul!
+        , .num! ;
+    
+    structure ExprU
+        = .add
+        , .mul
+        , .num ;
+    
+    make_expru_num = {.num} nil exprU newf ;
+    make_expru_add = new_tuple {.add} nil exprU newf ;
+    make_expru_mul = new_tuple {.mul} nil exprU newf ;
+    
+    structure Expr
+        = .kind
+        , .expr ;
+
+    make_expr_num = make_expru_num exprKind.num! expr new ;
+    make_expr_add = make_expru_add exprKind.add! expr new ;
+    make_expr_mul = make_expru_mul exprKind.mul! expr new ;
+
+    compute = expr\
+        expr.kind
+        [2 1 0]
+        [[expr.expr.num]
+         [expr.expr.mul.fst compute expr.expr.mul.snd compute *]
+         [expr.expr.add.fst compute expr.expr.add.snd compute +]]
+        ["Unknown value to compute: " puts nvshow puts]
+        select expr$ ;
+
+    // TODO! Dans la fonction ci-dessus ^ la récursion ne fonctionnera pas
+    // TODO! A cause de la lambda qui change de valeur à chaque fois, telle une variable STATIC.
+    // TODO! En fait, une lambda est une variable STATIC...
+    // TODO! Il faudrait trouver un autre système ! Absolument !
+    // TODO! Il s'agit de la nouvelle prioritée !!
+    // TODO? => lam\  -> NON-STATIC
+    // TODO? => lam\\ -> STATIC
+    // TODO! `no-static` est obligatoirement à utiliser pour la récursion
+
+    foo = 6 make_expr_num make_expr_add ;
+
+    structure NatKind
+        = .succ!
+        , .zero! ;
+    
+    structure NatUnion
+        = .succ ;
+    
+    make_natu_succ = natUnion new ;
+
+    structure Nat
+        = .kind
+        , .nat ;
+    
+    make_nat_zero = nil natKind.zero! nat new ;
+    make_nat_succ = make_natu_succ natKind.succ! nat new ;
+
+    zero = make_nat_zero ;
+    succ = make_nat_succ ;
+
+    nat_to_int_ = dup .kind natKind.zero! eq quote [pop] [swap ++ swap .nat.succ nat_to_int_] ifte ;
+    nat_to_int = 0 swap nat_to_int_ ;
+
+    int_to_nat_ = dup 0 eq quote [pop] [-- swap succ swap int_to_nat_] ifte ;
+    int_to_nat = zero swap int_to_nat_ ;
+
+    nadd = dup .kind natKind.zero! eq quote [pop] [swap succ swap .nat.succ nadd] ifte ;
+    ninc = none nadd ;
+
+    print_nat = dup .kind natKind.zero! eq quote [pop "zero" puts] ["succ(" puts .nat.succ print_nat ")" puts] ifte ;
+
+    nzero = zero ;
+    none = nzero succ ;
+    ntwo = none succ ;
+    nthree = ntwo succ ;
+    nfour = nthree succ ;
+    nfive = nfour succ ;
+    nsix = nfive succ ;
+    nseven = nsix succ ;
+    neight = nseven succ ;
+    nnine = neight succ ;
+    nten = nnine succ ;
+
+    ceadd = swap pop swap flip swap cat swap interpret_ ;
+    operator_eval = dup
+        ["dup" "flip" "swap" "dip" "quote" "unquote" "dip" "+" "-" "*" "/" "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "10"]
+        [
+            [[dup]      ceadd]
+            [[flip]     ceadd]
+            [[swap]     ceadd]
+            [[dip]      ceadd]
+            [[quote]    ceadd]
+            [[unquote]  ceadd]
+            [[dip]      ceadd]
+            [[+]        ceadd]
+            [[-]        ceadd]
+            [[*]        ceadd]
+            [[/]        ceadd]
+            [[0]        ceadd]
+            [[1]        ceadd]
+            [[2]        ceadd]
+            [[3]        ceadd]
+            [[4]        ceadd]
+            [[5]        ceadd]
+            [[6]        ceadd]
+            [[7]        ceadd]
+            [[8]        ceadd]
+            [[9]        ceadd]
+            [[10]       ceadd]
+        ]
+        ["Unknown operation: `" puts puts "`" puts beep pop2 vq]
+        select ;
+    interpret_ = dup vq eq quote [pop] [pick operator_eval] ifte ;
+    interpret = vq swap " " crave reverse interpret_ unquote ;
+
+//! Complete redesign of the interpreter 
+
+//TODO! [0 6 8 2] uncons pick => 0 [1 8] 6 : faux !
+//TODO! Transformer `' ' quote` en " " !
+//TODO! Rendre complet les rapports quotes / strings
+//TODO! dup cat à l'infinie doit fonctionner !
+//TODO! Bons messages d'erreurs
+//TODO! Changer la syntaxe, notamment des types FFI : faire un truc comme `extern "C" Lib.fname`
+//TODO! Egalement prendre en charge les types de fonctions, par exemple `void (f*)(int, schar)`
+//TODO! Préprocesseur : connaître la plateforme et les outils:
+//          ifset "something" then
+//              ...
+//          endset
+//TODO! Définir également pour la FFI et la memozation un "type de fonction":
+//          extern "Lang" Lib.function(T1, T2, ..., T3) -> FK RT
+//          extern "C" Lib.square(int) -> total int
+//          extern "C" Lib.display(char*) -> io void
+//  >  total : the function will no produce side effect
+//  >  io : the function will produce side effect
+//TODO! Dans la syntaxe, accepter les quotes vides !
+
+//TODO! Memoization:  Map(Memorizer, hash_t, Value)
+//          Example:  6 dup +  =>  (7840126, Value.Integer.12)
+//TODO! https://luajit.me/ !!!!!
+//TODO! https://www.w3.org/2005/03/23-lex-U
+//TODO! Dans la syntaxe, gérer autant les upper que les lowers !!!
+//TODO! Meilleur messages d'erreurs + rapports dans des dossiers !
+//TODO! Types de structures externes:
+//          structure GLPoint
+//              = .x :: extern "C" int
+//              , .y :: extern "C" int
+//TODO! Un tableau, c'est un pointeur en fait !
+//TODO! Ajouter une testsuite à là https://github.com/libffi/libffi/tree/master/testsuite
+//TODO! Arguments variadiques? Non ! Pas pour le moment en tout cas, ou alors avec une quotation
+//TODO! Passage de Make à Cmake
+//TODO! Pour la RCL 2.0: Créer un parseur de header C, de tel sorte à abstraire le processus d'externisation
+//!     on fait juste une macro:  include "mydll.dll"
+//!                               outsource "C" "mydll.h"
+//!     => Et ça défini toute les fonctions externes (notées `exportables`?)
+//TODO! Il faut que les identifiants commence aussi par '_'
+//TODO! Faire une fonction dans le REPL pour afficher toute les fonctions
+//TODO! Faire le `process.c`...
+//TODO! Il faudrait sort les libs et fonctions !
+//TODO! backup ?
+//TODO! Créer une lib de JIT complète, qui accèpte un AST à être construit, mais permet également
+//!     de parser un assembleur. On pourrait même définir plusieurs assembleurs qui sont ensuite
+//!     récris en un seul, qui est celui JITé ? => Ca serait Keystone, mais en mieux :)
+//TODO! Liberator! `free(...)`
+//TODO! Levenstehin dans les quals/words
+//TODO! Lambd dans des quotations...
+//TODO! Rendre le système de State plus "puissant" avec de meilleurs diagnostiques, et écrire un rapport dans un fichier
+
+//TODO Il faudra faire une réorganisation des fichiers:
+//TODO      => Il faudrait sortir le fichier `RCL.c` (donc l'exécutable) de `source`
+//TODO         dans le but de le mettre à l'extérieur de la 'library'.
+//TODO         Idem pour le REPL, il faudrait en fait créer un dossier `executable` qui contient tout ça,
+//TODO         et le reste peut rester là. Il faudra juste penser à un moyen de générer (?) les headers à utiliser.
+//TODO         Dans l'idéal, il faudrait créer un dossier de header `RCL/` qui contient la lib de compilation
+//TODO         => #include <RCL\Library\prefabs.h>
+//TODO         ou
+//TODO         => #include <RCL\prefabs.h>
+
+    tac = swap cat ;
+
+    extern RCL.my_max(int, int) -> int ;
+
+    extern RCL.my_max(int, int) -> int ;
+    extern RCL.rcl_hello_world() -> void ;
+    extern RCL.rcl_get_current_version_s(void) -> uchar* ;
+    extern RCL.rcl_simple_interpret_ir_s(uchar*, int) -> int ;
+    extern RCL.my_cos(double) -> double ;
+    extern RCL.my_test() -> double ;
+    extern RCL.new_file(uchar *, uchar *) -> void ;
+    //extern RCL.display_struct({int, double, uchar*}, int) -> void ;
+/*     extern "C" structure
+        = .field_a :: int
+        , .field_b :: double
+        , .field_c :: uchar* ; */
+
+//     nadd = dup .kind natKind.zero! eq quote [pop] [swap succ swap .nat.succ nadd] ifte ;
+
+    nmul = nat_to_int swap nat_to_int swap * int_to_nat ;
+
+    // Ajouter les combinateurs binrec et tout... Ca serait bien un qsort...
+
+    qat = dup 0 eq quote [pop pick swap pop] [-- swap pick pop swap qat] ifte ;
+
+    extern SDL.draw(uchar *, int, int) -> void ;
+    loop = dup unquote loop ;
+
+.main
+
+    //460 460 "Hello, world!" SDL.draw
+
+    10 0 gis_list pop
+
+    //10000000 0 gis_list pop
+// Faire de NIL, NEWF et tout des combinators
+    //! Libérer la mémoire de la DLL !
+    //dup -  == pop 0
+
+    //1000000 0 gis [7 + 2 % 0 2 eq quote [0] [1] ifte] steq 658 qat
+
+    //1000000 0 gis_list pop
+
+//? Au cas où on souhaites reprendre : il y avait les closures à implémenter
+//? Egalement l'inférence de type à compléter
+//? Aussi l'AST de la compilation et de l'assembleur à adapter
+//? La lib à faire
+//? Des problèmes au niveau des pointeurs, notamment les strings
+//? Free la mémoire lorqu'elle n'est plus utile
+//? Quelques combinateurs à ajouter
+//? La FFI à créer
+//? => Il ne restait pas tant de choses à faire, mais la globalité semble cependant néfase
+//? Ici Gerviss (Tarçin) : votre projet a de l'avenir, Monsieur. J'en suis convainqu. Ne baissez pas les bras et ayez confiance en vous.
+
+
+    //!! `[exprKind.num! exprKind.add! exprKind.mul!]` => il y a plus que 3 expressions -> il y en a 6!
+
+    // ! Créer un système d'exception dans la VM / IR !
+    // ! Par exemple: `"Overflow" except`
+    //* => Gestion des exceptions en 3 parties :   <signalisation de EXT> <gestion de EXT> <redémarage du calcul>
+
+    // TODO: comparaison entre structures 
+    //* Il faudrait une fonction comme `steq` mais qui prend une fonction et deux quotes
+    //* de même taille : [1 2 3 4] [5 6 7 8] [+] dsteq  ==  [2 3 6 8]
+    //*  => utiliser les instructions SIMD par dessus.
+
+    //* Faire --DASM
+    //* Avec un fichier header (ou .c extern ?) qui contient tout les commentaires / fonctions / macros de commentaire ?
+
+    //  ifte : [a] . [b] . [b] -> b
+    // + Le type des structures :)
+
+    // compute : Expr -> Int
+    //           ^^^^
+    //          est un row type polymorphique !
+
+    /* Les 'ARRAYS' -- Pools
+        o Un Array est une structure fermée, non-dynamiquement constructible, immuable.
+        o Un Array ne peut être utilisé à l'exécution que lorsque sa construction est achevée.
+        o Opérations utilisés avec les Arrays:
+            - Processus de construction     : {...}
+            - Processus d'accession         : {...} x aget
+            - Processus de piles classiques : {...} dup swap pop ...
+            - Processus d'itération         : {...} [f] step/q
+        o Les Arrays peuvent être utilisés en tant que simples tableaux (constant).
+        o Les Arrays peuvent être utilisés en tant que pools.
+            - D'objets
+            - De threads
+            - De mémoire
+            - ...
+    */
+
+    // * Le type ARRAY ou la donnée {} représente simplement une quote qui possède toutes ses opérations
+    // * du même type. Mais on peut aussi en faire autre chose, à voir => là c'est juste pour le front-end / types
+    // ? Voilà: Un ARRAY est une "succession" de programmes ! => un ensemble de programmes
+    // ? Tandis qu'une quotation est 1 seul programme
+    // * On pourrait faire du gros parrallelisme avec les ARRAYS :o Ou de la concurency !
+    // * ==> Développer les ARRAYs
+    // ! Il faudrait ajouter des combinators STEP/Q mais pour lister à l'envers
+    // * http://ftp.cvut.cz/kernel/people/geoff/cell/ps3-linux-docs/CellProgrammingTutorial/BasicsOfSIMDProgramming.html
+    // TODO Faire le préprocesseur de la RCL !
+    // TODO Faire l'extension ASVO (As Vectorized Operations) => SIMD explicite sur Arrays
+
+
+
+    //* Faire des words natifs !
+    //* => RCL.Native
+    //! Ne pas afficher les nombres trop gros, ou alors avec une notation scientifique !
+    //? RCL.Native.Misc.djb2
+    //? Pour la RCL 2.0, faire un package manager
+
+    // https://stackoverflow.com/a/527843/9382127 !!
+
+    // Inliner les lambdas qui ne s'overwrite pas ?
+    // Lancer des fichiers multiples... gdb et tout, c'est le refsize
+    // Retravailler le "Process" de manière global
+
+    // Généraliser la gestion de la récursion avec les quotations
+    // On peut aussi faire une vérification et optimisation TCO dans les quotes
+
+    // Absolument refaire le JIT !
+    //      -> Le décopyriter, le personnaliser
+    //      -> Comprendre et ajouter tout ce qui pourrait être utile
+    // Renomer les fonctions / macros
+
+    // Faire un "traceur" afin de tracer les variables pour les replacer, si besoin / possible
+    // par des combinateurs
+
+    // totality checker = termination checker
+
+    // + Implémenter correctement plus de combinators:
+    //          - savoir faire la recherche binaire
+    //          - combinators de parallelisme
+    //          - simultanéité (vectorisation)
+    // + FFI
+    // + Combinator pour les structures
+    // + Considérer les pointeurs
+    // + Gérer les importations cycliques
+
+    // Au niveau de la génération de code, il y a un truc à faire avec `dup <instr>`
+
+    // case <=> select
+
+    // Créer un combinator de récursion... Un qui loop tant qu'un programme est vrai
+    // genrec, linrec, binrec, tailrec, primrec     => vers la fin du lien en dessous
+
+    // https://github.com/nickelsworth/sympas/blob/master/text/18-minijoy.org
+
+    // http://debasishg.blogspot.com/4008/14/what-is-special-about-combinators-in.html
+    // http://tunes.org/~iepos/joy.html#swap
+    
+    // JIT !!
+    // https://www.ojdip.net/4014/06/simple-jit-compiler-cpp/
+    // https://github.com/tibordp/spasm
+
+    // Créer une structure SSA pour les lambdas !
+    // SSA + CPS : optimisations IR/Codegen
+    // Les multiplications par pairs peuvent être décritent en utilisant bit-shift:
+    //      `x 4 *` => `x 4 <<`
+    // Utiliser des logarithmes (/ tables de logarithmes ?) pour optimiser les gros calculs
+
+    // RECURSION AND ITS ELIMINATION : https://hypercubed.github.io/joy/html/j05cmp.html
+
+// https://en.wikipedia.org/wiki/AVL_tree
+// Flag `RedInf-` (Reduce Big Num To Infinity) `<Infinity>` when a computation give a too big number
+// Fonction builtin `find` pour les tableaux !
+// Supprimer toute les lambdas utilisées dans une fonction
+// https://techtalk.intersec.com/4014/09/memory-part-6-optimizing-the-fifo-and-stack-allocators/
+// https://solarianprogrammer.com/4018/01/10/writing-minimal-x86-64-jit-compiler-cpp/
+// https://nullprogram.com/blog/4015/03/19/
+
+/* Design pour les graphiques de performance et diagnostique de la RCL console-in ? :
+
+                                              █                                 
+                                    ▃         █                                 
+                                    █       ▃ █                                 
+                                  ▂ █       █ █▁                                
+                                  █ █▂    ▅ █ ██                                
+                                ▇ █▂██  ▄ █ █▆██▁                               
+     ▁ ▅  ▂            ▂    ▃ ▇ █▄████▅ █▂█▆█████▁ ▅  ▂                         
+▂▄▃▆▃█▅█▆▄█▅▃▂▄▃▆▃█▄▃▆▄█▅▃▇▄█▅█████████▇██████████▅█▆▄█▅▃▇▄▂▂▁▂▂▁▁▁▁▂▁▂▁▁▁▁▁▁▁▁▁
+
+    100% |
+    90%  |
+    80%  |
+    70%  |                                    .....
+    60%  |            .....                   .....
+    50%  |            .....                   .....
+    40%  |            .....           .....   .....
+    30%  |    .....   .....           .....   .....
+    20%  |    .....   .....           .....   .....
+    10%  |    .....   .....   .....   .....   .....
+    0%   |    .....   .....   .....   .....   .....
+                a       b       c       d       e
+
+        a= factorial : int -> int
+           Taken 30% of program execution
+           All time taken: 2.5s
+           Average execution time
+               - In each recursive call: 0.00001ms
+               - In function call: 0.128s
+        ...
+
+    a= example()
+    b= square()
+    c= factorial()
+    d= rec_fact()
+    e= malloc()
+
+*/
+
+/*
+    void assign_and_double(int *n_ptr, const int src)
+    {
+        *n_ptr = src * 2;
+    }
+
+    int a = 7;
+    int *b = &a;
+    assign_and_double(b, 3);
+
+    // assign_and_double = quote [2 *] cat replace_ptr_val ;
+    // 7 make_ptr 3 assign_and_double get_val_ptr print
+*/
+
+/*
+__m128 a = _mm_loadu_ps((float *)src);
+_mm_storeu_ps((float *)result, a);
+*/
